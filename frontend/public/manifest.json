@@ -1,0 +1,19 @@
+{
+  "name": "Car Vault",
+  "short_name": "Car Vault",
+  "description": "Personal digital garage and vehicle expense tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#F59E0B",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

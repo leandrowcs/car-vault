@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Brand Tokens - Vault Family Amber */
+  --vault-primary: #F59E0B;
+  --vault-primary-hover: #D97706;
+  --vault-primary-light: #FBBF24;
+  --vault-primary-glow: rgba(245, 158, 11, 0.18);
+  --vault-primary-soft: rgba(245, 158, 11, 0.1);
+
+  /* Backgrounds & Surfaces (Digital Garage Dark) */
+  --vault-bg: #020617;
+  --vault-surface: #0F172A;
+  --vault-surface-2: #1E293B;
+  --vault-surface-3: #253349;
+  --vault-border: #334155;
+  --vault-border-light: #475569;
+
+  /* Typography */
+  --vault-text: #F8FAFC;
+  --vault-text-secondary: #94A3B8;
+  --vault-text-muted: #64748B;
+
+  /* Status Colors */
+  --vault-success: #10B981;
+  --vault-success-soft: rgba(16, 185, 129, 0.12);
+  --vault-warning: #F59E0B;
+  --vault-warning-soft: rgba(245, 158, 11, 0.12);
+  --vault-danger: #EF4444;
+  --vault-danger-soft: rgba(239, 68, 68, 0.12);
+  --vault-info: #3B82F6;
+  --vault-info-soft: rgba(59, 130, 246, 0.12);
+
+  /* Focus & Elevation */
+  --vault-focus: #F59E0B;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --shadow-amber: 0 0 25px rgba(245, 158, 11, 0.15);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--vault-bg);
+  color: var(--vault-text);
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Number / Mono typography */
+.font-mono {
+  font-family: 'DM Mono', monospace;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--vault-focus);
+  outline-offset: 2px;
+}
+
+/* Custom modern scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--vault-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vault-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vault-border-light);
+}
+
