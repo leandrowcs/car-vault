@@ -26,7 +26,9 @@ Designed for tracking vehicle expenses, fuel consumption, EV charging, maintenan
 
 ## Getting Started
 
-For Vercel, set **Root Directory** to `frontend`. See the
+For Vercel, use the **repository root** as Root Directory (leave it empty or select `.`),
+matching Sports Vault and Series Vault. The root `vercel.json` installs and builds
+inside `frontend` and serves `frontend/dist`. See the
 [deployment and storage guide](docs/deployment-and-storage.md) for setup,
 moving existing local data, and Firebase setup. Configure Google sign-in,
 authorized domains, Firestore rules, and the variables from `frontend/.env.example`

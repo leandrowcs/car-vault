@@ -32,7 +32,7 @@ Na Vercel, abra **Project → Settings → Environment Variables** e cadastre os
 
 Mantenha `authDomain` como `car-vault-816ba.firebaseapp.com`. O login usa popup do Google. Se bloqueado, o app pede para permitir popups. Variáveis `VITE_*` são públicas no bundle: nunca inclua chave privada ou conta de serviço nelas.
 
-Use **Root Directory: frontend**, instalação `npm ci --include=dev`, build `npm run build`, saída `dist`. Após cadastrar as variáveis, faça um **Redeploy**: elas são incorporadas no build. Sem configuração Firebase, o app continua no modo local.
+Use a **raiz do repositório** como Root Directory (campo vazio ou `.`), seguindo Sports Vault e Series Vault. O `vercel.json` da raiz define instalação `npm --prefix frontend ci --include=dev`, build `npm --prefix frontend run build` e saída `frontend/dist`. Após cadastrar as variáveis, faça um **Redeploy**: elas são incorporadas no build. Sem configuração Firebase, o app continua no modo local.
 
 ### Erro `vite: command not found`
 
@@ -40,19 +40,23 @@ Em **Vercel → Project → Settings → Build and Deployment**, confirme:
 
 | Campo | Valor |
 | --- | --- |
-| Root Directory | `frontend` |
+| Root Directory | Raiz do repositório — vazio ou `.` |
 | Framework Preset | `Vite` |
-| Install Command | `npm ci --include=dev` |
-| Build Command | `npm run build` |
-| Output Directory | `dist` |
+| Install Command | `npm --prefix frontend ci --include=dev` |
+| Build Command | `npm --prefix frontend run build` |
+| Output Directory | `frontend/dist` |
 
-O `vercel.json` está dentro de `frontend`, assim como `package.json` e o lockfile.
-Usar a raiz do repositório impede a leitura dessa configuração e a instalação
-das dependências no diretório correto. Vite e TypeScript são dependências de
-desenvolvimento necessárias para compilar; `--include=dev` garante sua instalação.
+O `vercel.json` da raiz direciona os comandos para `frontend`, onde estão
+`package.json` e o lockfile. Antes dessa configuração na raiz, um deploy iniciado
+ali não lia `frontend/vercel.json`, podendo executar o padrão `vite build` sem
+instalar os pacotes do app. Vite e TypeScript são dependências de desenvolvimento
+necessárias para compilar; `--include=dev` garante sua instalação.
+O arquivo `frontend/vercel.json` também foi mantido para projetos que escolham
+explicitamente `frontend` como Root Directory; nesse caso os comandos e a saída
+são relativos a `frontend`. Não misture as duas configurações.
 Envie o commit com esses arquivos e crie um deploy desse commit, sem reutilizar
 o cache de build. Reimplantar um deploy antigo não inclui alterações posteriores.
-No log, confirme a instalação e a execução de `npm run build`.
+No log, confirme a instalação e a execução de `npm --prefix frontend run build`.
 
 ## Uso e migração
 
