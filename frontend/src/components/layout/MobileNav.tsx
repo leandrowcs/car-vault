@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { LayoutDashboard, Warehouse, Fuel, Receipt, Menu, X, Wrench, Bell, FileText, BarChart3, Settings, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
 import type { NavView } from './Sidebar'
+import { ThemeSwitcher } from './ThemeSwitcher'
 
 interface MobileNavProps {
   currentView: NavView
@@ -60,6 +61,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, o
       <div className="drawer-heading"><strong id="mobile-menu-title">Car Vault</strong><button type="button" className="btn btn-secondary btn-icon" aria-label="Close navigation menu" onClick={() => setOpen(false)}><X size={20} /></button></div>
       <p className="card-subtitle">Your digital garage</p>
       <nav aria-label="All sections">{items.map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`drawer-link ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} />{label}</button>)}</nav>
+      <ThemeSwitcher />
     </dialog>
   </>
 }

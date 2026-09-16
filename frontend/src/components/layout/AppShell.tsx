@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useSyncExternalStore } from 'react'
+import { getTheme, subscribeTheme } from '../../services/theme'
 import { Sidebar, type NavView } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
@@ -21,6 +22,10 @@ export const AppShell: React.FC<AppShellProps> = ({
   onQuickAddExpense,
   onQuickAddMaintenance,
 }) => {
+  const theme = useSyncExternalStore(subscribeTheme, getTheme)
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
   return (
     <div className="app-shell">
       {/* Desktop Sidebar Navigation */}

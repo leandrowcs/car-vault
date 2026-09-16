@@ -62,6 +62,6 @@
 .record-grid-compact .record-card-icon { width: 32px; height: 32px; border-radius: 8px; }
 .record-grid-compact .record-card-title h4 { font-size: 14px; margin-top: 1px; }
 .record-grid-compact .record-card-total strong { font-size: 20px; }
-.record-grid-compact .record-card-metrics { gap: 10px; padding-top: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.record-grid-compact .record-card-metrics { gap: 10px; padding-top: 10px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .record-grid-compact .record-card-metrics dt { margin-bottom: 2px; }
 .record-grid-compact .record-card-actions { padding-top: 0; }

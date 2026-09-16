@@ -1,4 +1,5 @@
 import React from 'react'
+import { ThemeSwitcher } from './ThemeSwitcher'
 import {
   LayoutDashboard,
   Warehouse,
@@ -76,6 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => 
           )
         })}
       </nav>
+      <ThemeSwitcher />
 
       {activeVehicle && (
         <div className="sidebar-vehicle-card">

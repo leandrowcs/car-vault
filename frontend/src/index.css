@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800;900&display=swap');
 
 :root {
+  color-scheme: dark;
   /* Brand Tokens - Vault Family Amber */
   --vault-primary: #F59E0B;
   --vault-primary-hover: #D97706;
@@ -43,6 +44,25 @@
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-full: 9999px;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --vault-bg: #F1F5F9;
+  --vault-surface: #FFFFFF;
+  --vault-surface-2: #F1F5F9;
+  --vault-surface-3: #E2E8F0;
+  --vault-border: #CBD5E1;
+  --vault-border-light: #94A3B8;
+  --vault-text: #0F172A;
+  --vault-text-secondary: #475569;
+  --vault-text-muted: #526176;
+  --vault-success: #047857;
+  --vault-danger: #DC2626;
+  --vault-info: #1D4ED8;
+  --shadow-sm: 0 1px 2px #0f172a0d;
+  --shadow-md: 0 4px 8px #0f172a12;
+  --shadow-lg: 0 10px 20px #0f172a1a;
 }
 
 * {
