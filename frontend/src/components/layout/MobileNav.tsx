@@ -54,7 +54,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, o
       {items.slice(0, 4).map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`mobile-nav-item ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}>
         <Icon size={20} /><span>{id === 'dashboard' ? 'Dash' : label}</span>
       </button>)}
-      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddFuel}><Plus size={24} /><span>+ Fuel</span></button>
+      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddFuel}><Plus size={24} /><span>Fuel</span></button>
     </nav>
     <dialog ref={dialog} id="mobile-menu" className="mobile-drawer" aria-labelledby="mobile-menu-title" onCancel={() => setOpen(false)} onClick={e => { if (e.target === e.currentTarget && e.clientX > e.currentTarget.getBoundingClientRect().right) setOpen(false) }}>
       <div className="drawer-heading"><strong id="mobile-menu-title">Car Vault</strong><button type="button" className="btn btn-secondary btn-icon" aria-label="Close navigation menu" onClick={() => setOpen(false)}><X size={20} /></button></div>

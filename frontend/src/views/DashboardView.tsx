@@ -388,17 +388,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <div className="smart-reminders">
             {suggestions.map(r => <div className="smart-reminder" key={r.id}>
+              <div className="smart-reminder-content">
               <div className="smart-reminder-heading"><strong>{r.title}</strong>{r.id.endsWith('-summer') ? <span className="badge badge-slate">Optional</span> : <ReminderBadge status={evaluateReminderStatus(r, activeVehicle.currentOdometer)} />}</div>
               <p className="smart-reminder-target">{r.dueDate && formatDate(r.dueDate, settings.dateFormat)}{r.daysRemaining !== undefined && ` (${r.daysRemaining > 0 ? `in ${r.daysRemaining} days` : r.daysRemaining === 0 ? 'today' : `${Math.abs(r.daysRemaining)} days ago`})`}{r.targetOdometer !== undefined && ` · ${r.targetOdometer.toLocaleString()} km (${Math.max(0, r.targetOdometer - activeVehicle.currentOdometer).toLocaleString()} km left)`}</p>
-              <p>{r.reason}</p>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={r.action === 'fuel' ? onAddFuel : onAddMaintenance}>{r.action === 'fuel' ? 'Log fill-up' : 'Log service'}</button>
+              <details className="reminder-details"><summary>Details</summary><p>{r.reason}</p></details>
+              </div>
+              <button type="button" className="btn btn-secondary btn-icon reminder-log" aria-label={`${r.action === 'fuel' ? 'Log fill-up' : 'Log service'}: ${r.title}`} title={r.action === 'fuel' ? 'Log fill-up' : 'Log service'} onClick={r.action === 'fuel' ? onAddFuel : onAddMaintenance}>{r.action === 'fuel' ? <Fuel size={18} /> : <Wrench size={18} />}</button>
             </div>)}
             <button type="button" className="btn btn-secondary btn-sm" onClick={onAddReminder}>Set oil / service mileage target</button>
-            <p className="card-subtitle">Service predictions need two matching records. Otherwise, set a mileage target from your maintenance schedule. Record seasonal tires using Winter / Summer Tire Installation.</p>
+            <details className="reminder-details reminder-help"><summary>How reminders work</summary><p className="card-subtitle">Service predictions need two matching records. Otherwise, set a mileage target from your maintenance schedule. Record seasonal tires using Winter / Summer Tire Installation.</p></details>
           </div>
           {upcomingReminders.length === 0 ? (
-            <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-              <CheckCircle2 size={32} color="var(--vault-success)" style={{ marginBottom: '8px' }} />
+            <div style={{ padding: '8px 0', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
               <p>No manually scheduled reminders.</p>
             </div>
           ) : (
@@ -413,7 +414,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     gap: '10px',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '12px 14px',
+                    padding: '8px 10px',
                     background: 'var(--vault-surface-2)',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--vault-border)',

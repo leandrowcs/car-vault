@@ -846,13 +846,32 @@
 .mobile-nav-item.mobile-add-fuel { background: var(--vault-primary); color: #111827; border-radius: 14px; margin: 4px 8px 4px 2px; }
 @keyframes drawer-slide-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .mobile-drawer[open] { animation: none; } }
-.smart-reminders { display: grid; gap: 12px; margin-bottom: 16px; }
-.smart-reminder { padding: 14px; border: 1px solid var(--vault-border); border-left: 3px solid var(--vault-primary); background: var(--vault-surface-2); border-radius: 12px; }
-.smart-reminder-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
-.smart-reminder p { font-size: 12px; color: var(--vault-text-muted); margin: 8px 0; }
+.smart-reminders { display: grid; gap: 8px; margin-bottom: 8px; }
+.smart-reminder { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: 8px; padding: 10px; border: 1px solid var(--vault-border); border-left: 3px solid var(--vault-primary); background: var(--vault-surface-2); border-radius: 10px; }
+.smart-reminder-content { min-width: 0; }
+.smart-reminder-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.smart-reminder-heading strong { font-size: 13px; line-height: 1.4; }
+.smart-reminder-heading .badge { font-size: 10px; padding: 2px 6px; }
+.smart-reminder p { font-size: 12px; line-height: 1.45; color: var(--vault-text-muted); margin: 4px 0 0; overflow-wrap: anywhere; }
 .smart-reminder .smart-reminder-target { color: var(--vault-text-secondary); font-variant-numeric: tabular-nums; }
+.reminder-log { width: 44px; min-height: 44px; color: var(--vault-primary); }
+.reminder-details { font-size: 11px; color: var(--vault-text-muted); }
+.reminder-details summary { cursor: pointer; min-height: 32px; align-content: center; width: fit-content; padding-right: 12px; }
+.reminder-details summary:hover { color: var(--vault-primary); }
+.reminder-details summary:focus-visible { outline: 2px solid var(--vault-primary); outline-offset: 2px; border-radius: 4px; }
+.reminder-help summary { min-height: 36px; }
+.reminder-help p { margin: 0 0 6px; }
 .activity-timeline { position: relative; padding-left: 42px; }
-.activity-timeline::before { content: ''; position: absolute; top: 12px; bottom: 16px; left: 14px; width: 3px; background: repeating-linear-gradient(to bottom, var(--vault-border) 0 7px, transparent 7px 11px); }
+/* Asphalt shoulders and a dashed yellow centerline, underneath the event markers. */
+.activity-timeline::before {
+  content: ''; position: absolute; top: 12px; bottom: 16px; left: 6px; width: 18px;
+  border: 1px solid #47515d; border-radius: 5px;
+  background:
+    repeating-linear-gradient(to bottom, #facc15 0 9px, transparent 9px 17px) center / 2px 100% no-repeat,
+    linear-gradient(to right, #292d32, #0a0b0d 28%, #0a0b0d 72%, #292d32);
+  box-shadow: inset 2px 0 #71717a40, inset -2px 0 #71717a40, 0 0 0 2px #02061755;
+  pointer-events: none;
+}
 .timeline-month { border: 1px solid var(--vault-border); border-radius: 14px; background: var(--vault-surface-2); padding: 14px 16px; margin: 8px 0; font-size: 13px; color: var(--vault-text-secondary); overflow-wrap: anywhere; }
 .timeline-month h4 { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; color: var(--vault-text-muted); margin-bottom: 8px; }
 .timeline-month strong { color: var(--vault-text); font-variant-numeric: tabular-nums; }
@@ -875,7 +894,7 @@
 .timeline-empty { padding: 24px 0; color: var(--vault-text-muted); }
 @media (max-width: 380px) {
   .activity-timeline { padding-left: 32px; }
-  .activity-timeline::before { left: 10px; }
+  .activity-timeline::before { left: 4px; width: 16px; }
   .timeline-icon { left: -32px; width: 24px; height: 24px; }
   .timeline-entry { grid-template-columns: minmax(0, 1fr); }
   .timeline-amount { text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
