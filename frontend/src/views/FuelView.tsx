@@ -43,6 +43,14 @@ export const FuelView: React.FC<FuelViewProps> = ({
   const [fuelToDelete, setFuelToDelete] = useState<FuelEntry | null>(null)
   const [chargeToDelete, setChargeToDelete] = useState<ChargingEntry | null>(null)
   const [tab, setTab] = useState<'fuel' | 'charging'>('fuel')
+  const [sortBy, setSortBy] = useState<'date' | 'cost' | 'volume'>('date')
+  const [sortAscending, setSortAscending] = useState(false)
+  const sortedFuelEntries = useMemo(() => [...activeFuelEntries].sort((a, b) => {
+    const difference = sortBy === 'cost' ? a.totalCost - b.totalCost
+      : sortBy === 'volume' ? a.liters - b.liters
+      : a.date.localeCompare(b.date) || a.odometer - b.odometer
+    return (sortAscending ? difference : -difference) || b.date.localeCompare(a.date) || a.id.localeCompare(b.id)
+  }), [activeFuelEntries, sortBy, sortAscending])
 
   const isEvOrPhev =
     activeVehicle?.fuelType === 'electric' ||
@@ -178,11 +186,28 @@ export const FuelView: React.FC<FuelViewProps> = ({
               <h3 className="card-title">Fill-Up History</h3>
               <span className="badge badge-slate">{activeFuelEntries.length} fill-ups</span>
             </div>
+            <div className="record-sort" role="group" aria-label="Sort fill-ups">
+              <span>Sort by</span>
+              {(['date', 'cost', 'volume'] as const).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`btn btn-sm ${sortBy === key ? 'btn-primary' : 'btn-secondary'}`}
+                  aria-pressed={sortBy === key}
+                  onClick={() => setSortBy(key)}
+                >
+                  {key === 'date' ? 'Date' : key === 'cost' ? 'Cost' : 'Volume'}
+                </button>
+              ))}
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSortAscending(value => !value)} aria-label="Reverse sort order">
+                {sortBy === 'date' ? (sortAscending ? 'Oldest first ↑' : 'Newest first ↓') : (sortAscending ? 'Lowest first ↑' : 'Highest first ↓')}
+              </button>
+            </div>
             {activeFuelEntries.length === 0 ? (
               <div className="record-empty">No fuel fill-ups logged yet for this vehicle.</div>
             ) : (
-              <div className="record-grid">
-                {activeFuelEntries.map((entry) => {
+              <div className="record-grid record-grid-compact">
+                {sortedFuelEntries.map((entry) => {
                   const stat = fuelStats.entryStats.get(entry.id)
                   return (
                     <RecordCard
