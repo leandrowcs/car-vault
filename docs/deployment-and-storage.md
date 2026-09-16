@@ -32,7 +32,27 @@ Na Vercel, abra **Project → Settings → Environment Variables** e cadastre os
 
 Mantenha `authDomain` como `car-vault-816ba.firebaseapp.com`. O login usa popup do Google. Se bloqueado, o app pede para permitir popups. Variáveis `VITE_*` são públicas no bundle: nunca inclua chave privada ou conta de serviço nelas.
 
-Use **Root Directory: frontend**, build `npm run build`, saída `dist`. Após cadastrar as variáveis, faça um **Redeploy**: elas são incorporadas no build. Sem configuração Firebase, o app continua no modo local.
+Use **Root Directory: frontend**, instalação `npm ci --include=dev`, build `npm run build`, saída `dist`. Após cadastrar as variáveis, faça um **Redeploy**: elas são incorporadas no build. Sem configuração Firebase, o app continua no modo local.
+
+### Erro `vite: command not found`
+
+Em **Vercel → Project → Settings → Build and Deployment**, confirme:
+
+| Campo | Valor |
+| --- | --- |
+| Root Directory | `frontend` |
+| Framework Preset | `Vite` |
+| Install Command | `npm ci --include=dev` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+O `vercel.json` está dentro de `frontend`, assim como `package.json` e o lockfile.
+Usar a raiz do repositório impede a leitura dessa configuração e a instalação
+das dependências no diretório correto. Vite e TypeScript são dependências de
+desenvolvimento necessárias para compilar; `--include=dev` garante sua instalação.
+Envie o commit com esses arquivos e crie um deploy desse commit, sem reutilizar
+o cache de build. Reimplantar um deploy antigo não inclui alterações posteriores.
+No log, confirme a instalação e a execução de `npm run build`.
 
 ## Uso e migração
 
