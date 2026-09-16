@@ -768,7 +768,7 @@
   }
 
   .content-container {
-    padding: 18px max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    padding: 12px max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
     overflow-wrap: anywhere;
   }
 
@@ -779,7 +779,7 @@
 
 @media (max-width: 560px) {
   .card {
-    padding: 16px;
+    padding: 12px;
   }
 
   .grid-metrics {
@@ -787,7 +787,7 @@
   }
 
   .metric-card {
-    padding: 14px 12px;
+    padding: 12px;
   }
 
   .metric-card-top {

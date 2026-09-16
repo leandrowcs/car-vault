@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAccount } from '../../context/AccountContext'
 import { useCarVault } from '../../context/CarVaultContext'
 import { firebaseConfigured, isTrustedDevice } from '../../services/firebase'
@@ -9,7 +9,15 @@ import { ConfirmDialog } from '../common/ConfirmDialog'
 export function SyncNotice() {
   const { user } = useAccount()
   const { sync, retrySync } = useCarVault()
-  if (!user && !sync.error) return null
+  const [hidden, setHidden] = useState(false)
+  const settled = Boolean(user && sync.ready && !sync.error && !sync.pending && !sync.fromCache)
+  useEffect(() => {
+    setHidden(false)
+    if (!settled) return
+    const timeout = window.setTimeout(() => setHidden(true), 5000)
+    return () => window.clearTimeout(timeout)
+  }, [settled, user?.uid])
+  if ((!user && !sync.error) || (settled && hidden)) return null
   return <div className={`sync-notice ${sync.error ? 'sync-error' : ''}`} role={sync.error ? 'alert' : 'status'}>
     <span>{sync.error ?? (sync.pending ? 'Changes pending — keep this device until sync completes.' :
       sync.fromCache ? 'Offline / connecting — showing cached data.' : 'Synced to your account.')}</span>

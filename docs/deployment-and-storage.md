@@ -101,3 +101,14 @@ Antes de usar dados reais, valide em `car-vault-one.vercel.app`: login Google, g
 - [Persistência offline](https://firebase.google.com/docs/firestore/manage-data/enable-offline)
 - [Regras por usuário](https://firebase.google.com/docs/firestore/security/rules-conditions)
 - [Vite na Vercel](https://vercel.com/docs/frameworks/frontend/vite)
+
+
+### Installed app icons
+
+The Vite PWA configuration uses `frontend/public/manifest.json` as the manifest source. Android has separate opaque maskable PNGs (192 and 512 pixels); standard PNGs and an Apple touch icon are also provided. The original favicon remains the vector source.
+
+After editing `frontend/public/favicon.svg`, run `npm --prefix frontend run generate:icons` and commit the generated assets. The generator keeps the artwork inside the maskable safe circle and fills the full canvas with the dark app background.
+
+Existing Android installations may retain their cached launcher icon after deployment. First reopen the installed app online and allow the browser to update it. Before removing/reinstalling an app to refresh the icon, confirm account sync or export a backup if using local-only storage.
+
+A successful sync notice automatically hides after five seconds. Pending changes, offline/cache state and sync errors stay visible until resolved; a new sync cycle shows the notice again.
