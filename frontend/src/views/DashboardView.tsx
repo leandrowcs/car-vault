@@ -206,7 +206,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const isEv = activeVehicle.fuelType === 'electric'
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
+    <div style={{ display: 'grid', gap: '12px' }}>
       {/* Vehicle Hero Banner */}
       <Card style={{ padding: '24px', borderLeft: '4px solid var(--vault-primary)' }}>
         <div
