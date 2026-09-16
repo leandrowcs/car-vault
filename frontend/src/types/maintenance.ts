@@ -1,6 +1,8 @@
 export const DEFAULT_MAINTENANCE_CATEGORIES = [
   'Oil Change',
   'Tires',
+  'Winter Tire Installation',
+  'Summer Tire Installation',
   'Brakes',
   'Battery',
   'Filters',

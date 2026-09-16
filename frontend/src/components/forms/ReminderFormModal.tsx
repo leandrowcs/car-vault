@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
+import { DEFAULT_MAINTENANCE_CATEGORIES } from '../../types/maintenance'
 import type { Reminder, ReminderType } from '../../types/reminder'
 import { useCarVault } from '../../context/CarVaultContext'
 
@@ -16,7 +17,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
   onSave,
   initialData,
 }) => {
-  const { activeVehicle } = useCarVault()
+  const { activeVehicle, activeMaintenanceRecords } = useCarVault()
 
   const [title, setTitle] = useState('')
   const [type, setType] = useState<ReminderType>('both')
@@ -24,8 +25,14 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
   const [targetOdometer, setTargetOdometer] = useState('')
   const [category, setCategory] = useState('Oil Change')
   const [notes, setNotes] = useState('')
+  const [intervalKm, setIntervalKm] = useState('')
+  const [error, setError] = useState('')
+  const lastService = [...activeMaintenanceRecords].filter(r => r.category === category && r.date.slice(0, 10) <= new Date().toLocaleDateString('en-CA')).sort((a, b) => b.date.localeCompare(a.date))[0]
+  const intervalBase = lastService?.odometer ?? activeVehicle?.currentOdometer ?? 0
 
   useEffect(() => {
+    setIntervalKm('')
+    setError('')
     if (initialData) {
       setTitle(initialData.title)
       setType(initialData.type)
@@ -39,9 +46,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
       setTitle('')
       setType('both')
       setDueDate('')
-      // Default target odometer to current + 8,000 km (typical synthetic oil interval)
-      const cur = activeVehicle ? activeVehicle.currentOdometer : 0
-      setTargetOdometer(cur ? String(cur + 8000) : '')
+      setTargetOdometer('')
       setCategory('Oil Change')
       setNotes('')
     }
@@ -53,6 +58,15 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
     const odoNum = targetOdometer ? parseFloat(targetOdometer) : undefined
 
+    if (type === 'both' && !dueDate && odoNum === undefined) {
+      setError('Enter a due date or an odometer target.')
+      return
+    }
+    if (odoNum !== undefined && (!Number.isFinite(odoNum) || odoNum < 0)) {
+      setError('Enter a valid odometer target.')
+      return
+    }
+    setError('')
     onSave({
       vehicleId: activeVehicle.id,
       title,
@@ -85,6 +99,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
       }
     >
       <form id="reminder-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
+        {error && <p role="alert" className="account-error">{error}</p>}
         <div className="form-group">
           <label className="form-label">Reminder Title *</label>
           <input
@@ -116,10 +131,12 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. Maintenance, Tires, Registration"
+              list="reminder-categories"
+              placeholder="e.g. Scheduled Maintenance, Tires, Registration"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => { setCategory(e.target.value); setIntervalKm('') }}
             />
+            <datalist id="reminder-categories">{DEFAULT_MAINTENANCE_CATEGORIES.map(c => <option key={c} value={c} />)}</datalist>
           </div>
         </div>
 
@@ -138,6 +155,13 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
         {(type === 'mileage' || type === 'both') && (
           <div className="form-group">
+            <label className="form-label" htmlFor="service-interval">Service interval (km, optional)</label>
+            <input id="service-interval" type="number" min="1" step="1" className="form-input" value={intervalKm} placeholder="Use the interval in your owner's manual" onChange={e => {
+              setIntervalKm(e.target.value)
+              const interval = Number(e.target.value)
+              if (Number.isFinite(interval) && interval > 0) setTargetOdometer(String(intervalBase + interval))
+            }} />
+            <span className="card-subtitle">Adds the interval to {lastService ? 'the last matching service' : 'the current odometer'}: {intervalBase.toLocaleString()} km. You can also enter the target directly.</span>
             <label className="form-label">Due at Odometer (km) *</label>
             <input
               type="number"
@@ -146,7 +170,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
               className="form-input font-mono"
               placeholder="Target vehicle odometer (e.g. 32000)"
               value={targetOdometer}
-              onChange={(e) => setTargetOdometer(e.target.value)}
+              onChange={(e) => { setTargetOdometer(e.target.value); setIntervalKm('') }}
             />
             {activeVehicle && (
               <span style={{ fontSize: '12px', color: 'var(--vault-text-muted)' }}>

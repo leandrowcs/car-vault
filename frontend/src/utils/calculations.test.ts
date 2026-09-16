@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import {
   calculateFuelStats,
+  calculateSuggestedReminders,
+  calculateRefillInterval,
+  calculateActivityTimeline,
   calculateEvStats,
   calculateCostPerKm,
   calculateTotalVehicleCosts,
@@ -359,3 +362,59 @@ describe('evaluateReminderStatus', () => {
   })
 })
 
+
+
+describe('dashboard predictions and timeline', () => {
+  const vehicle = { id: 'v1', fuelType: 'gasoline' }
+  const fill = (id: string, date: string, odometer: number, extra: Partial<FuelEntry> = {}): FuelEntry => ({ id, vehicleId: 'v1', date, odometer, liters: 40, pricePerLiter: 1.5, totalCost: 60, fullTank: true, createdAt: date, ...extra })
+  const service = (id: string, date: string, odometer: number, category: string): MaintenanceRecord => ({ id, vehicleId: 'v1', date, odometer, category, description: '', cost: 100, createdAt: date })
+  const at = (date: string) => new Date(date + 'T12:00:00')
+  const suggestions = (date: string, records: MaintenanceRecord[] = []) => calculateSuggestedReminders(vehicle, [], records, [], at(date))
+  it('predicts dates and mileage from recent valid intervals without mutating input', () => {
+    const fuel = [fill('b', '2026-09-10', 1500), fill('a', '2026-09-05', 1000)]
+    const result = calculateSuggestedReminders(vehicle, fuel, [], [], at('2026-09-11'))
+    expect(result.find(r => r.action === 'fuel')).toMatchObject({ dueDate: '2026-09-15', targetOdometer: 2000 })
+    expect(fuel[0].id).toBe('b')
+  })
+  it('requires evidence and excludes missed, reversed, same-day and future intervals', () => {
+    expect(calculateRefillInterval([fill('a', '2026-01-01', 1000)])).toBeNull()
+    expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2026-01-02', 1500, { missedPreviousFillUp: true })])).toBeNull()
+    expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2026-01-01', 1500)])).toBeNull()
+    expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2026-01-02', 900)])).toBeNull()
+    expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2027-01-01', 1500)], '2026-01-02')).toBeNull()
+  })
+  it('starts winter warnings exactly two months before the deadline and carries across New Year', () => {
+    expect(suggestions('2026-09-30').some(r => r.id.endsWith('-winter'))).toBe(false)
+    expect(suggestions('2026-10-01').find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2026-12-01')
+    expect(suggestions('2027-01-01').find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2026-12-01')
+    expect(suggestions('2027-03-15').some(r => r.id.endsWith('-winter'))).toBe(true)
+    expect(suggestions('2027-03-16').some(r => r.id.endsWith('-winter'))).toBe(false)
+  })
+  it('plans optional summer tires from Jan 16, never before Mar 16', () => {
+    expect(suggestions('2027-01-15').some(r => r.id.endsWith('-summer'))).toBe(false)
+    expect(suggestions('2027-01-16').find(r => r.id.endsWith('-summer'))?.dueDate).toBe('2027-03-16')
+  })
+  it('suppresses installed tires until the opposite set is recorded', () => {
+    const winter = service('w', '2026-11-01', 15000, 'Winter Tire Installation')
+    expect(suggestions('2026-12-02', [winter]).some(r => r.id.endsWith('-winter'))).toBe(false)
+    const summer = service('s', '2027-04-01', 19000, 'Summer Tire Installation')
+    expect(suggestions('2027-10-01', [winter, summer]).find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2027-11-01')
+    expect(suggestions('2027-05-01', [winter, summer]).some(r => r.id.endsWith('-summer'))).toBe(false)
+  })
+  it('infers oil intervals, respects manual targets and excludes other vehicles', () => {
+    const records = [service('a', '2026-01-01', 10000, 'Oil Change'), service('b', '2026-06-01', 18000, 'Oil Change')]
+    expect(suggestions('2026-09-01', records).find(r => r.id.endsWith('-Oil Change'))?.targetOdometer).toBe(26000)
+    const reminder: Reminder = { id: 'r', vehicleId: 'v1', title: 'Oil', type: 'mileage', targetOdometer: 25000, category: 'Oil Change', isCompleted: false, createdAt: '2026-01-01' }
+    expect(calculateSuggestedReminders(vehicle, [], records, [reminder], at('2026-09-01')).some(r => r.id.endsWith('-Oil Change'))).toBe(false)
+    expect(suggestions('2026-09-01', records.map(r => ({ ...r, vehicleId: 'other' }))).some(r => r.id.endsWith('-Oil Change'))).toBe(false)
+    expect(calculateSuggestedReminders({ ...vehicle, fuelType: 'electric' }, [], records, [], at('2026-09-01')).some(r => r.id.endsWith('-Oil Change'))).toBe(false)
+  })
+  it('groups complete months and includes consumption across month boundaries', () => {
+    const fuel = [fill('a', '2026-08-31', 1000), fill('b', '2026-09-05', 1500)]
+    const months = calculateActivityTimeline(fuel, [], [service('b', '2026-09-05', 1500, 'Inspection')], [])
+    expect(months.map(m => m.month)).toEqual(['2026-09', '2026-08'])
+    expect(months[0]).toMatchObject({ total: 160, distance: 500, consumption: 8 })
+    expect(new Set(months[0].entries.map(e => e.id)).size).toBe(2)
+    expect(calculateActivityTimeline([], [], [], [])).toEqual([])
+  })
+})

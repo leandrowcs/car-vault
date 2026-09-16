@@ -18,6 +18,7 @@ import {
   calculateTotalVehicleCosts,
   calculateMonthlySpending,
   evaluateReminderStatus,
+  calculateSuggestedReminders,
 } from '../utils/calculations'
 import {
   formatCurrency,
@@ -26,6 +27,7 @@ import {
   formatCostPerKm,
   formatDate,
 } from '../utils/formatters'
+import { ActivityTimeline } from '../components/ActivityTimeline'
 import { Card } from '../components/common/Card'
 import { ReminderBadge } from '../components/common/StatBadge'
 import { SimpleBarChart } from '../components/charts/SimpleBarChart'
@@ -119,70 +121,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const upcomingReminders = evaluatedReminders.filter((r) => !r.isCompleted).slice(0, 4)
 
-  // Recent transactions timeline
-  interface ActivityItem {
-    id: string
-    type: 'fuel' | 'charge' | 'expense' | 'maintenance'
-    date: string
-    title: string
-    subtitle: string
-    amount: number
-  }
-
-  const recentActivities: ActivityItem[] = useMemo(() => {
-    const list: ActivityItem[] = []
-
-    for (const f of activeFuelEntries) {
-      list.push({
-        id: f.id,
-        type: 'fuel',
-        date: f.date,
-        title: `Fuel Fill-Up (${f.liters.toFixed(1)} L)`,
-        subtitle: f.station || 'Fill-up',
-        amount: f.totalCost,
-      })
-    }
-
-    for (const c of activeChargingEntries) {
-      list.push({
-        id: c.id,
-        type: 'charge',
-        date: c.date,
-        title: `EV Charge (${c.kwh.toFixed(1)} kWh)`,
-        subtitle: c.chargingLocation || 'Charging session',
-        amount: c.totalCost,
-      })
-    }
-
-    for (const m of activeMaintenanceRecords) {
-      list.push({
-        id: m.id,
-        type: 'maintenance',
-        date: m.date,
-        title: m.category,
-        subtitle: m.description,
-        amount: m.cost,
-      })
-    }
-
-    for (const e of activeExpenses) {
-      list.push({
-        id: e.id,
-        type: 'expense',
-        date: e.date,
-        title: e.category,
-        subtitle: e.description,
-        amount: e.amount,
-      })
-    }
-
-    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6)
-  }, [
-    activeFuelEntries,
-    activeChargingEntries,
-    activeMaintenanceRecords,
-    activeExpenses,
-  ])
+  const suggestions = activeVehicle ? calculateSuggestedReminders(activeVehicle, activeFuelEntries, activeMaintenanceRecords, activeReminders) : []
 
   if (!activeVehicle) {
     return (
@@ -436,7 +375,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Bell size={18} color="var(--vault-primary)" />
                 Upcoming Reminders
               </h3>
-              <p className="card-subtitle">Upcoming services and renewals</p>
+              <p className="card-subtitle">Predictions, services and seasonal tire changes</p>
             </div>
             <button
               type="button"
@@ -447,18 +386,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
 
+          <div className="smart-reminders">
+            {suggestions.map(r => <div className="smart-reminder" key={r.id}>
+              <div className="smart-reminder-heading"><strong>{r.title}</strong>{r.id.endsWith('-summer') ? <span className="badge badge-slate">Optional</span> : <ReminderBadge status={evaluateReminderStatus(r, activeVehicle.currentOdometer)} />}</div>
+              <p className="smart-reminder-target">{r.dueDate && formatDate(r.dueDate, settings.dateFormat)}{r.daysRemaining !== undefined && ` (${r.daysRemaining > 0 ? `in ${r.daysRemaining} days` : r.daysRemaining === 0 ? 'today' : `${Math.abs(r.daysRemaining)} days ago`})`}{r.targetOdometer !== undefined && ` · ${r.targetOdometer.toLocaleString()} km (${Math.max(0, r.targetOdometer - activeVehicle.currentOdometer).toLocaleString()} km left)`}</p>
+              <p>{r.reason}</p>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={r.action === 'fuel' ? onAddFuel : onAddMaintenance}>{r.action === 'fuel' ? 'Log fill-up' : 'Log service'}</button>
+            </div>)}
+            <button type="button" className="btn btn-secondary btn-sm" onClick={onAddReminder}>Set oil / service mileage target</button>
+            <p className="card-subtitle">Service predictions need two matching records. Otherwise, set a mileage target from your maintenance schedule. Record seasonal tires using Winter / Summer Tire Installation.</p>
+          </div>
           {upcomingReminders.length === 0 ? (
             <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
               <CheckCircle2 size={32} color="var(--vault-success)" style={{ marginBottom: '8px' }} />
-              <p>No active reminders! Your vehicle is up to date.</p>
+              <p>No manually scheduled reminders.</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '10px' }}>
               {upcomingReminders.map((r) => (
                 <div
                   key={r.id}
+                  className="manual-reminder"
                   style={{
                     display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 14px',
@@ -507,50 +459,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        {recentActivities.length === 0 ? (
-          <div style={{ padding: '28px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-            No transactions recorded yet. Use the buttons above to log your first fill-up or service!
-          </div>
-        ) : (
-          <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Activity</th>
-                  <th>Details</th>
-                  <th style={{ textAlign: 'right' }}>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivities.map((act) => (
-                  <tr key={act.id}>
-                    <td className="font-mono" style={{ color: 'var(--vault-text-secondary)', fontSize: '12.5px' }}>
-                      {formatDate(act.date, settings.dateFormat)}
-                    </td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          act.type === 'fuel' || act.type === 'charge'
-                            ? 'badge-amber'
-                            : act.type === 'maintenance'
-                            ? 'badge-blue'
-                            : 'badge-slate'
-                        }`}
-                      >
-                        {act.title}
-                      </span>
-                    </td>
-                    <td style={{ color: 'var(--vault-text-secondary)' }}>{act.subtitle}</td>
-                    <td className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
-                      {formatCurrency(act.amount, settings.currency)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ActivityTimeline key={activeVehicle.id} />
       </Card>
     </div>
   )

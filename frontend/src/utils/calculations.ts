@@ -366,3 +366,133 @@ export function evaluateReminderStatus(
   return 'upcoming'
 }
 
+
+export interface SuggestedReminder extends Reminder {
+  reason: string
+  action: 'fuel' | 'maintenance'
+  daysRemaining?: number
+}
+
+const dayMilliseconds = 86_400_000
+const calendarDay = (date: string) => Date.parse(date.slice(0, 10) + 'T00:00:00Z')
+const isoDay = (date: number) => new Date(date).toISOString().slice(0, 10)
+
+/** Recent positive, consecutive intervals; missing fill-ups break the series. */
+export function calculateRefillInterval(entries: FuelEntry[], today = '9999-12-31') {
+  const sorted = entries.filter(e => e.date.slice(0, 10) <= today).sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer).slice(-9)
+  const intervals: { days: number; km: number }[] = []
+  for (let i = 1; i < sorted.length; i++) {
+    const days = (calendarDay(sorted[i].date) - calendarDay(sorted[i - 1].date)) / dayMilliseconds
+    const km = sorted[i].odometer - sorted[i - 1].odometer
+    if (!sorted[i].missedPreviousFillUp && days > 0 && km > 0) intervals.push({ days, km })
+  }
+  if (!intervals.length) return null
+  return {
+    days: Math.max(1, Math.round(intervals.reduce((sum, x) => sum + x.days, 0) / intervals.length)),
+    km: Math.round(intervals.reduce((sum, x) => sum + x.km, 0) / intervals.length),
+    samples: intervals.length,
+    latest: sorted[sorted.length - 1],
+  }
+}
+
+/** Derived suggestions are never persisted or marked completed without a real record. */
+export function calculateSuggestedReminders(
+  vehicle: { id: string; fuelType: string },
+  fuel: FuelEntry[],
+  maintenance: MaintenanceRecord[],
+  reminders: Reminder[],
+  referenceDate = new Date(),
+): SuggestedReminder[] {
+  const today = `${referenceDate.getFullYear()}-${String(referenceDate.getMonth() + 1).padStart(2, '0')}-${String(referenceDate.getDate()).padStart(2, '0')}`
+  const now = calendarDay(today)
+  const result: SuggestedReminder[] = []
+  const add = (id: string, title: string, reason: string, action: SuggestedReminder['action'], dueDate?: string, targetOdometer?: number) => result.push({
+    id: `suggested-${vehicle.id}-${id}`, vehicleId: vehicle.id, title, reason, action,
+    daysRemaining: dueDate ? Math.round((calendarDay(dueDate) - now) / dayMilliseconds) : undefined,
+    dueDate, targetOdometer, type: dueDate && targetOdometer !== undefined ? 'both' : dueDate ? 'date' : 'mileage',
+    isCompleted: false, createdAt: today,
+  })
+  const interval = calculateRefillInterval(fuel.filter(f => f.vehicleId === vehicle.id), today)
+  if (vehicle.fuelType !== 'electric' && interval) {
+    add('fuel', 'Expected next fill-up', `Estimate from ${interval.samples} recent intervals: every ${interval.days} days.`, 'fuel', isoDay(calendarDay(interval.latest.date) + interval.days * dayMilliseconds), interval.latest.odometer + interval.km)
+  }
+  const records = maintenance.filter(m => m.vehicleId === vehicle.id && m.date.slice(0, 10) <= today).sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer)
+  for (const [category, title] of [['Oil Change', 'Expected oil change'], ['Scheduled Maintenance', 'Expected scheduled service']]) {
+    if (category === 'Oil Change' && vehicle.fuelType === 'electric') continue
+    if (reminders.some(r => r.vehicleId === vehicle.id && !r.isCompleted && r.category === category)) continue
+    const history = records.filter(m => m.category === category).slice(-4)
+    const gaps = history.slice(1).map((m, i) => m.odometer - history[i].odometer).filter(km => km > 0)
+    if (gaps.length) {
+      const km = Math.round(gaps.reduce((sum, x) => sum + x, 0) / gaps.length)
+      add(category, title, 'Estimated from recorded service intervals. Follow your manufacturer’s schedule.', 'maintenance', undefined, history[history.length - 1].odometer + km)
+    }
+  }
+  // Québec: winter tires Dec 1–Mar 15 inclusive. Summer change is optional.
+  const year = referenceDate.getFullYear()
+  for (const season of ['winter', 'summer'] as const) {
+    const targetYear = season === 'winter' && referenceDate.getMonth() < 3 ? year - 1 : year
+    const target = `${targetYear}-${season === 'winter' ? '12-01' : '03-16'}`
+    const starts = `${targetYear}-${season === 'winter' ? '10-01' : '01-16'}`
+    const ends = season === 'winter' ? `${targetYear + 1}-03-15` : `${targetYear}-09-30`
+    if (today < starts || today > ends) continue
+    const category = season === 'winter' ? 'Winter Tire Installation' : 'Summer Tire Installation'
+    const tireRecords = records.filter(m => m.category === 'Winter Tire Installation' || m.category === 'Summer Tire Installation')
+    const latest = tireRecords.at(-1)
+    // A confirmed set remains installed until the opposite set is recorded.
+    if (latest?.category === category) continue
+    const pastSeasons = records.filter(m => m.category === category && m.date.slice(0, 4) < String(targetYear))
+    let due = target
+    const previous = pastSeasons.at(-1)
+    if (previous) {
+      const anniversary = `${targetYear}-${previous.date.slice(5, 10)}`
+      if (Number.isFinite(calendarDay(anniversary))) {
+        // History may suggest an earlier winter appointment or a later spring appointment.
+        due = season === 'winter' ? (anniversary < target && anniversary >= starts ? anniversary : target) : (anniversary > target && anniversary < ends ? anniversary : target)
+      }
+    }
+    add(season, season === 'winter' ? 'Install winter tires' : 'Plan summer tire change', season === 'winter'
+      ? 'Québec requirement: December 1–March 15. Confirm installation in the service log.'
+      : 'Optional seasonal change, March 16 at the earliest. Choose a date appropriate for the weather.', 'maintenance', due)
+  }
+  return result.filter(r => !r.dueDate || Number.isFinite(calendarDay(r.dueDate)) && Number.isFinite(now))
+}
+
+export interface TimelineActivity {
+  id: string
+  type: 'fuel' | 'charge' | 'expense' | 'maintenance'
+  date: string
+  title: string
+  detail: string
+  amount: number
+  odometer?: number
+  liters?: number
+  consumption?: number
+}
+
+export function calculateActivityTimeline(fuel: FuelEntry[], charges: ChargingEntry[], maintenance: MaintenanceRecord[], expenses: Expense[]) {
+  const stats = calculateFuelStats(fuel)
+  const activities: TimelineActivity[] = [
+    ...fuel.map(f => ({ id: `fuel-${f.id}`, type: 'fuel' as const, date: f.date, title: f.fuelType || 'Fuel fill-up', detail: f.station || (f.fullTank ? 'Full tank' : 'Partial fill'), amount: f.totalCost, odometer: f.odometer, liters: f.liters, consumption: stats.entryStats.get(f.id)?.lPer100Km })),
+    ...charges.map(c => ({ id: `charge-${c.id}`, type: 'charge' as const, date: c.date, title: 'EV charge', detail: `${c.kwh.toFixed(1)} kWh${c.chargingLocation ? ' · ' + c.chargingLocation : ''}`, amount: c.totalCost, odometer: c.odometer })),
+    ...maintenance.map(m => ({ id: `maintenance-${m.id}`, type: 'maintenance' as const, date: m.date, title: m.category, detail: m.description, amount: m.cost, odometer: m.odometer })),
+    ...expenses.map(e => ({ id: `expense-${e.id}`, type: 'expense' as const, date: e.date, title: e.category, detail: e.description, amount: e.amount, odometer: e.odometer })),
+  ]
+  activities.sort((a, b) => b.date.localeCompare(a.date) || (b.odometer ?? 0) - (a.odometer ?? 0) || a.id.localeCompare(b.id))
+  const months = new Map<string, TimelineActivity[]>()
+  for (const activity of activities) {
+    const key = activity.date.slice(0, 7)
+    months.set(key, [...(months.get(key) || []), activity])
+  }
+  return [...months].map(([month, entries]) => {
+    // Count full-tank intervals ending this month, including cross-month intervals.
+    const intervalStats = fuel.filter(f => f.date.startsWith(month)).flatMap(f => {
+      const value = stats.entryStats.get(f.id)
+      return value ? [value] : []
+    })
+    const distance = intervalStats.reduce((sum, s) => sum + s.distanceKm, 0)
+    const liters = intervalStats.reduce((sum, s) => sum + s.liters, 0)
+    return { month, entries, total: entries.reduce((sum, e) => sum + e.amount, 0), distance,
+      consumption: distance > 0 ? liters / distance * 100 : null,
+      refillInterval: calculateRefillInterval(fuel.filter(f => f.date.startsWith(month))) }
+  })
+}
