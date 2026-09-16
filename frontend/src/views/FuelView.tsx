@@ -225,6 +225,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
                         { label: 'Economy', value: stat?.lPer100Km ? formatConsumption(stat.lPer100Km, settings.fuelEconomyUnit) : '—' },
                       ]}
                       actionLabel={`fill-up on ${formatDate(entry.date, settings.dateFormat)}`}
+                      actionsInHeader
                       onEdit={() => onEditFuel(entry)}
                       onDelete={() => setFuelToDelete(entry)}
                     />

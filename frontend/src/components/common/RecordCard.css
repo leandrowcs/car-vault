@@ -30,6 +30,8 @@
 .record-card-heading { display: flex; align-items: center; gap: 12px; }
 .record-card-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid var(--vault-border); border-radius: 12px; color: var(--vault-primary); background: var(--vault-surface-2); }
 .record-card-title { min-width: 0; }
+.record-card-header-actions { display: flex; flex-shrink: 0; align-self: flex-start; gap: 4px; margin-left: auto; }
+.record-card-header-actions .btn { width: 32px; min-height: 32px; padding: 0; }
 .record-card-title h4 { font-size: 15px; line-height: 1.5; margin: 3px 0 0; overflow-wrap: anywhere; }
 .record-card-date { font-size: 12px; color: var(--vault-text-secondary); }
 .record-card-total { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }

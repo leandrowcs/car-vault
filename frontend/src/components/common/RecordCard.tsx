@@ -10,11 +10,12 @@ interface RecordCardProps {
   badge?: ReactNode
   metrics: { label: string; value: ReactNode }[]
   actionLabel: string
+  actionsInHeader?: boolean
   onEdit: () => void
   onDelete: () => void
 }
 
-export function RecordCard({ icon, title, date, amount, badge, metrics, actionLabel, onEdit, onDelete }: RecordCardProps) {
+export function RecordCard({ icon, title, date, amount, badge, metrics, actionLabel, actionsInHeader = false, onEdit, onDelete }: RecordCardProps) {
   return (
     <article className="record-card">
       <header className="record-card-heading">
@@ -23,6 +24,16 @@ export function RecordCard({ icon, title, date, amount, badge, metrics, actionLa
           <span className="record-card-date">{date}</span>
           <h4>{title}</h4>
         </div>
+        {actionsInHeader && (
+          <div className="record-card-header-actions">
+            <button type="button" className="btn btn-secondary btn-icon btn-sm" onClick={onEdit} aria-label={`Edit ${actionLabel}`} title="Edit fill-up">
+              <Edit2 size={14} aria-hidden="true" />
+            </button>
+            <button type="button" className="btn btn-secondary btn-icon btn-sm" onClick={onDelete} aria-label={`Delete ${actionLabel}`} title="Delete fill-up">
+              <Trash2 size={14} color="var(--vault-danger)" aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </header>
       <div className="record-card-total">
         <strong className="font-mono">{amount}</strong>
@@ -33,14 +44,14 @@ export function RecordCard({ icon, title, date, amount, badge, metrics, actionLa
           <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
         ))}
       </dl>
-      <footer className="record-card-actions">
+      {!actionsInHeader && <footer className="record-card-actions">
         <button type="button" className="btn btn-secondary btn-sm" onClick={onEdit} aria-label={`Edit ${actionLabel}`}>
           <Edit2 size={14} /> Edit
         </button>
         <button type="button" className="btn btn-secondary btn-sm" onClick={onDelete} aria-label={`Delete ${actionLabel}`}>
           <Trash2 size={14} color="var(--vault-danger)" /> Delete
         </button>
-      </footer>
+      </footer>}
     </article>
   )
 }
