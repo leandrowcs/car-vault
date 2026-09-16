@@ -28,6 +28,16 @@
 }
 
 .record-card-heading { display: flex; align-items: center; gap: 12px; }
+.record-card-heading:has(.record-card-header-actions) { padding-right: 76px; min-height: 32px; }
+.record-card-header-actions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 4px;
+}
+.record-card-header-actions .btn { width: 32px; height: 32px; min-height: 32px; padding: 0; flex-shrink: 0; }
+.record-grid-compact .record-card-header-actions { top: 12px; right: 12px; }
 .record-card-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid var(--vault-border); border-radius: 12px; color: var(--vault-primary); background: var(--vault-surface-2); }
 .record-card-title { min-width: 0; }
 .record-card-title h4 { font-size: 15px; line-height: 1.5; margin: 3px 0 0; overflow-wrap: anywhere; }
