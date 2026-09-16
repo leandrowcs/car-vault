@@ -87,7 +87,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '18px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: '18px' }}>
           {activeDocuments.map((doc) => {
             const expiryBadge = getExpiryStatus(doc.expiryDate)
 
@@ -102,7 +102,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
                       <span className="badge badge-slate">{doc.category}</span>
                       {expiryBadge}
                     </div>

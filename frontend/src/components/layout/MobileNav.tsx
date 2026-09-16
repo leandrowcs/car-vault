@@ -47,14 +47,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({
     <>
       {/* Mobile Top App Bar */}
       <div className="mobile-topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/favicon.svg" alt="Car Vault" style={{ width: '28px', height: '28px' }} />
+        <div className="mobile-vehicle-picker">
+          <img src="/favicon.svg" alt="Car Vault" className="mobile-brand-icon" />
           {vehicles.length > 0 && (
             <select
               className="vehicle-select"
+              aria-label="Active vehicle"
               value={activeVehicle?.id || ''}
               onChange={(e) => setActiveVehicleId(e.target.value)}
-              style={{ padding: '4px 8px', fontSize: '12px' }}
             >
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -63,6 +63,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
               ))}
             </select>
           )}
+          {vehicles.length === 0 && <span className="mobile-brand-name">Car Vault</span>}
         </div>
 
         <button
@@ -75,7 +76,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" aria-label="Main navigation">
         <button
           type="button"
           className={`mobile-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}

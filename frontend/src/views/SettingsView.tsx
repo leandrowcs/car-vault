@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react'
+import { useAccount } from '../context/AccountContext'
+import { AccountPanel } from '../components/account/AccountPanel'
 import {
   Download,
   Upload,
@@ -15,6 +17,7 @@ import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { DistanceUnit, VolumeUnit, FuelEconomyUnit, DateFormatOption } from '../types/settings'
 
 export const SettingsView: React.FC = () => {
+  const { user } = useAccount()
   const {
     data,
     settings,
@@ -22,6 +25,7 @@ export const SettingsView: React.FC = () => {
     loadDemoData,
     restoreData,
     resetAllData,
+    sync,
   } = useCarVault()
 
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
@@ -50,7 +54,7 @@ export const SettingsView: React.FC = () => {
       if (result.success && result.data) {
         restoreData(result.data)
         setNotification({
-          message: `Successfully restored ${result.data.vehicles.length} vehicle(s) and history!`,
+          message: user ? 'Backup import submitted. Check the sync status above.' : 'Backup restored to this device.',
           type: 'success',
         })
       } else {
@@ -103,6 +107,8 @@ export const SettingsView: React.FC = () => {
           <span>{notification.message}</span>
         </div>
       )}
+
+      <AccountPanel />
 
       {/* Regional & Automotive Units (Canadian Default) */}
       <Card>
@@ -194,7 +200,7 @@ export const SettingsView: React.FC = () => {
           <div>
             <h3 className="card-title">Data Backup & Portability</h3>
             <p className="card-subtitle">
-              Car Vault is local-first: your data lives on your device with zero mandatory accounts or cloud locks
+              {user ? 'Changes sync to your account. Keep JSON backups for independent recovery.' : 'Your local garage stays on this device. Export a backup before changing domains or clearing browser data.'}
             </p>
           </div>
         </div>
@@ -213,8 +219,9 @@ export const SettingsView: React.FC = () => {
               type="button"
               className="btn btn-secondary"
               onClick={() => fileInputRef.current?.click()}
+              disabled={Boolean(sync.error) || Boolean(user && (sync.fromCache || sync.pending))}
             >
-              <Upload size={16} color="var(--vault-info)" /> Restore from JSON
+              <Upload size={16} color="var(--vault-info)" /> {user ? 'Merge JSON Backup' : 'Restore from JSON'}
             </button>
             <input
               type="file"
@@ -228,6 +235,7 @@ export const SettingsView: React.FC = () => {
               type="button"
               className="btn btn-secondary"
               onClick={() => setConfirmDemoOpen(true)}
+              disabled={Boolean(user) || Boolean(sync.error)}
             >
               <RefreshCw size={16} color="var(--vault-warning)" /> Load Demo Garage
             </button>
@@ -249,7 +257,7 @@ export const SettingsView: React.FC = () => {
                 Reset All Vault Data
               </strong>
               <span style={{ fontSize: '12px', color: 'var(--vault-text-muted)' }}>
-                Irreversibly removes all vehicles, fill-ups, service logs, and documents.
+                {user ? 'Deletes account records across all synced devices. Your separate local garage remains.' : 'Irreversibly removes this device’s local garage.'}
               </span>
             </div>
 
@@ -257,6 +265,7 @@ export const SettingsView: React.FC = () => {
               type="button"
               className="btn btn-danger btn-sm"
               onClick={() => setConfirmResetOpen(true)}
+              disabled={Boolean(sync.error) || Boolean(user && (sync.fromCache || sync.pending))}
             >
               <Trash2 size={14} /> Clear All Data
             </button>
@@ -298,13 +307,13 @@ export const SettingsView: React.FC = () => {
       <ConfirmDialog
         isOpen={confirmResetOpen}
         title="Clear All Car Vault Data"
-        message="Are you sure? This will delete all vehicles, fuel logs, service history, expenses, reminders, and documents permanently."
+        message={user ? 'Delete all records currently loaded in this account? This deletion syncs to your other devices. Export a backup first.' : 'Delete all records in this device’s local garage? Export a backup first.'}
         confirmLabel="Delete Everything"
         danger={true}
         onConfirm={() => {
           resetAllData()
           setConfirmResetOpen(false)
-          setNotification({ message: 'All vault data has been cleared.', type: 'success' })
+          setNotification({ message: user ? 'Deletion submitted. Check the sync status above.' : 'Local garage cleared.', type: 'success' })
         }}
         onCancel={() => setConfirmResetOpen(false)}
       />

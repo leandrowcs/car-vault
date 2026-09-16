@@ -46,11 +46,7 @@ export class CarVaultStorage {
   }
 
   static save(data: CarVaultData): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    } catch (err) {
-      console.error('CarVaultStorage.save failed:', err)
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   }
 
   static clear(): void {

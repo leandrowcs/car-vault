@@ -63,7 +63,7 @@ export const GarageView: React.FC<GarageViewProps> = ({
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: '20px' }}>
           {vehicles.map((vehicle) => {
             const isActive = vehicle.id === activeVehicleId
 
@@ -83,7 +83,7 @@ export const GarageView: React.FC<GarageViewProps> = ({
                 {/* Header with Make, Model, Year, Badges */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '4px' }}>
                       <FuelTypeBadge fuelType={vehicle.fuelType} />
                       {isActive && <span className="badge badge-amber">Active Vehicle</span>}
                     </div>

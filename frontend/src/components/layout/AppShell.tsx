@@ -2,6 +2,7 @@ import React from 'react'
 import { Sidebar, type NavView } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
+import { SyncNotice } from '../account/AccountPanel'
 
 interface AppShellProps {
   currentView: NavView
@@ -43,7 +44,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         />
 
         {/* Dynamic Page View Content */}
-        <main className="content-container">{children}</main>
+        <main className="content-container"><SyncNotice />{children}</main>
       </div>
     </div>
   )

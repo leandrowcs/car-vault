@@ -32,4 +32,8 @@ lerna-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*-debug.log
 

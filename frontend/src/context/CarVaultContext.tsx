@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react'
 import type {
   CarVaultData,
   Vehicle,
@@ -12,9 +12,15 @@ import type {
 } from '../types'
 import { CarVaultStorage } from '../services/storage'
 import { DEMO_VAULT_DATA } from '../services/demoData'
+import { VaultStore, type VaultState } from '../services/vaultStore'
+import { createFirestoreAdapter } from '../services/firestoreVault'
+import { mergeLocalVault } from '../services/vaultRecords'
 
 interface CarVaultContextType {
   data: CarVaultData
+  sync: VaultState
+  retrySync: () => void
+  importLocalData: () => void
   vehicles: Vehicle[]
   activeVehicle: Vehicle | null
   activeVehicleId: string | null
@@ -82,23 +88,14 @@ interface CarVaultContextType {
 
 const CarVaultContext = createContext<CarVaultContextType | undefined>(undefined)
 
-export const CarVaultProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
+export const CarVaultProvider: React.FC<{ children: React.ReactNode; uid?: string }> = ({
+  children, uid,
 }) => {
-  const [data, setData] = useState<CarVaultData>(() => {
-    const loaded = CarVaultStorage.load()
-    // If no vehicles exist on fresh load, automatically populate demo data so the app looks alive immediately
-    if (!loaded.vehicles || loaded.vehicles.length === 0) {
-      CarVaultStorage.save(DEMO_VAULT_DATA)
-      return DEMO_VAULT_DATA
-    }
-    return loaded
-  })
-
-  // Persist whenever data changes
-  useEffect(() => {
-    CarVaultStorage.save(data)
-  }, [data])
+  const [store] = useState(() => new VaultStore(uid ? createFirestoreAdapter(uid) : undefined))
+  const sync = useSyncExternalStore(store.subscribe, store.getSnapshot)
+  const data = sync.data
+  const setData = store.update
+  useEffect(store.start, [store])
 
   const activeVehicleId = data.settings.activeVehicleId
 
@@ -424,13 +421,11 @@ export const CarVaultProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [])
 
   const loadDemoData = useCallback(() => {
-    setData(DEMO_VAULT_DATA)
-    CarVaultStorage.save(DEMO_VAULT_DATA)
+    if (!uid) setData(DEMO_VAULT_DATA)
   }, [])
 
   const restoreData = useCallback((newData: CarVaultData) => {
-    setData(newData)
-    CarVaultStorage.save(newData)
+    setData(previous => uid ? mergeLocalVault(previous, newData) : newData)
   }, [])
 
   const resetAllData = useCallback(() => {
@@ -454,7 +449,6 @@ export const CarVaultProvider: React.FC<{ children: React.ReactNode }> = ({
       },
     }
     setData(empty)
-    CarVaultStorage.save(empty)
   }, [])
 
   // Filtered lists for the currently active vehicle
@@ -496,6 +490,11 @@ export const CarVaultProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value: CarVaultContextType = {
     data,
+    sync,
+    retrySync: store.retry,
+    importLocalData: () => {
+      if (uid && !sync.fromCache && !sync.pending) setData(previous => mergeLocalVault(previous, CarVaultStorage.load()))
+    },
     vehicles: data.vehicles,
     activeVehicle,
     activeVehicleId,

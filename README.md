@@ -14,7 +14,7 @@ Designed for tracking vehicle expenses, fuel consumption, EV charging, maintenan
 - 📂 **Documents**: Vehicle registration, insurance policies, warranties, and inspection records with expiry tracking.
 - 📊 **Statistics & Analytics**: Monthly and yearly spend breakdowns, cost/km insights, and fuel economy trends.
 - 🇨🇦 **Canadian Context**: Default CAD currency, kilometers, L/100 km, and CAD/L with customizable settings.
-- 🔒 **Local-First & Portable**: All data persists locally without mandatory cloud accounts. Full JSON backup and restore supported.
+- 🔒 **Local-First & Portable**: Optional Google sign-in and Firebase synchronization, with per-user records and offline caching on trusted devices. Local mode and JSON backups remain available.
 - 📱 **PWA Ready**: Works seamlessly on desktop, tablet, and mobile devices.
 
 ## Tech Stack
@@ -25,6 +25,12 @@ Designed for tracking vehicle expenses, fuel consumption, EV charging, maintenan
 - **Branding**: Vault Family Amber (`#F59E0B`)
 
 ## Getting Started
+
+For Vercel, set **Root Directory** to `frontend`. See the
+[deployment and storage guide](docs/deployment-and-storage.md) for setup,
+moving existing local data, and Firebase setup. Configure Google sign-in,
+authorized domains, Firestore rules, and the variables from `frontend/.env.example`
+before using account sync in production.
 
 ```powershell
 cd frontend

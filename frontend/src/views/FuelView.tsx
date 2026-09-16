@@ -92,7 +92,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {isEvOrPhev && (
             <button type="button" className="btn btn-secondary" onClick={onAddCharge}>
               <Zap size={15} color="var(--vault-info)" /> Log EV Charge
@@ -106,7 +106,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
 
       {/* Tabs if vehicle supports both or user tracks both */}
       {isEvOrPhev && (
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--vault-border)', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--vault-border)', paddingBottom: '12px' }}>
           <button
             type="button"
             className={`btn btn-sm ${tab === 'fuel' ? 'btn-primary' : 'btn-secondary'}`}

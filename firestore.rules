@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function text(v, key) { return v[key] is string && v[key].size() <= 10000; }
+    function number(v, key) { return v[key] is number && v[key] >= 0 && v[key] < 1000000000000; }
+    function optionalText(v, key) { return !(key in v) || text(v, key); }
+    function optionalNumber(v, key) { return !(key in v) || number(v, key); }
+    function optionalBool(v, key) { return !(key in v) || v[key] is bool; }
+    function optionalFields(v) {
+      return optionalText(v, 'notes') && optionalText(v, 'trim') && optionalText(v, 'vin')
+        && optionalText(v, 'licensePlate') && optionalText(v, 'transmission')
+        && optionalText(v, 'purchaseDate') && optionalText(v, 'photoUrl')
+        && optionalText(v, 'station') && optionalText(v, 'fuelType')
+        && optionalText(v, 'chargingLocation') && optionalText(v, 'locationType')
+        && optionalText(v, 'chargingType') && optionalText(v, 'vendor')
+        && optionalText(v, 'receiptUrl') && optionalText(v, 'serviceProvider')
+        && optionalText(v, 'dueDate') && optionalText(v, 'completedAt')
+        && optionalText(v, 'category') && optionalText(v, 'documentNumber')
+        && optionalText(v, 'issueDate') && optionalText(v, 'expiryDate')
+        && optionalText(v, 'fileReference') && optionalNumber(v, 'odometer')
+        && optionalNumber(v, 'purchasePrice') && optionalNumber(v, 'partsCost')
+        && optionalNumber(v, 'laborCost') && optionalNumber(v, 'dueMileage')
+        && optionalNumber(v, 'targetOdometer') && optionalBool(v, 'isPrimary')
+        && optionalBool(v, 'missedPreviousFillUp');
+    }
+    function settings(v) {
+      return v.keys().hasOnly(['currency', 'distanceUnit', 'volumeUnit', 'fuelEconomyUnit', 'evEconomyUnit', 'dateFormat', 'activeVehicleId'])
+        && text(v, 'currency') && v.currency.matches('^[A-Z]{3}$')
+        && v.distanceUnit in ['km', 'mi'] && v.volumeUnit in ['L', 'gal']
+        && v.fuelEconomyUnit in ['L/100km', 'mpg-us', 'mpg-uk', 'km/L']
+        && v.evEconomyUnit in ['kWh/100km', 'mi/kWh', 'km/kWh']
+        && v.dateFormat in ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY']
+        && (v.activeVehicleId == null || text(v, 'activeVehicleId'));
+    }
+    function entity(kind, v) {
+      return (kind == 'vehicles' && text(v, 'name') && text(v, 'make') && text(v, 'model')
+          && number(v, 'year') && number(v, 'currentOdometer') && text(v, 'updatedAt')
+          && v.fuelType in ['gasoline', 'diesel', 'hybrid', 'plug-in-hybrid', 'electric', 'other'])
+        || (kind != 'vehicles' && text(v, 'vehicleId') && v.vehicleId.size() > 0 && (
+          (kind == 'fuelEntries' && text(v, 'date') && number(v, 'odometer') && number(v, 'liters')
+            && number(v, 'pricePerLiter') && number(v, 'totalCost') && v.fullTank is bool)
+          || (kind == 'chargingEntries' && text(v, 'date') && number(v, 'odometer') && number(v, 'kwh')
+            && number(v, 'pricePerKwh') && number(v, 'totalCost'))
+          || (kind == 'expenses' && text(v, 'date') && text(v, 'category') && text(v, 'description') && number(v, 'amount'))
+          || (kind == 'maintenanceRecords' && text(v, 'date') && text(v, 'category') && text(v, 'description')
+            && number(v, 'odometer') && number(v, 'cost'))
+          || (kind == 'reminders' && text(v, 'title') && v.type in ['date', 'mileage', 'both'] && v.isCompleted is bool)
+          || (kind == 'documents' && text(v, 'title') && text(v, 'category'))
+        ));
+    }
+    function validRecord(recordId) {
+      let record = request.resource.data;
+      let v = record.value;
+      return record.keys().hasOnly(['kind', 'value']) && v is map && v.size() <= 40
+        && ((recordId == 'settings' && record.kind == 'settings' && settings(v))
+          || (text(v, 'id') && v.id.size() > 0 && v.id.size() <= 200
+            && recordId == record.kind + '~' + v.id && text(v, 'createdAt')
+            && optionalFields(v) && entity(record.kind, v)));
+    }
+    match /users/{uid}/records/{recordId} {
+      allow read, delete: if owner(uid);
+      allow create, update: if owner(uid) && validRecord(recordId);
+    }
+  }
+}

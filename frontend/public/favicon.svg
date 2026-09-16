@@ -1,20 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <defs>
-    <linearGradient id="amberGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FDE68A" />
-      <stop offset="60%" stop-color="#F59E0B" />
-      <stop offset="100%" stop-color="#D97706" />
-    </linearGradient>
-  </defs>
-  <rect width="128" height="128" rx="28" fill="#090D16" />
-  <circle cx="64" cy="64" r="50" fill="#0F172A" stroke="#F59E0B" stroke-opacity="0.5" stroke-width="3" />
-  <g transform="translate(20, 24)">
-    <path d="M 6 52 C 14 36 28 26 44 26 L 56 26 C 68 26 78 33 82 44 L 88 52" fill="none" stroke="url(#amberGlow)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 2 56 L 86 56 C 89 56 91 58 90 61 L 88 66 C 86 70 82 72 78 72 L 8 72 C 4 72 0 69 0 65 L 1 58 C 1 57 1.5 56 2 56 Z" fill="#1E293B" stroke="#F59E0B" stroke-width="3" />
-    <circle cx="22" cy="70" r="9" fill="#090D16" stroke="#F59E0B" stroke-width="4" />
-    <circle cx="68" cy="70" r="9" fill="#090D16" stroke="#F59E0B" stroke-width="4" />
-    <circle cx="22" cy="70" r="3" fill="#FDE68A" />
-    <circle cx="68" cy="70" r="3" fill="#FDE68A" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Car Vault — steering wheel and fuel pump</title>
+  <rect width="128" height="128" rx="28" fill="#0F172A"/>
+  <g fill="none" stroke="#F59E0B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="49" cy="64" r="30"/>
+    <circle cx="49" cy="64" r="8"/>
+    <path d="M20 58 41 62m16 0 21-4M49 72v22"/>
   </g>
+  <path d="M79 90V46a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v44" fill="#0F172A" stroke="#0F172A" stroke-width="13"/>
+  <g stroke="#F59E0B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M79 90V46a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v44M75 91h32" fill="#0F172A"/>
+    <path d="M103 62h3a5 5 0 0 1 5 5v10a3 3 0 0 0 6 0V56l-7-8" fill="none"/>
+  </g>
+  <rect x="85" y="48" width="12" height="12" rx="2" fill="#FDE68A"/>
+  <path d="M86 70h10" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
 </svg>
-
