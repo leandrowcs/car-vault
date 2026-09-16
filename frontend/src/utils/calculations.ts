@@ -429,12 +429,17 @@ export function calculateSuggestedReminders(
   }
   // Québec: winter tires Dec 1–Mar 15 inclusive. Summer change is optional.
   const year = referenceDate.getFullYear()
+  // Switch to winter planning once its date is closer than this year's summer date.
+  const winterPlanningStart = isoDay(Math.ceil(
+    (calendarDay(`${year}-03-16`) + calendarDay(`${year}-12-01`)) / (2 * dayMilliseconds),
+  ) * dayMilliseconds)
   for (const season of ['winter', 'summer'] as const) {
     const targetYear = season === 'winter' && referenceDate.getMonth() < 3 ? year - 1 : year
     const target = `${targetYear}-${season === 'winter' ? '12-01' : '03-16'}`
     const starts = `${targetYear}-${season === 'winter' ? '10-01' : '01-16'}`
     const ends = season === 'winter' ? `${targetYear + 1}-03-15` : `${targetYear}-09-30`
-    if (today < starts || today > ends) continue
+    const planningStart = season === 'winter' && targetYear === year ? winterPlanningStart : starts
+    if (today < planningStart || today > ends || (season === 'summer' && today >= winterPlanningStart)) continue
     const category = season === 'winter' ? 'Winter Tire Installation' : 'Summer Tire Installation'
     const tireRecords = records.filter(m => m.category === 'Winter Tire Installation' || m.category === 'Summer Tire Installation')
     const latest = tireRecords.at(-1)

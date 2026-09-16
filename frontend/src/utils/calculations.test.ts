@@ -383,12 +383,19 @@ describe('dashboard predictions and timeline', () => {
     expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2026-01-02', 900)])).toBeNull()
     expect(calculateRefillInterval([fill('a', '2026-01-01', 1000), fill('b', '2027-01-01', 1500)], '2026-01-02')).toBeNull()
   })
-  it('starts winter warnings exactly two months before the deadline and carries across New Year', () => {
-    expect(suggestions('2026-09-30').some(r => r.id.endsWith('-winter'))).toBe(false)
+  it('plans winter when its date is closer and carries across New Year', () => {
+    expect(suggestions('2026-09-16').find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2026-12-01')
+    expect(suggestions('2026-09-16').some(r => r.id.endsWith('-summer'))).toBe(false)
     expect(suggestions('2026-10-01').find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2026-12-01')
     expect(suggestions('2027-01-01').find(r => r.id.endsWith('-winter'))?.dueDate).toBe('2026-12-01')
     expect(suggestions('2027-03-15').some(r => r.id.endsWith('-winter'))).toBe(true)
     expect(suggestions('2027-03-16').some(r => r.id.endsWith('-winter'))).toBe(false)
+  })
+  it('switches seasonal plans at the midpoint, including leap years', () => {
+    for (const year of [2026, 2028]) {
+      expect(suggestions(`${year}-07-23`).map(r => r.id)).toEqual(['suggested-v1-summer'])
+      expect(suggestions(`${year}-07-24`).map(r => r.id)).toEqual(['suggested-v1-winter'])
+    }
   })
   it('plans optional summer tires from Jan 16, never before Mar 16', () => {
     expect(suggestions('2027-01-15').some(r => r.id.endsWith('-summer'))).toBe(false)

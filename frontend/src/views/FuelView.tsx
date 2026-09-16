@@ -3,8 +3,6 @@ import {
   Fuel,
   Zap,
   Plus,
-  Edit2,
-  Trash2,
   TrendingDown,
   Gauge,
   DollarSign,
@@ -16,7 +14,7 @@ import {
   formatConsumption,
   formatDate,
 } from '../utils/formatters'
-import { Card } from '../components/common/Card'
+import { RecordCard } from '../components/common/RecordCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { FuelEntry, ChargingEntry } from '../types/fuel'
 
@@ -175,96 +173,41 @@ export const FuelView: React.FC<FuelViewProps> = ({
             </div>
           </div>
 
-          {/* Fill-ups table */}
-          <Card>
-            <div className="card-header">
+          <section aria-label="Fill-up history">
+            <div className="record-history-heading">
               <h3 className="card-title">Fill-Up History</h3>
+              <span className="badge badge-slate">{activeFuelEntries.length} fill-ups</span>
             </div>
-
             {activeFuelEntries.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-                No fuel fill-ups logged yet for this vehicle.
-              </div>
+              <div className="record-empty">No fuel fill-ups logged yet for this vehicle.</div>
             ) : (
-              <div className="table-wrapper">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Odometer</th>
-                      <th>Distance</th>
-                      <th>Liters</th>
-                      <th>Price/L</th>
-                      <th>Total Cost</th>
-                      <th>Economy</th>
-                      <th>Station</th>
-                      <th style={{ textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeFuelEntries.map((entry) => {
-                      const stat = fuelStats.entryStats.get(entry.id)
-
-                      return (
-                        <tr key={entry.id}>
-                          <td className="font-mono" style={{ whiteSpace: 'nowrap' }}>
-                            {formatDate(entry.date, settings.dateFormat)}
-                          </td>
-                          <td className="font-mono" style={{ fontWeight: 600 }}>
-                            {entry.odometer.toLocaleString()} km
-                          </td>
-                          <td className="font-mono" style={{ color: 'var(--vault-text-secondary)' }}>
-                            {stat?.distanceKm ? `+${stat.distanceKm} km` : '—'}
-                          </td>
-                          <td className="font-mono">{entry.liters.toFixed(2)} L</td>
-                          <td className="font-mono" style={{ color: 'var(--vault-text-secondary)' }}>
-                            ${entry.pricePerLiter.toFixed(3)}
-                          </td>
-                          <td className="font-mono" style={{ fontWeight: 700 }}>
-                            {formatCurrency(entry.totalCost, settings.currency)}
-                          </td>
-                          <td>
-                            {stat?.lPer100Km ? (
-                              <span className="badge badge-amber font-mono">
-                                {stat.lPer100Km.toFixed(1)} L/100km
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--vault-text-muted)', fontSize: '12px' }}>
-                                {entry.fullTank ? '1st full tank' : 'Partial fill'}
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ color: 'var(--vault-text-secondary)' }}>
-                            {entry.station || '—'}
-                          </td>
-                          <td style={{ textAlign: 'right' }}>
-                            <div style={{ display: 'inline-flex', gap: '4px' }}>
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-icon btn-sm"
-                                onClick={() => onEditFuel(entry)}
-                                title="Edit fill-up"
-                              >
-                                <Edit2 size={13} />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-icon btn-sm"
-                                onClick={() => setFuelToDelete(entry)}
-                                title="Delete fill-up"
-                              >
-                                <Trash2 size={13} color="var(--vault-danger)" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+              <div className="record-grid">
+                {activeFuelEntries.map((entry) => {
+                  const stat = fuelStats.entryStats.get(entry.id)
+                  return (
+                    <RecordCard
+                      key={entry.id}
+                      icon={<Fuel size={20} />}
+                      title={entry.station || 'Fuel fill-up'}
+                      date={formatDate(entry.date, settings.dateFormat)}
+                      amount={formatCurrency(entry.totalCost, settings.currency)}
+                      badge={<span className="badge badge-amber">{entry.fullTank ? 'Full tank' : 'Partial fill'}</span>}
+                      metrics={[
+                        { label: 'Odometer', value: `${entry.odometer.toLocaleString()} km` },
+                        { label: 'Distance', value: stat?.distanceKm ? `+${stat.distanceKm.toLocaleString()} km` : '—' },
+                        { label: 'Volume', value: `${entry.liters.toFixed(2)} L` },
+                        { label: 'Price / L', value: `$${entry.pricePerLiter.toFixed(3)}` },
+                        { label: 'Economy', value: stat?.lPer100Km ? formatConsumption(stat.lPer100Km, settings.fuelEconomyUnit) : '—' },
+                      ]}
+                      actionLabel={`fill-up on ${formatDate(entry.date, settings.dateFormat)}`}
+                      onEdit={() => onEditFuel(entry)}
+                      onDelete={() => setFuelToDelete(entry)}
+                    />
+                  )
+                })}
               </div>
             )}
-          </Card>
+          </section>
         </>
       ) : (
         /* EV Charging Log */
@@ -315,73 +258,36 @@ export const FuelView: React.FC<FuelViewProps> = ({
             </div>
           </div>
 
-          <Card>
-            <div className="card-header">
+          <section aria-label="EV charging history">
+            <div className="record-history-heading">
               <h3 className="card-title">EV Charging History</h3>
+              <span className="badge badge-slate">{activeChargingEntries.length} sessions</span>
             </div>
-
             {activeChargingEntries.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-                No EV charging sessions logged yet for this vehicle.
-              </div>
+              <div className="record-empty">No EV charging sessions logged yet for this vehicle.</div>
             ) : (
-              <div className="table-wrapper">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Odometer</th>
-                      <th>Energy (kWh)</th>
-                      <th>Rate ($/kWh)</th>
-                      <th>Total Cost</th>
-                      <th>Type</th>
-                      <th>Location</th>
-                      <th style={{ textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeChargingEntries.map((entry) => (
-                      <tr key={entry.id}>
-                        <td className="font-mono">{formatDate(entry.date, settings.dateFormat)}</td>
-                        <td className="font-mono">{entry.odometer.toLocaleString()} km</td>
-                        <td className="font-mono" style={{ fontWeight: 600 }}>{entry.kwh.toFixed(1)} kWh</td>
-                        <td className="font-mono" style={{ color: 'var(--vault-text-secondary)' }}>
-                          ${entry.pricePerKwh.toFixed(3)}
-                        </td>
-                        <td className="font-mono" style={{ fontWeight: 700 }}>
-                          {formatCurrency(entry.totalCost, settings.currency)}
-                        </td>
-                        <td>
-                          <span className="badge badge-blue">{entry.chargingType || 'Level 2'}</span>
-                        </td>
-                        <td style={{ color: 'var(--vault-text-secondary)' }}>
-                          {entry.chargingLocation || (entry.locationType === 'home' ? 'Home' : 'Public')}
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '4px' }}>
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-icon btn-sm"
-                              onClick={() => onEditCharge(entry)}
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-icon btn-sm"
-                              onClick={() => setChargeToDelete(entry)}
-                            >
-                              <Trash2 size={13} color="var(--vault-danger)" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="record-grid">
+                {activeChargingEntries.map((entry) => (
+                  <RecordCard
+                    key={entry.id}
+                    icon={<Zap size={20} />}
+                    title={entry.chargingLocation || (entry.locationType === 'home' ? 'Home' : 'Public')}
+                    date={formatDate(entry.date, settings.dateFormat)}
+                    amount={formatCurrency(entry.totalCost, settings.currency)}
+                    badge={<span className="badge badge-blue">{entry.chargingType || 'Level 2'}</span>}
+                    metrics={[
+                      { label: 'Odometer', value: `${entry.odometer.toLocaleString()} km` },
+                      { label: 'Energy', value: `${entry.kwh.toFixed(1)} kWh` },
+                      { label: 'Rate / kWh', value: `$${entry.pricePerKwh.toFixed(3)}` },
+                    ]}
+                    actionLabel={`charge on ${formatDate(entry.date, settings.dateFormat)}`}
+                    onEdit={() => onEditCharge(entry)}
+                    onDelete={() => setChargeToDelete(entry)}
+                  />
+                ))}
               </div>
             )}
-          </Card>
+          </section>
         </>
       )}
 

@@ -2,14 +2,12 @@ import React, { useState, useMemo } from 'react'
 import {
   Receipt,
   Plus,
-  Edit2,
-  Trash2,
   DollarSign,
   Search,
 } from 'lucide-react'
 import { useCarVault } from '../context/CarVaultContext'
 import { formatCurrency, formatDate } from '../utils/formatters'
-import { Card } from '../components/common/Card'
+import { RecordCard } from '../components/common/RecordCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { Expense } from '../types/expense'
 
@@ -157,85 +155,53 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         </div>
 
         {/* Search input */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, width: '100%', maxWidth: '320px' }}>
           <Search size={16} color="var(--vault-text-muted)" />
           <input
             type="text"
             className="form-input"
             style={{ padding: '6px 10px', fontSize: '13px' }}
             placeholder="Search expenses..."
+            aria-label="Search expenses"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Expenses Table */}
-      <Card>
+      <section aria-label="Expense history">
+        <div className="record-history-heading">
+          <h3 className="card-title">Expense History</h3>
+          <span className="badge badge-slate">{filteredExpenses.length} records</span>
+        </div>
         {filteredExpenses.length === 0 ? (
-          <div style={{ padding: '36px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-            No expenses found matching the selected criteria.
+          <div className="record-empty">
+            {activeExpenses.length === 0
+              ? 'No expenses logged yet for this vehicle.'
+              : 'No expenses found matching the selected criteria.'}
           </div>
         ) : (
-          <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th>Vendor</th>
-                  <th>Odometer</th>
-                  <th style={{ textAlign: 'right' }}>Amount</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredExpenses.map((expense) => (
-                  <tr key={expense.id}>
-                    <td className="font-mono" style={{ whiteSpace: 'nowrap' }}>
-                      {formatDate(expense.date, settings.dateFormat)}
-                    </td>
-                    <td>
-                      <span className="badge badge-slate">{expense.category}</span>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{expense.description}</td>
-                    <td style={{ color: 'var(--vault-text-secondary)' }}>
-                      {expense.vendor || '—'}
-                    </td>
-                    <td className="font-mono" style={{ color: 'var(--vault-text-secondary)' }}>
-                      {expense.odometer ? `${expense.odometer.toLocaleString()} km` : '—'}
-                    </td>
-                    <td className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
-                      {formatCurrency(expense.amount, settings.currency)}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '4px' }}>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-icon btn-sm"
-                          onClick={() => onEditExpense(expense)}
-                          title="Edit expense"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-icon btn-sm"
-                          onClick={() => setExpenseToDelete(expense)}
-                          title="Delete expense"
-                        >
-                          <Trash2 size={13} color="var(--vault-danger)" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="record-grid">
+            {filteredExpenses.map((expense) => (
+              <RecordCard
+                key={expense.id}
+                icon={<Receipt size={20} />}
+                title={expense.description || expense.category}
+                date={formatDate(expense.date, settings.dateFormat)}
+                amount={formatCurrency(expense.amount, settings.currency)}
+                badge={<span className="badge badge-slate">{expense.category}</span>}
+                metrics={[
+                  { label: 'Vendor', value: expense.vendor || '—' },
+                  { label: 'Odometer', value: expense.odometer != null ? `${expense.odometer.toLocaleString()} km` : '—' },
+                ]}
+                actionLabel={`expense ${expense.description} on ${formatDate(expense.date, settings.dateFormat)}`}
+                onEdit={() => onEditExpense(expense)}
+                onDelete={() => setExpenseToDelete(expense)}
+              />
+            ))}
           </div>
         )}
-      </Card>
+      </section>
 
       <ConfirmDialog
         isOpen={Boolean(expenseToDelete)}

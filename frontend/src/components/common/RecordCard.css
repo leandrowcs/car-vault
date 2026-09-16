@@ -1,0 +1,45 @@
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+  gap: 16px;
+}
+
+.record-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--vault-border);
+  border-radius: 16px;
+  background: radial-gradient(ellipse at top right, #f59e0b08, transparent 65%), var(--vault-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* A horizontal road shoulder, separate from the timeline's vertical route. */
+.record-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 7px;
+  background: repeating-linear-gradient(90deg, #f59e0b99 0 22px, transparent 22px 38px) center / 100% 2px no-repeat,
+    repeating-linear-gradient(135deg, #ffffff09 0 1px, transparent 1px 4px), #202329;
+}
+
+.record-card-heading { display: flex; align-items: center; gap: 12px; }
+.record-card-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid var(--vault-border); border-radius: 12px; color: var(--vault-primary); background: var(--vault-surface-2); }
+.record-card-title { min-width: 0; }
+.record-card-title h4 { font-size: 15px; line-height: 1.5; margin: 3px 0 0; overflow-wrap: anywhere; }
+.record-card-date { font-size: 12px; color: var(--vault-text-secondary); }
+.record-card-total { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.record-card-total strong { font-size: 24px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.record-card-total .badge { white-space: normal; }
+.record-card-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 125px), 1fr)); gap: 16px; padding-top: 16px; margin: 0; border-top: 1px solid var(--vault-border); }
+.record-card-metrics > div { min-width: 0; }
+.record-card-metrics dt { font-size: 11px; color: var(--vault-text-muted); margin-bottom: 5px; }
+.record-card-metrics dd { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.5; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.record-card-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: auto; padding-top: 4px; }
+.record-card-actions .btn { min-height: 40px; }
+.record-history-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.record-empty { padding: 32px 20px; text-align: center; color: var(--vault-text-muted); border: 1px dashed var(--vault-border); border-radius: 16px; }
