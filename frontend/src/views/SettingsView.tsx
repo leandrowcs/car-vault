@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useAccount } from '../context/AccountContext'
 import { AccountPanel } from '../components/account/AccountPanel'
+import { DrivvoTransfer } from '../components/account/DrivvoTransfer'
 import {
   Download,
   Upload,
@@ -109,6 +110,7 @@ export const SettingsView: React.FC = () => {
       )}
 
       <AccountPanel />
+      <DrivvoTransfer />
 
       {/* Regional & Automotive Units (Canadian Default) */}
       <Card>

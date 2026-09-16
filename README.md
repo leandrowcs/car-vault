@@ -6,6 +6,8 @@ Designed for tracking vehicle expenses, fuel consumption, EV charging, maintenan
 
 ## Features
 
+- **Drivvo CSV**: Import/export refuelling with preview, vehicle mapping and duplicate detection. See the [Drivvo CSV guide](docs/drivvo-csv.md). JSON remains the complete backup format.
+
 - 🏎️ **Garage Management**: Multi-vehicle support (Gasoline, Diesel, Hybrid, Plug-in Hybrid, EV, Other) with trim, VIN, license plate, and odometer tracking.
 - ⛽ **Fuel & Charging Logs**: Quick-entry fill-ups and EV charging records with automatic L/100 km, cost/km, and weighted average price calculations.
 - 🛠️ **Maintenance History**: Track services, parts vs labor costs, service providers, and mileage intervals.

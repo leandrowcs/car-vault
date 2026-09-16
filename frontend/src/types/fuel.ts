@@ -14,6 +14,8 @@ export interface FuelEntry {
   missedPreviousFillUp?: boolean
   notes?: string
   createdAt: string
+  /** Original Drivvo columns preserve time, driver, payment and other CSV-only fields. */
+  drivvo?: { columns: string[] }
 }
 
 export type ChargingLocationType = 'home' | 'public'

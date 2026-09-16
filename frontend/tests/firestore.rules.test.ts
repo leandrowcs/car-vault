@@ -31,6 +31,17 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore owner isolation
     await assertFails(setDoc(doc(db, 'users/alice/records', vehicle[0]), vehicle[1]))
   })
 
+  it('accepts Drivvo source columns on a refuelling record and preserves decimals', async () => {
+    const db = env.authenticatedContext('alice').firestore()
+    const fuel = [...records.entries()].find(([, record]) => record.kind === 'fuelEntries')!
+    const imported = { ...fuel[1], value: { ...fuel[1].value, totalCost: 89.643, liters: 45.527,
+      drivvo: { columns: Array<string>(30).fill('') } } }
+    const ref = doc(db, 'users/alice/records', fuel[0])
+    await assertSucceeds(setDoc(ref, imported))
+    expect((await getDoc(ref)).data()?.value.totalCost).toBe(89.643)
+    expect((await getDoc(ref)).data()?.value.drivvo.columns).toHaveLength(30)
+  })
+
   it('denies reading, querying, writing and deleting another account', async () => {
     const db = env.authenticatedContext('bob').firestore()
     const ref = doc(db, 'users/alice/records', vehicle[0])

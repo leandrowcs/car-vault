@@ -15,12 +15,14 @@ import { DEMO_VAULT_DATA } from '../services/demoData'
 import { VaultStore, type VaultState } from '../services/vaultStore'
 import { createFirestoreAdapter } from '../services/firestoreVault'
 import { mergeLocalVault } from '../services/vaultRecords'
+import { mergeDrivvoImport } from '../services/drivvoCsv'
 
 interface CarVaultContextType {
   data: CarVaultData
   sync: VaultState
   retrySync: () => void
   importLocalData: () => void
+  importDrivvoData: (incoming: CarVaultData, existingIds: string[]) => number
   vehicles: Vehicle[]
   activeVehicle: Vehicle | null
   activeVehicleId: string | null
@@ -490,6 +492,17 @@ export const CarVaultProvider: React.FC<{ children: React.ReactNode; uid?: strin
 
   const value: CarVaultContextType = {
     data,
+    importDrivvoData: (incoming, existingIds) => {
+      const current = store.getSnapshot()
+      if (!current.ready || current.error || (uid && (current.fromCache || current.pending))) throw new Error('Wait for synchronization before importing.')
+      if (existingIds.some(id => !current.data.vehicles.some(vehicle => vehicle.id === id))) throw new Error('A selected vehicle was removed. Select the destination again.')
+      const next = mergeDrivvoImport(current.data, incoming)
+      const added = next.fuelEntries.length - current.data.fuelEntries.length
+      setData(next)
+      const error = store.getSnapshot().error
+      if (error) throw new Error(error)
+      return added
+    },
     sync,
     retrySync: store.retry,
     importLocalData: () => {

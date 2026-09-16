@@ -1,5 +1,16 @@
 import type { CarVaultData } from '../types'
 
+export function downloadFile(content: string, filename: string, mimeType: string): void {
+  const url = URL.createObjectURL(new Blob([content], { type: mimeType }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
 export function exportVaultToJson(data: CarVaultData): void {
   const exportPayload: CarVaultData = {
     ...data,
@@ -7,17 +18,7 @@ export function exportVaultToJson(data: CarVaultData): void {
   }
 
   const jsonStr = JSON.stringify(exportPayload, null, 2)
-  const blob = new Blob([jsonStr], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-
-  const today = new Date().toISOString().slice(0, 10)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `car-vault-backup-${today}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  downloadFile(jsonStr, `car-vault-backup-${new Date().toISOString().slice(0, 10)}.json`, 'application/json')
 }
 
 export function parseAndValidateVaultJson(jsonString: string): {

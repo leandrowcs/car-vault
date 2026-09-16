@@ -7,6 +7,8 @@ function object(value: unknown): value is Record<string, unknown> {
 export function isVaultRecord(id: string, record: unknown): record is VaultRecord {
   if (!object(record) || !object(record.value)) return false
   const value = record.value
+  if ('drivvo' in value && (!object(value.drivvo) || !Array.isArray(value.drivvo.columns) ||
+      value.drivvo.columns.length !== 30 || value.drivvo.columns.some(cell => typeof cell !== 'string' || cell.length > 10000))) return false
   const optionalStrings = ['notes', 'trim', 'vin', 'licensePlate', 'transmission', 'purchaseDate', 'photoUrl', 'station', 'fuelType', 'chargingLocation', 'locationType', 'chargingType', 'vendor', 'receiptUrl', 'serviceProvider', 'dueDate', 'completedAt', 'category', 'documentNumber', 'issueDate', 'expiryDate', 'fileReference']
   const optionalNumbers = ['odometer', 'purchasePrice', 'partsCost', 'laborCost', 'dueMileage', 'targetOdometer']
   if (optionalStrings.some(key => key in value && typeof value[key] !== 'string') ||
