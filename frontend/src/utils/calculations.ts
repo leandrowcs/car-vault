@@ -4,9 +4,26 @@ import type { MaintenanceRecord } from '../types/maintenance'
 import type { Reminder, ReminderStatus } from '../types/reminder'
 import type { CarVaultData } from '../types'
 
+/** Sort by the latest expense date, keeping ties stable and vehicles without records last. */
+export function sortVehiclesByLatestExpense(data: CarVaultData) {
+  const latest = new Map<string, number>()
+  for (const entries of [data.fuelEntries, data.chargingEntries, data.expenses, data.maintenanceRecords]) {
+    for (const entry of entries) {
+      const date = Date.parse(entry.date)
+      if (!Number.isFinite(date)) continue
+      latest.set(entry.vehicleId, Math.max(latest.get(entry.vehicleId) ?? -Infinity, date))
+    }
+  }
+  return [...data.vehicles].sort((a, b) => {
+    const aDate = latest.get(a.id) ?? -Infinity
+    const bDate = latest.get(b.id) ?? -Infinity
+    return aDate === bDate ? 0 : bDate > aDate ? 1 : -1
+  })
+}
+
 /** Compare operating costs over recorded odometer intervals, never lifetime odometer. */
 export function calculateVehicleComparisons(data: CarVaultData) {
-  return data.vehicles.map(vehicle => {
+  return sortVehiclesByLatestExpense(data).map(vehicle => {
     const fuel = data.fuelEntries.filter(entry => entry.vehicleId === vehicle.id)
     const charging = data.chargingEntries.filter(entry => entry.vehicleId === vehicle.id)
     const maintenance = data.maintenanceRecords.filter(entry => entry.vehicleId === vehicle.id)

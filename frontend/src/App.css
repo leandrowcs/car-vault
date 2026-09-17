@@ -496,6 +496,10 @@
   background: var(--vault-surface);
 }
 
+.vehicle-comparison-table thead th {
+  white-space: nowrap;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;

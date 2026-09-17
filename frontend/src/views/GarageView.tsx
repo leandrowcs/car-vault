@@ -13,6 +13,7 @@ import { FuelTypeBadge } from '../components/common/StatBadge'
 import { Card } from '../components/common/Card'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { Vehicle } from '../types/vehicle'
+import { sortVehiclesByLatestExpense } from '../utils/calculations'
 
 interface GarageViewProps {
   onAddVehicle: () => void
@@ -24,7 +25,7 @@ export const GarageView: React.FC<GarageViewProps> = ({
   onEditVehicle,
 }) => {
   const t = useTranslation()
-  const { vehicles, activeVehicleId, setActiveVehicleId, deleteVehicle, updateVehicle, settings } =
+  const { data, vehicles, activeVehicleId, setActiveVehicleId, deleteVehicle, updateVehicle, settings } =
     useCarVault()
 
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
@@ -67,7 +68,7 @@ export const GarageView: React.FC<GarageViewProps> = ({
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: '12px' }}>
-          {vehicles.map((vehicle) => {
+          {sortVehiclesByLatestExpense(data).map((vehicle) => {
             const isActive = vehicle.id === activeVehicleId
 
             return (

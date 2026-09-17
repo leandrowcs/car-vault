@@ -3,6 +3,7 @@ import { initialVaultData } from '../services/storage'
 import {
   calculateFuelStats,
   calculateVehicleComparisons,
+  sortVehiclesByLatestExpense,
   calculateSuggestedReminders,
   calculateRefillInterval,
   calculateActivityTimeline,
@@ -16,6 +17,30 @@ import type { FuelEntry, ChargingEntry } from '../types/fuel'
 import type { Expense } from '../types/expense'
 import type { MaintenanceRecord } from '../types/maintenance'
 import type { Reminder } from '../types/reminder'
+
+describe('sortVehiclesByLatestExpense', () => {
+  it('uses the latest record across all expense types in both garage and comparison order', () => {
+    const data = structuredClone(initialVaultData)
+    data.vehicles = ['none', 'fuel', 'charge', 'expense', 'service'].map(id => ({ id, name: id, make: 'Honda', model: 'Civic', year: 2020, fuelType: 'gasoline', currentOdometer: 1000, createdAt: '', updatedAt: '' }))
+    data.fuelEntries = ['2026-01-02', '2026-01-01'].map((date, index) => ({ id: String(index), vehicleId: 'fuel', date, odometer: 1000, liters: 40, pricePerLiter: 2, totalCost: 80, fullTank: true, createdAt: '2026-12-01' }))
+    data.chargingEntries = [{ id: 'c', vehicleId: 'charge', date: '2026-01-03', odometer: 1000, kwh: 40, pricePerKwh: 1, totalCost: 40, createdAt: '' }]
+    data.expenses = [{ id: 'e', vehicleId: 'expense', date: '2026-01-05', category: 'Other', description: 'Insurance', amount: 50, createdAt: '' }]
+    data.maintenanceRecords = [{ id: 'm', vehicleId: 'service', date: '2026-01-04', odometer: 1000, category: 'Other', description: 'Service', cost: 20, createdAt: '' }]
+    data.vehicles[3].isSold = true
+    const original = structuredClone(data)
+    const expected = ['expense', 'service', 'charge', 'fuel', 'none']
+    expect(sortVehiclesByLatestExpense(data).map(vehicle => vehicle.id)).toEqual(expected)
+    expect(calculateVehicleComparisons(data).map(row => row.vehicle.id)).toEqual(expected)
+    expect(data).toEqual(original)
+  })
+
+  it('preserves the original order for equal dates and ignores invalid dates', () => {
+    const data = structuredClone(initialVaultData)
+    data.vehicles = ['a', 'b', 'c', 'd'].map(id => ({ id, name: id, make: 'Honda', model: 'Civic', year: 2020, fuelType: 'gasoline', currentOdometer: 1000, createdAt: '', updatedAt: '' }))
+    data.expenses = ['a', 'b', 'c'].map(id => ({ id, vehicleId: id, date: id === 'a' ? 'invalid' : '2026-01-01', category: 'Other', description: 'Expense', amount: 10, createdAt: '' }))
+    expect(sortVehiclesByLatestExpense(data).map(vehicle => vehicle.id)).toEqual(['b', 'c', 'a', 'd'])
+  })
+})
 
 describe('calculateVehicleComparisons', () => {
   it('keeps sold and owned vehicles separate and uses recorded distance instead of lifetime mileage', () => {
