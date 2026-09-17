@@ -1,3 +1,4 @@
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState, useMemo } from 'react'
 import {
   BarChart3,
@@ -23,6 +24,7 @@ import { Card } from '../components/common/Card'
 import { SimpleBarChart } from '../components/charts/SimpleBarChart'
 
 export const StatisticsView: React.FC = () => {
+  const t = useTranslation()
   const {
     activeVehicle,
     activeFuelEntries,
@@ -153,9 +155,9 @@ export const StatisticsView: React.FC = () => {
     return (
       <div className="empty-state">
         <BarChart3 className="empty-state-icon" />
-        <h3 className="empty-state-title">Select or Add a Vehicle First</h3>
+        <h3 className="empty-state-title">{t("Select or Add a Vehicle First")}</h3>
         <p className="empty-state-desc">
-          Statistics require an active vehicle in your garage.
+          {t("Statistics require an active vehicle in your garage.")}
         </p>
       </div>
     )
@@ -164,7 +166,7 @@ export const StatisticsView: React.FC = () => {
   const isEv = activeVehicle.fuelType === 'electric'
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
+    <div style={{ display: 'grid', gap: '12px' }}>
       {/* Top Header & Period Filter */}
       <div
         style={{
@@ -176,9 +178,9 @@ export const StatisticsView: React.FC = () => {
         }}
       >
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Vehicle Analytics & Reports</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Vehicle Analytics & Reports")}</h2>
           <p className="card-subtitle">
-            Comprehensive financial and fuel efficiency breakdown for {activeVehicle.name}
+            {t("Comprehensive financial and fuel efficiency breakdown for")} {activeVehicle.name}
           </p>
         </div>
 
@@ -189,21 +191,21 @@ export const StatisticsView: React.FC = () => {
             className={`btn btn-sm ${periodFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setPeriodFilter('all')}
           >
-            All Time
+            {t("All Time")}
           </button>
           <button
             type="button"
             className={`btn btn-sm ${periodFilter === 'year' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setPeriodFilter('year')}
           >
-            Year {currentYear}
+            {t("Year")} {currentYear}
           </button>
           <button
             type="button"
             className={`btn btn-sm ${periodFilter === 'month' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setPeriodFilter('month')}
           >
-            This Month
+            {t("This Month")}
           </button>
         </div>
       </div>
@@ -212,50 +214,46 @@ export const StatisticsView: React.FC = () => {
       <div className="grid-metrics">
         <div className="metric-card" style={{ borderLeft: '3px solid var(--vault-primary)' }}>
           <div className="metric-card-top">
-            <span>Overall Cost / KM</span>
+            <span>{t("Overall Cost / KM")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono" style={{ color: 'var(--vault-primary)' }}>
             {formatCostPerKm(totalCosts.costPerKm, settings.currency)}
           </div>
-          <div className="metric-subtext">All expenses / total distance</div>
+          <div className="metric-subtext">{t("All expenses / total distance")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Fuel Cost / KM</span>
+            <span>{t("Fuel Cost / KM")}</span>
             <Fuel className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCostPerKm(fuelCostPerKm, settings.currency)}
           </div>
-          <div className="metric-subtext">Fuel / distance</div>
+          <div className="metric-subtext">{t("Fuel / distance")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Maintenance / KM</span>
+            <span>{t("Maintenance / KM")}</span>
             <Wrench className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCostPerKm(maintCostPerKm, settings.currency)}
           </div>
-          <div className="metric-subtext">Service & repairs / distance</div>
+          <div className="metric-subtext">{t("Service & repairs / distance")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Average Economy</span>
+            <span>{t("Average Economy")}</span>
             <Gauge className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
-            {isEv
-              ? evStats.kwhPer100Km !== null
-                ? `${evStats.kwhPer100Km} kWh/100km`
-                : '—'
-              : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
+            {isEv ? evStats.kwhPer100Km !== null ? t("{0} kWh/100km", { "0": evStats.kwhPer100Km ?? '' }) : '—' : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
           </div>
-          <div className="metric-subtext">Vehicle fuel efficiency</div>
+          <div className="metric-subtext">{t("Vehicle fuel efficiency")}</div>
         </div>
       </div>
 
@@ -263,24 +261,24 @@ export const StatisticsView: React.FC = () => {
       <Card>
         <div className="card-header">
           <div>
-            <h3 className="card-title">Monthly Expenditure Trend</h3>
-            <p className="card-subtitle">Historical month-by-month spending across fuel, service, and general expenses</p>
+            <h3 className="card-title">{t("Monthly Expenditure Trend")}</h3>
+            <p className="card-subtitle">{t("Historical month-by-month spending across fuel, service, and general expenses")}</p>
           </div>
         </div>
         <SimpleBarChart data={monthlySpending} currency={settings.currency} />
       </Card>
 
       {/* 2-Column Category Breakdown */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '12px' }}>
         {/* Expenses by Category */}
         <Card>
           <div className="card-header">
-            <h3 className="card-title">Expenses by Category</h3>
+            <h3 className="card-title">{t("Expenses by Category")}</h3>
           </div>
 
           {categoryBreakdown.length === 0 ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-              No general expenses recorded in this period.
+              {t("No general expenses recorded in this period.")}
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -293,7 +291,7 @@ export const StatisticsView: React.FC = () => {
                 return (
                   <div key={item.category}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' }}>
-                      <span style={{ fontWeight: 600 }}>{item.category}</span>
+                      <span style={{ fontWeight: 600 }}>{t(item.category)}</span>
                       <span className="font-mono">
                         {formatCurrency(item.amount, settings.currency)} ({percent}%)
                       </span>
@@ -325,12 +323,12 @@ export const StatisticsView: React.FC = () => {
         {/* Maintenance by Category */}
         <Card>
           <div className="card-header">
-            <h3 className="card-title">Maintenance by Service Type</h3>
+            <h3 className="card-title">{t("Maintenance by Service Type")}</h3>
           </div>
 
           {maintenanceCategoryBreakdown.length === 0 ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-              No maintenance records in this period.
+              {t("No maintenance records in this period.")}
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -343,7 +341,7 @@ export const StatisticsView: React.FC = () => {
                 return (
                   <div key={item.category}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' }}>
-                      <span style={{ fontWeight: 600 }}>{item.category}</span>
+                      <span style={{ fontWeight: 600 }}>{t(item.category)}</span>
                       <span className="font-mono">
                         {formatCurrency(item.amount, settings.currency)} ({percent}%)
                       </span>

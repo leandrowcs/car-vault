@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import {
@@ -19,6 +20,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const t = useTranslation()
   const { activeVehicle } = useCarVault()
 
   const [title, setTitle] = useState('')
@@ -66,27 +68,27 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Document' : 'Record Vehicle Document'}
+      title={initialData ? t("Edit Document") : t("Record Vehicle Document")}
       maxWidth="520px"
       footer={
         <>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="submit" form="document-form" className="btn btn-primary">
-            {initialData ? 'Update Record' : 'Save Document'}
+            {initialData ? t("Update Record") : t("Save Document")}
           </button>
         </>
       }
     >
       <form id="document-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
         <div className="form-group">
-          <label className="form-label">Document Title *</label>
+          <label className="form-label">{t("Document Title *")}</label>
           <input
             type="text"
             required
             className="form-input"
-            placeholder="e.g. Ontario Vehicle Ownership, Intact Insurance Policy"
+            placeholder={t("e.g. Ontario Vehicle Ownership, Intact Insurance Policy")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -94,7 +96,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Category *</label>
+            <label className="form-label">{t("Category *")}</label>
             <select
               className="form-select"
               value={category}
@@ -102,18 +104,18 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
             >
               {DEFAULT_DOCUMENT_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t(cat)}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Document / Policy #</label>
+            <label className="form-label">{t("Document / Policy #")}</label>
             <input
               type="text"
               className="form-input font-mono"
-              placeholder="e.g. POL-99201"
+              placeholder={t("e.g. POL-99201")}
               value={documentNumber}
               onChange={(e) => setDocumentNumber(e.target.value)}
             />
@@ -122,7 +124,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Issue Date</label>
+            <label className="form-label">{t("Issue Date")}</label>
             <input
               type="date"
               className="form-input"
@@ -132,7 +134,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label className="form-label">Expiry Date</label>
+            <label className="form-label">{t("Expiry Date")}</label>
             <input
               type="date"
               className="form-input"
@@ -143,10 +145,10 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label className="form-label">Notes / Storage Location</label>
+          <label className="form-label">{t("Notes / Storage Location")}</label>
           <textarea
             className="form-textarea"
-            placeholder="Physical location (glove compartment), policy coverage details, agent contact..."
+            placeholder={t("Physical location (glove compartment), policy coverage details, agent contact...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

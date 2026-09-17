@@ -1,3 +1,5 @@
+import { getLanguage } from '../../services/language'
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import { DEFAULT_MAINTENANCE_CATEGORIES } from '../../types/maintenance'
@@ -17,6 +19,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const t = useTranslation()
   const { activeVehicle, activeMaintenanceRecords } = useCarVault()
 
   const [title, setTitle] = useState('')
@@ -85,28 +88,28 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Reminder' : 'Set Service Reminder'}
+      title={initialData ? t("Edit Reminder") : t("Set Service Reminder")}
       maxWidth="520px"
       footer={
         <>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="submit" form="reminder-form" className="btn btn-primary">
-            {initialData ? 'Update Reminder' : 'Set Reminder'}
+            {initialData ? t("Update Reminder") : t("Set Reminder")}
           </button>
         </>
       }
     >
       <form id="reminder-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
-        {error && <p role="alert" className="account-error">{error}</p>}
+        {error && (<p role="alert" className="account-error">{t(error)}</p>)}
         <div className="form-group">
-          <label className="form-label">Reminder Title *</label>
+          <label className="form-label">{t("Reminder Title *")}</label>
           <input
             type="text"
             required
             className="form-input"
-            placeholder="e.g. Synthetic Oil & Filter, Winter Tire Changeover"
+            placeholder={t("e.g. Synthetic Oil & Filter, Winter Tire Changeover")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -114,25 +117,25 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Reminder Trigger Type *</label>
+            <label className="form-label">{t("Reminder Trigger Type *")}</label>
             <select
               className="form-select"
               value={type}
               onChange={(e) => setType(e.target.value as ReminderType)}
             >
-              <option value="both">By Date OR Mileage (Whichever comes first)</option>
-              <option value="date">By Date Only</option>
-              <option value="mileage">By Mileage Only</option>
+              <option value="both">{t("By Date OR Mileage (Whichever comes first)")}</option>
+              <option value="date">{t("By Date Only")}</option>
+              <option value="mileage">{t("By Mileage Only")}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Category</label>
+            <label className="form-label">{t("Category")}</label>
             <input
               type="text"
               className="form-input"
               list="reminder-categories"
-              placeholder="e.g. Scheduled Maintenance, Tires, Registration"
+              placeholder={t("e.g. Scheduled Maintenance, Tires, Registration")}
               value={category}
               onChange={(e) => { setCategory(e.target.value); setIntervalKm('') }}
             />
@@ -142,7 +145,7 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
         {(type === 'date' || type === 'both') && (
           <div className="form-group">
-            <label className="form-label">Due Date *</label>
+            <label className="form-label">{t("Due Date *")}</label>
             <input
               type="date"
               required={type === 'date'}
@@ -155,37 +158,37 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
         {(type === 'mileage' || type === 'both') && (
           <div className="form-group">
-            <label className="form-label" htmlFor="service-interval">Service interval (km, optional)</label>
-            <input id="service-interval" type="number" min="1" step="1" className="form-input" value={intervalKm} placeholder="Use the interval in your owner's manual" onChange={e => {
+            <label className="form-label" htmlFor="service-interval">{t("Service interval (km, optional)")}</label>
+            <input id="service-interval" type="number" min="1" step="1" className="form-input" value={intervalKm} placeholder={t("Use the interval in your owner's manual")} onChange={e => {
               setIntervalKm(e.target.value)
               const interval = Number(e.target.value)
               if (Number.isFinite(interval) && interval > 0) setTargetOdometer(String(intervalBase + interval))
             }} />
-            <span className="card-subtitle">Adds the interval to {lastService ? 'the last matching service' : 'the current odometer'}: {intervalBase.toLocaleString()} km. You can also enter the target directly.</span>
-            <label className="form-label">Due at Odometer (km) *</label>
+            <span className="card-subtitle">{t("Adds the interval to")} {lastService ? t("the last matching service") : t("the current odometer")}: {intervalBase.toLocaleString(getLanguage())} {t("km. You can also enter the target directly.")}</span>
+            <label className="form-label">{t("Due at Odometer (km) *")}</label>
             <input
               type="number"
               required={type === 'mileage'}
               min="0"
               className="form-input font-mono"
-              placeholder="Target vehicle odometer (e.g. 32000)"
+              placeholder={t("Target vehicle odometer (e.g. 32000)")}
               value={targetOdometer}
               onChange={(e) => { setTargetOdometer(e.target.value); setIntervalKm('') }}
             />
             {activeVehicle && (
               <span style={{ fontSize: '12px', color: 'var(--vault-text-muted)' }}>
-                Current vehicle odometer: {activeVehicle.currentOdometer.toLocaleString()} km
+                {t("Current vehicle odometer:")} {activeVehicle.currentOdometer.toLocaleString(getLanguage())} {t("km")}
               </span>
             )}
           </div>
         )}
 
         <div className="form-group">
-          <label className="form-label">Notes</label>
+          <label className="form-label">{t("Notes")}</label>
           <input
             type="text"
             className="form-input"
-            placeholder="Service code, dealership coupon, oil viscosity..."
+            placeholder={t("Service code, dealership coupon, oil viscosity...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

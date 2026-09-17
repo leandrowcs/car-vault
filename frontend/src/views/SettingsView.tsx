@@ -1,3 +1,4 @@
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState, useRef } from 'react'
 import { useAccount } from '../context/AccountContext'
 import { AccountPanel } from '../components/account/AccountPanel'
@@ -18,6 +19,7 @@ import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { DistanceUnit, VolumeUnit, FuelEconomyUnit, DateFormatOption } from '../types/settings'
 
 export const SettingsView: React.FC = () => {
+  const t = useTranslation()
   const { user } = useAccount()
   const {
     data,
@@ -73,9 +75,9 @@ export const SettingsView: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '24px', maxWidth: '820px' }}>
       <div>
-        <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Settings & Preferences</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Settings & Preferences")}</h2>
         <p className="card-subtitle">
-          Configure automotive units, regional currency, and local data persistence
+          {t("Configure automotive units, regional currency, and local data persistence")}
         </p>
       </div>
 
@@ -105,7 +107,7 @@ export const SettingsView: React.FC = () => {
           }}
         >
           {notification.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-          <span>{notification.message}</span>
+          <span>{t(notification.message)}</span>
         </div>
       )}
 
@@ -115,54 +117,54 @@ export const SettingsView: React.FC = () => {
       {/* Regional & Automotive Units (Canadian Default) */}
       <Card>
         <div className="card-header">
-          <h3 className="card-title">Regional & Automotive Units</h3>
+          <h3 className="card-title">{t("Regional & Automotive Units")}</h3>
         </div>
 
         <div style={{ display: 'grid', gap: '16px' }}>
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Currency</label>
+              <label className="form-label">{t("Currency")}</label>
               <select
                 className="form-select"
                 value={settings.currency}
                 onChange={(e) => updateSettings({ currency: e.target.value })}
               >
-                <option value="CAD">CAD ($ - Canadian Dollar)</option>
-                <option value="USD">USD ($ - US Dollar)</option>
-                <option value="EUR">EUR (€ - Euro)</option>
-                <option value="GBP">GBP (£ - British Pound)</option>
-                <option value="BRL">BRL (R$ - Brazilian Real)</option>
+                <option value="CAD">{t("CAD ($ - Canadian Dollar)")}</option>
+                <option value="USD">{t("USD ($ - US Dollar)")}</option>
+                <option value="EUR">{t("EUR (€ - Euro)")}</option>
+                <option value="GBP">{t("GBP (£ - British Pound)")}</option>
+                <option value="BRL">{t("BRL (R$ - Brazilian Real)")}</option>
               </select>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Distance Unit</label>
+              <label className="form-label">{t("Distance Unit")}</label>
               <select
                 className="form-select"
                 value={settings.distanceUnit}
                 onChange={(e) => updateSettings({ distanceUnit: e.target.value as DistanceUnit })}
               >
-                <option value="km">Kilometers (km)</option>
-                <option value="mi">Miles (mi)</option>
+                <option value="km">{t("Kilometers (km)")}</option>
+                <option value="mi">{t("Miles (mi)")}</option>
               </select>
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Fuel Volume Unit</label>
+              <label className="form-label">{t("Fuel Volume Unit")}</label>
               <select
                 className="form-select"
                 value={settings.volumeUnit}
                 onChange={(e) => updateSettings({ volumeUnit: e.target.value as VolumeUnit })}
               >
-                <option value="L">Liters (L)</option>
-                <option value="gal">US Gallons (gal)</option>
+                <option value="L">{t("Liters (L)")}</option>
+                <option value="gal">{t("US Gallons (gal)")}</option>
               </select>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Fuel Efficiency Format</label>
+              <label className="form-label">{t("Fuel Efficiency Format")}</label>
               <select
                 className="form-select"
                 value={settings.fuelEconomyUnit}
@@ -170,16 +172,16 @@ export const SettingsView: React.FC = () => {
                   updateSettings({ fuelEconomyUnit: e.target.value as FuelEconomyUnit })
                 }
               >
-                <option value="L/100km">Liters per 100 km (L/100 km)</option>
-                <option value="mpg-us">Miles per Gallon US (MPG US)</option>
-                <option value="km/L">Kilometers per Liter (km/L)</option>
+                <option value="L/100km">{t("Liters per 100 km (L/100 km)")}</option>
+                <option value="mpg-us">{t("Miles per Gallon US (MPG US)")}</option>
+                <option value="km/L">{t("Kilometers per Liter (km/L)")}</option>
               </select>
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Date Format</label>
+              <label className="form-label">{t("Date Format")}</label>
               <select
                 className="form-select"
                 value={settings.dateFormat}
@@ -187,9 +189,9 @@ export const SettingsView: React.FC = () => {
                   updateSettings({ dateFormat: e.target.value as DateFormatOption })
                 }
               >
-                <option value="YYYY-MM-DD">YYYY-MM-DD (ISO / Canadian Standard)</option>
-                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">{t("YYYY-MM-DD (ISO / Canadian Standard)")}</option>
+                <option value="DD/MM/YYYY">{t("DD/MM/YYYY")}</option>
+                <option value="MM/DD/YYYY">{t("MM/DD/YYYY")}</option>
               </select>
             </div>
           </div>
@@ -200,9 +202,9 @@ export const SettingsView: React.FC = () => {
       <Card>
         <div className="card-header">
           <div>
-            <h3 className="card-title">Data Backup & Portability</h3>
+            <h3 className="card-title">{t("Data Backup & Portability")}</h3>
             <p className="card-subtitle">
-              {user ? 'Changes sync to your account. Keep JSON backups for independent recovery.' : 'Your local garage stays on this device. Export a backup before changing domains or clearing browser data.'}
+              {user ? t("Changes sync to your account. Keep JSON backups for independent recovery.") : t("Your local garage stays on this device. Export a backup before changing domains or clearing browser data.")}
             </p>
           </div>
         </div>
@@ -214,7 +216,7 @@ export const SettingsView: React.FC = () => {
               className="btn btn-secondary"
               onClick={handleExport}
             >
-              <Download size={16} color="var(--vault-primary)" /> Export JSON Backup
+              <Download size={16} color="var(--vault-primary)" /> {t("Export JSON Backup")}
             </button>
 
             <button
@@ -223,7 +225,7 @@ export const SettingsView: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               disabled={Boolean(sync.error) || Boolean(user && (sync.fromCache || sync.pending))}
             >
-              <Upload size={16} color="var(--vault-info)" /> {user ? 'Merge JSON Backup' : 'Restore from JSON'}
+              <Upload size={16} color="var(--vault-info)" /> {user ? t("Merge JSON Backup") : t("Restore from JSON")}
             </button>
             <input
               type="file"
@@ -239,7 +241,7 @@ export const SettingsView: React.FC = () => {
               onClick={() => setConfirmDemoOpen(true)}
               disabled={Boolean(user) || Boolean(sync.error)}
             >
-              <RefreshCw size={16} color="var(--vault-warning)" /> Load Demo Garage
+              <RefreshCw size={16} color="var(--vault-warning)" /> {t("Load Demo Garage")}
             </button>
           </div>
 
@@ -256,10 +258,10 @@ export const SettingsView: React.FC = () => {
           >
             <div>
               <strong style={{ color: 'var(--vault-danger)', display: 'block', fontSize: '13.5px' }}>
-                Reset All Vault Data
+                {t("Reset All Vault Data")}
               </strong>
               <span style={{ fontSize: '12px', color: 'var(--vault-text-muted)' }}>
-                {user ? 'Deletes account records across all synced devices. Your separate local garage remains.' : 'Irreversibly removes this device’s local garage.'}
+                {user ? t("Deletes account records across all synced devices. Your separate local garage remains.") : t("Irreversibly removes this device’s local garage.")}
               </span>
             </div>
 
@@ -269,7 +271,7 @@ export const SettingsView: React.FC = () => {
               onClick={() => setConfirmResetOpen(true)}
               disabled={Boolean(sync.error) || Boolean(user && (sync.fromCache || sync.pending))}
             >
-              <Trash2 size={14} /> Clear All Data
+              <Trash2 size={14} /> {t("Clear All Data")}
             </button>
           </div>
         </div>
@@ -282,10 +284,9 @@ export const SettingsView: React.FC = () => {
             <Car size={20} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '15px' }}>Car Vault • Vault Family</div>
+            <div style={{ fontWeight: 800, fontSize: '15px' }}>{t("Car Vault • Vault Family")}</div>
             <div style={{ fontSize: '12.5px', color: 'var(--vault-text-secondary)' }}>
-              Part of the Vault suite alongside <strong>Series Vault</strong> and <strong>Sports Vault</strong>.
-              Designed with a dark-first digital garage aesthetic and local-first architecture.
+              {t("Part of the Vault suite alongside")} <strong>{t("Series Vault")}</strong> {t("and")} <strong>{t("Sports Vault")}</strong>{t(". Designed with a dark-first digital garage aesthetic and local-first architecture.")}
             </div>
           </div>
         </div>
@@ -294,9 +295,9 @@ export const SettingsView: React.FC = () => {
       {/* Confirm Dialogs */}
       <ConfirmDialog
         isOpen={confirmDemoOpen}
-        title="Load Demo Garage"
-        message="This will overwrite current data with sample Canadian vehicles (2023 Honda Civic Sedan and 2024 Hyundai Ioniq 5) with 1 year of realistic fill-ups, maintenance records, and reminders."
-        confirmLabel="Load Demo Data"
+        title={t("Load Demo Garage")}
+        message={t("This will overwrite current data with sample Canadian vehicles (2023 Honda Civic Sedan and 2024 Hyundai Ioniq 5) with 1 year of realistic fill-ups, maintenance records, and reminders.")}
+        confirmLabel={t("Load Demo Data")}
         danger={false}
         onConfirm={() => {
           loadDemoData()
@@ -308,9 +309,9 @@ export const SettingsView: React.FC = () => {
 
       <ConfirmDialog
         isOpen={confirmResetOpen}
-        title="Clear All Car Vault Data"
-        message={user ? 'Delete all records currently loaded in this account? This deletion syncs to your other devices. Export a backup first.' : 'Delete all records in this device’s local garage? Export a backup first.'}
-        confirmLabel="Delete Everything"
+        title={t("Clear All Car Vault Data")}
+        message={user ? t("Delete all records currently loaded in this account? This deletion syncs to your other devices. Export a backup first.") : t("Delete all records in this device’s local garage? Export a backup first.")}
+        confirmLabel={t("Delete Everything")}
         danger={true}
         onConfirm={() => {
           resetAllData()

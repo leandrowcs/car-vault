@@ -1,5 +1,7 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React from 'react'
 import { ThemeSwitcher } from './ThemeSwitcher'
+import { LanguageSwitcher } from './LanguageSwitcher'
 import {
   LayoutDashboard,
   Warehouse,
@@ -32,6 +34,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => {
+  const t = useTranslation()
   const { activeVehicle, settings } = useCarVault()
 
   const navItems = [
@@ -51,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => 
       <div className="brand-wrapper">
         <img
           src="/logo.svg"
-          alt="Car Vault"
+          alt={t("Car Vault")}
           className="brand-logo-img"
           onError={(e) => {
             // If image fails, hide image and fallback displays cleanly
@@ -72,17 +75,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => 
               onClick={() => onNavigate(item.id)}
             >
               <Icon className="nav-icon" />
-              <span>{item.label}</span>
+              <span>{t(item.label)}</span>
             </button>
           )
         })}
       </nav>
       <ThemeSwitcher />
+      <LanguageSwitcher />
 
       {activeVehicle && (
         <div className="sidebar-vehicle-card">
           <div className="sidebar-vehicle-header">
-            <span>Active Vehicle</span>
+            <span>{t("Active Vehicle")}</span>
             <Car size={14} color="var(--vault-primary)" />
           </div>
           <div className="sidebar-vehicle-name" title={activeVehicle.name}>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React from 'react'
 import { Modal } from './Modal'
 
@@ -22,11 +23,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   danger = true,
 }) => {
+  const t = useTranslation()
   return (
     <Modal
       isOpen={isOpen}
       onClose={onCancel}
-      title={title}
+      title={t(title)}
       maxWidth="420px"
       footer={
         <>
@@ -38,13 +40,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {t(confirmLabel)}
           </button>
         </>
       }
     >
       <p style={{ color: 'var(--vault-text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
-        {message}
+        {t(message)}
       </p>
     </Modal>
   )

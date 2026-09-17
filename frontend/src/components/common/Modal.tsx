@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
 
@@ -18,6 +19,7 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = '540px',
 }) => {
+  const t = useTranslation()
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -42,18 +44,18 @@ export const Modal: React.FC<ModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h3 className="modal-title">{title}</h3>
+          <h3 className="modal-title">{t(title)}</h3>
           <button
             type="button"
             className="btn btn-secondary btn-icon"
             onClick={onClose}
-            aria-label="Close modal"
+            aria-label={t("Close modal")}
           >
             <X size={18} />
           </button>
         </div>
         <div className="modal-body">{children}</div>
-        {footer && <div className="modal-footer">{footer}</div>}
+        {footer && (<div className="modal-footer">{footer}</div>)}
       </div>
     </div>
   )

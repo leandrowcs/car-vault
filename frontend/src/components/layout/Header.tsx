@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React from 'react'
 import { Car, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onQuickAddExpense,
   onQuickAddMaintenance,
 }) => {
+  const t = useTranslation()
   const { vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
 
   const viewTitles: Record<NavView, { title: string; subtitle: string }> = {
@@ -63,8 +65,8 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="topbar">
       <div className="topbar-left">
         <div>
-          <h1 className="topbar-title">{title}</h1>
-          <p className="card-subtitle">{subtitle}</p>
+          <h1 className="topbar-title">{t(title)}</h1>
+          <p className="card-subtitle">{t(subtitle)}</p>
         </div>
       </div>
 
@@ -76,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="vehicle-select"
               value={activeVehicle?.id || ''}
               onChange={(e) => setActiveVehicleId(e.target.value)}
-              aria-label="Select active vehicle"
+              aria-label={t("Select active vehicle")}
             >
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -92,27 +94,27 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
           className="btn btn-primary btn-sm"
           onClick={onQuickAddFuel}
-          title="Add Fuel Fill-up"
+          title={t("Add Fuel Fill-up")}
         >
-          <Plus size={14} /> Fuel
+          <Plus size={14} /> {t("Fuel")}
         </button>
 
         <button
           type="button"
           className="btn btn-secondary btn-sm"
           onClick={onQuickAddExpense}
-          title="Add General Expense"
+          title={t("Add General Expense")}
         >
-          <Plus size={14} /> Expense
+          <Plus size={14} /> {t("Expense")}
         </button>
 
         <button
           type="button"
           className="btn btn-secondary btn-sm"
           onClick={onQuickAddMaintenance}
-          title="Add Maintenance Record"
+          title={t("Add Maintenance Record")}
         >
-          <Plus size={14} /> Service
+          <Plus size={14} /> {t("Service")}
         </button>
       </div>
     </header>

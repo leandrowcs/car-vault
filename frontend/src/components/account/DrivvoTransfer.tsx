@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import { useEffect, useRef, useState } from 'react'
 import { useCarVault } from '../../context/CarVaultContext'
 import { useAccount } from '../../context/AccountContext'
@@ -5,6 +6,7 @@ import { exportDrivvoCsv, parseDrivvoCsv, prepareDrivvoImport, type DrivvoPrevie
 import { Card } from '../common/Card'
 
 export function DrivvoTransfer() {
+  const t = useTranslation()
   const { data, sync, importDrivvoData } = useCarVault()
   const { user } = useAccount()
   const [preview, setPreview] = useState<DrivvoPreview | null>(null)
@@ -48,7 +50,7 @@ export function DrivvoTransfer() {
       const incoming = await prepareDrivvoImport(preview, mappings, data)
       if (version !== request.current) return
       const added = importDrivvoData(incoming, mappings.map(mapping => mapping.existingId).filter(Boolean))
-      setMessage(`${added} refuelling records added; ${preview.rows.length - added} duplicates skipped.${user ? ' Check the cloud sync status above.' : ''}`)
+      setMessage(t('{0} refuelling records added; {1} duplicates skipped.{2}', { 0: added, 1: preview.rows.length - added, 2: user ? t(' Check the cloud sync status above.') : '' }))
       setPreview(null)
     } catch (reason) {
       if (version === request.current) setError(reason instanceof Error ? reason.message : 'Import failed.')
@@ -61,10 +63,10 @@ export function DrivvoTransfer() {
   }
 
   return <Card>
-    <div className="card-header"><h3 className="card-title">Drivvo CSV</h3></div>
-    <p className="card-subtitle">Import or export refuelling using the Portuguese Drivvo format (km / liters). Use JSON backup for the complete garage, including EV charging, expenses, maintenance and documents.</p>
+    <div className="card-header"><h3 className="card-title">{t("Drivvo CSV")}</h3></div>
+    <p className="card-subtitle">{t("Import or export refuelling using the Portuguese Drivvo format (km / liters). Use JSON backup for the complete garage, including EV charging, expenses, maintenance and documents.")}</p>
     <div className="account-actions">
-      <label className="form-group">Choose Drivvo CSV
+      <label className="form-group">{t("Choose Drivvo CSV")}
         <input type="file" accept=".csv,text/csv" disabled={busy || blocked} onChange={event => {
           void readFile(event.target.files?.[0]); event.target.value = ''
         }} />
@@ -72,39 +74,39 @@ export function DrivvoTransfer() {
       <button type="button" className="btn btn-secondary" disabled={busy || !data.fuelEntries.length} onClick={() => {
         try { exportDrivvoCsv(data); setMessage('Refuelling CSV exported.'); setError('') }
         catch (reason) { setError(reason instanceof Error ? reason.message : 'Export failed.') }
-      }}>Export refuelling CSV</button>
+      }}>{t("Export refuelling CSV")}</button>
     </div>
-    {busy && <p role="status">Processing CSV…</p>}
-    {error && <p role="alert" className="account-error">{error}</p>}
-    {message && <p role="status">{message}</p>}
-    {preview && <div style={{ display: 'grid', gap: 16, marginTop: 20 }}>
-      <p><strong>{preview.rows.length} refuelling records</strong> · {preview.totalLiters.toFixed(3)} L · {preview.totalCost.toFixed(3)} total in the file’s currency</p>
-      <p className="card-subtitle">Dates: {preview.rows.map(row => row.entry.date).sort()[0]} — {preview.rows.map(row => row.entry.date).sort().at(-1)}. Odometer range: {Math.min(...preview.rows.map(row => row.entry.odometer))} — {Math.max(...preview.rows.map(row => row.entry.odometer))} km.</p>
-      <p className="card-subtitle">Review the vehicle details below. Existing entries are preserved; matching date, odometer, volume, price and total for the same vehicle are skipped. Odometers only increase.</p>
+    {busy && (<p role="status">{t("Processing CSV…")}</p>)}
+    {error && (<p role="alert" className="account-error">{t(error)}</p>)}
+    {message && (<p role="status">{t(message)}</p>)}
+    {preview && (<div style={{ display: 'grid', gap: 16, marginTop: 20 }}>
+      <p><strong>{preview.rows.length} {t("refuelling records")}</strong> · {preview.totalLiters.toFixed(3)} {t("L ·")} {preview.totalCost.toFixed(3)} {t("total in the file’s currency")}</p>
+      <p className="card-subtitle">{t("Dates:")} {preview.rows.map(row => row.entry.date).sort()[0]} — {preview.rows.map(row => row.entry.date).sort().at(-1)}{t(". Odometer range:")} {Math.min(...preview.rows.map(row => row.entry.odometer))} — {Math.max(...preview.rows.map(row => row.entry.odometer))} {t("km.")}</p>
+      <p className="card-subtitle">{t("Review the vehicle details below. Existing entries are preserved; matching date, odometer, volume, price and total for the same vehicle are skipped. Odometers only increase.")}</p>
       {mappings.map((mapping, index) => <fieldset key={mapping.source} style={{ border: '1px solid var(--vault-border)', borderRadius: 10, padding: 12, minWidth: 0 }} disabled={busy}>
         <legend>{mapping.source}</legend>
-        <label className="form-group">Destination vehicle
+        <label className="form-group">{t("Destination vehicle")}
           <select className="form-select" value={mapping.existingId} onChange={event => update(index, { existingId: event.target.value })}>
-            <option value="">Create vehicle — review details below</option>
+            <option value="">{t("Create vehicle — review details below")}</option>
             {data.vehicles.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} ({vehicle.year})</option>)}
           </select>
         </label>
         {!mapping.existingId && <div className="form-row" style={{ marginTop: 12 }}>
-          <label className="form-group">Make<input className="form-input" value={mapping.make} onChange={event => update(index, { make: event.target.value })} /></label>
-          <label className="form-group">Model / trim<input className="form-input" value={mapping.model} onChange={event => update(index, { model: event.target.value })} /></label>
-          <label className="form-group">Year<input className="form-input" type="number" min="1886" max="2200" value={mapping.year || ''} onChange={event => update(index, { year: Number(event.target.value) })} /></label>
-          <label className="form-group">Vehicle fuel type<select className="form-select" value={mapping.fuelType} onChange={event => update(index, { fuelType: event.target.value as VehicleMapping['fuelType'] })}>
-            <option value="gasoline">Gasoline</option><option value="diesel">Diesel</option><option value="hybrid">Hybrid</option><option value="plug-in-hybrid">Plug-in hybrid</option><option value="other">Other</option>
+          <label className="form-group">{t("Make")}<input className="form-input" value={mapping.make} onChange={event => update(index, { make: event.target.value })} /></label>
+          <label className="form-group">{t("Model / trim")}<input className="form-input" value={mapping.model} onChange={event => update(index, { model: event.target.value })} /></label>
+          <label className="form-group">{t("Year")}<input className="form-input" type="number" min="1886" max="2200" value={mapping.year || ''} onChange={event => update(index, { year: Number(event.target.value) })} /></label>
+          <label className="form-group">{t("Vehicle fuel type")}<select className="form-select" value={mapping.fuelType} onChange={event => update(index, { fuelType: event.target.value as VehicleMapping['fuelType'] })}>
+            <option value="gasoline">{t("Gasoline")}</option><option value="diesel">{t("Diesel")}</option><option value="hybrid">{t("Hybrid")}</option><option value="plug-in-hybrid">{t("Plug-in hybrid")}</option><option value="other">{t("Other")}</option>
           </select></label>
         </div>}
       </fieldset>)}
       <label className="form-checkbox-label"><input type="checkbox" className="form-checkbox" checked={confirmed} disabled={busy} onChange={event => setConfirmed(event.target.checked)} />
-        I reviewed the vehicles. Amounts are in {data.settings.currency}; the file uses km and liters. No currency conversion will be applied.
+        {t("I reviewed the vehicles. Amounts are in")} {data.settings.currency}{t("; the file uses km and liters. No currency conversion will be applied.")}
       </label>
       <div className="account-actions">
-        <button type="button" className="btn btn-primary" disabled={busy || blocked || !confirmed} onClick={() => void applyImport()}>Import refuelling</button>
-        <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => setPreview(null)}>Cancel</button>
+        <button type="button" className="btn btn-primary" disabled={busy || blocked || !confirmed} onClick={() => void applyImport()}>{t("Import refuelling")}</button>
+        <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => setPreview(null)}>{t("Cancel")}</button>
       </div>
-    </div>}
+    </div>)}
   </Card>
 }

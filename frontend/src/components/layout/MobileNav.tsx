@@ -1,8 +1,10 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useEffect, useRef, useState } from 'react'
 import { LayoutDashboard, Warehouse, Fuel, Receipt, Menu, X, Wrench, Bell, FileText, BarChart3, Settings, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
 import type { NavView } from './Sidebar'
 import { ThemeSwitcher } from './ThemeSwitcher'
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface MobileNavProps {
   currentView: NavView
@@ -22,6 +24,7 @@ const items = [
 ] as const
 
 export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, onQuickAddFuel }) => {
+  const t = useTranslation()
   const { vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
   const [open, setOpen] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -43,25 +46,26 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, o
   const navigate = (view: NavView) => { setOpen(false); onNavigate(view) }
   return <>
     <div className="mobile-topbar">
-      <button type="button" className="btn btn-secondary btn-icon" aria-label="Open navigation menu" aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen(true)}><Menu size={22} /></button>
+      <button type="button" className="btn btn-secondary btn-icon" aria-label={t("Open navigation menu")} aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen(true)}><Menu size={22} /></button>
       <div className="mobile-vehicle-picker">
-        <img src="/favicon.svg" alt="Car Vault" className="mobile-brand-icon" />
-        {vehicles.length > 0 ? <select className="vehicle-select" aria-label="Active vehicle" value={activeVehicle?.id || ''} onChange={e => setActiveVehicleId(e.target.value)}>
+        <img src="/favicon.svg" alt={t("Car Vault")} className="mobile-brand-icon" />
+        {vehicles.length > 0 ? <select className="vehicle-select" aria-label={t("Active vehicle")} value={activeVehicle?.id || ''} onChange={e => setActiveVehicleId(e.target.value)}>
           {vehicles.map(v => <option key={v.id} value={v.id}>{v.year} {v.make} {v.model}</option>)}
-        </select> : <span className="mobile-brand-name">Car Vault</span>}
+        </select> : <span className="mobile-brand-name">{t("Car Vault")}</span>}
       </div>
     </div>
-    <nav className="mobile-bottom-nav" aria-label="Main navigation">
+    <nav className="mobile-bottom-nav" aria-label={t("Main navigation")}>
       {items.slice(0, 4).map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`mobile-nav-item ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}>
-        <Icon size={20} /><span>{id === 'dashboard' ? 'Dash' : label}</span>
+        <Icon size={20} /><span>{id === 'dashboard' ? t("Dash") : t(label)}</span>
       </button>)}
-      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddFuel}><Plus size={24} /><span>Fuel</span></button>
+      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddFuel}><Plus size={24} /><span>{t("Fuel")}</span></button>
     </nav>
     <dialog ref={dialog} id="mobile-menu" className="mobile-drawer" aria-labelledby="mobile-menu-title" onCancel={() => setOpen(false)} onClick={e => { if (e.target === e.currentTarget && e.clientX > e.currentTarget.getBoundingClientRect().right) setOpen(false) }}>
-      <div className="drawer-heading"><strong id="mobile-menu-title">Car Vault</strong><button type="button" className="btn btn-secondary btn-icon" aria-label="Close navigation menu" onClick={() => setOpen(false)}><X size={20} /></button></div>
-      <p className="card-subtitle">Your digital garage</p>
-      <nav aria-label="All sections">{items.map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`drawer-link ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} />{label}</button>)}</nav>
+      <div className="drawer-heading"><strong id="mobile-menu-title">{t("Car Vault")}</strong><button type="button" className="btn btn-secondary btn-icon" aria-label={t("Close navigation menu")} onClick={() => setOpen(false)}><X size={20} /></button></div>
+      <p className="card-subtitle">{t("Your digital garage")}</p>
+      <nav aria-label={t("All sections")}>{items.map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`drawer-link ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} />{t(label)}</button>)}</nav>
       <ThemeSwitcher />
+      <LanguageSwitcher />
     </dialog>
   </>
 }

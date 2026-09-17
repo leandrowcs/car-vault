@@ -1,8 +1,10 @@
+import { getLanguage } from '../services/language'
+
 export function formatCurrency(amount: number, currency = 'CAD'): string {
   if (amount === undefined || amount === null || isNaN(amount)) {
     return '$0.00'
   }
-  return new Intl.NumberFormat('en-CA', {
+  return new Intl.NumberFormat(getLanguage(), {
     style: 'currency',
     currency: currency || 'CAD',
     minimumFractionDigits: 2,
@@ -14,7 +16,7 @@ export function formatDistance(distanceKm: number, unit: 'km' | 'mi' = 'km'): st
   if (distanceKm === undefined || distanceKm === null || isNaN(distanceKm)) {
     return `0 ${unit}`
   }
-  const formatted = new Intl.NumberFormat('en-CA', {
+  const formatted = new Intl.NumberFormat(getLanguage(), {
     maximumFractionDigits: 0,
   }).format(distanceKm)
   return `${formatted} ${unit}`
@@ -51,5 +53,9 @@ export function formatDate(dateString: string, format = 'YYYY-MM-DD'): string {
     return `${year}-${month}-${day}`
   }
 
-  return date.toLocaleDateString('en-CA')
+  return date.toLocaleDateString(getLanguage())
+}
+
+export function formatMonth(monthKey: string, month: 'short' | 'long' = 'long'): string {
+  return new Date(`${monthKey}-01T12:00:00`).toLocaleDateString(getLanguage(), { month, year: 'numeric' })
 }

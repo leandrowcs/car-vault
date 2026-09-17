@@ -369,6 +369,7 @@ export function evaluateReminderStatus(
 
 export interface SuggestedReminder extends Reminder {
   reason: string
+  reasonValues?: Record<string, string | number>
   action: 'fuel' | 'maintenance'
   daysRemaining?: number
 }
@@ -406,15 +407,15 @@ export function calculateSuggestedReminders(
   const today = `${referenceDate.getFullYear()}-${String(referenceDate.getMonth() + 1).padStart(2, '0')}-${String(referenceDate.getDate()).padStart(2, '0')}`
   const now = calendarDay(today)
   const result: SuggestedReminder[] = []
-  const add = (id: string, title: string, reason: string, action: SuggestedReminder['action'], dueDate?: string, targetOdometer?: number) => result.push({
-    id: `suggested-${vehicle.id}-${id}`, vehicleId: vehicle.id, title, reason, action,
+  const add = (id: string, title: string, reason: string, action: SuggestedReminder['action'], dueDate?: string, targetOdometer?: number, reasonValues?: Record<string, string | number>) => result.push({
+    id: `suggested-${vehicle.id}-${id}`, vehicleId: vehicle.id, title, reason, reasonValues, action,
     daysRemaining: dueDate ? Math.round((calendarDay(dueDate) - now) / dayMilliseconds) : undefined,
     dueDate, targetOdometer, type: dueDate && targetOdometer !== undefined ? 'both' : dueDate ? 'date' : 'mileage',
     isCompleted: false, createdAt: today,
   })
   const interval = calculateRefillInterval(fuel.filter(f => f.vehicleId === vehicle.id), today)
   if (vehicle.fuelType !== 'electric' && interval) {
-    add('fuel', 'Expected next fill-up', `Estimate from ${interval.samples} recent intervals: every ${interval.days} days.`, 'fuel', isoDay(calendarDay(interval.latest.date) + interval.days * dayMilliseconds), interval.latest.odometer + interval.km)
+    add('fuel', 'Expected next fill-up', 'Estimate from {0} recent intervals: every {1} days.', 'fuel', isoDay(calendarDay(interval.latest.date) + interval.days * dayMilliseconds), interval.latest.odometer + interval.km, { 0: interval.samples, 1: interval.days })
   }
   const records = maintenance.filter(m => m.vehicleId === vehicle.id && m.date.slice(0, 10) <= today).sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer)
   for (const [category, title] of [['Oil Change', 'Expected oil change'], ['Scheduled Maintenance', 'Expected scheduled service']]) {

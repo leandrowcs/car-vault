@@ -38,6 +38,18 @@
 
 /* Sidebar (Desktop) */
 .theme-switcher { display: flex; gap: 8px; padding: 16px 0; }
+.language-switcher { display: flex; align-items: center; gap: 8px; padding: 0 0 16px; color: var(--vault-text-secondary); }
+.language-switcher .btn { flex: 1; min-height: 40px; white-space: nowrap; }
+.garage-hero-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: center; gap: 16px; }
+.garage-hero-layout > div { min-width: 0; }
+.garage-hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.garage-hero-layout h2 { overflow-wrap: anywhere; }
+.garage-hero-actions .btn svg { flex-shrink: 0; }
+.garage-hero-actions .btn { width: 100%; min-height: 36px; white-space: normal; }
+@media (max-width: 600px) {
+  .garage-hero-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .garage-hero-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .theme-switcher .btn { flex: 1; min-height: 40px; }
 :root[data-theme='light'] .sidebar,
 :root[data-theme='light'] .topbar,

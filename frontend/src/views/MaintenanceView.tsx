@@ -1,3 +1,5 @@
+import { getLanguage } from '../services/language'
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState, useMemo } from 'react'
 import {
   Wrench,
@@ -22,6 +24,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
   onAddMaintenance,
   onEditMaintenance,
 }) => {
+  const t = useTranslation()
   const { activeVehicle, activeMaintenanceRecords, deleteMaintenanceRecord, settings } =
     useCarVault()
 
@@ -68,16 +71,16 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
     return (
       <div className="empty-state">
         <Wrench className="empty-state-icon" />
-        <h3 className="empty-state-title">Select or Add a Vehicle First</h3>
+        <h3 className="empty-state-title">{t("Select or Add a Vehicle First")}</h3>
         <p className="empty-state-desc">
-          You must have an active vehicle in your garage to log maintenance records.
+          {t("You must have an active vehicle in your garage to log maintenance records.")}
         </p>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'grid', gap: '20px' }}>
+    <div style={{ display: 'grid', gap: '12px' }}>
       {/* Header */}
       <div
         style={{
@@ -89,14 +92,14 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         }}
       >
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Maintenance & Service History</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Maintenance & Service History")}</h2>
           <p className="card-subtitle">
-            Keep track of oil changes, tire rotations, brake jobs, and scheduled service
+            {t("Keep track of oil changes, tire rotations, brake jobs, and scheduled service")}
           </p>
         </div>
 
         <button type="button" className="btn btn-primary" onClick={onAddMaintenance}>
-          <Plus size={16} /> Log Service Record
+          <Plus size={16} /> {t("Log Service Record")}
         </button>
       </div>
 
@@ -104,46 +107,46 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
       <div className="grid-metrics">
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Total Maintenance Cost</span>
+            <span>{t("Total Maintenance Cost")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalCost, settings.currency)}
           </div>
-          <div className="metric-subtext">Across {filteredRecords.length} records</div>
+          <div className="metric-subtext">{t("Across")} {filteredRecords.length} {t("records")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Parts Spend</span>
+            <span>{t("Parts Spend")}</span>
             <Wrench className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(partsTotal, settings.currency)}
           </div>
-          <div className="metric-subtext">Components & supplies</div>
+          <div className="metric-subtext">{t("Components & supplies")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Labor Spend</span>
+            <span>{t("Labor Spend")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(laborTotal, settings.currency)}
           </div>
-          <div className="metric-subtext">Shop and technician fees</div>
+          <div className="metric-subtext">{t("Shop and technician fees")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Current Odometer</span>
+            <span>{t("Current Odometer")}</span>
             <Wrench className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatDistance(activeVehicle.currentOdometer, settings.distanceUnit)}
           </div>
-          <div className="metric-subtext">Vehicle baseline</div>
+          <div className="metric-subtext">{t("Vehicle baseline")}</div>
         </div>
       </div>
 
@@ -167,7 +170,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
             className={`btn btn-sm ${selectedCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setSelectedCategory('all')}
           >
-            All Services
+            {t("All Services")}
           </button>
           {categories.map((cat) => (
             <button
@@ -176,7 +179,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               className={`btn btn-sm ${selectedCategory === cat ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setSelectedCategory(cat)}
             >
-              {cat}
+              {t(cat)}
             </button>
           ))}
         </div>
@@ -187,7 +190,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
             type="text"
             className="form-input"
             style={{ padding: '6px 10px', fontSize: '13px' }}
-            placeholder="Search service records..."
+            placeholder={t("Search service records...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -198,21 +201,21 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
       <Card>
         {filteredRecords.length === 0 ? (
           <div style={{ padding: '36px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-            No maintenance records found.
+            {t("No maintenance records found.")}
           </div>
         ) : (
           <div className="table-wrapper">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Odometer</th>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th>Service Provider</th>
-                  <th>Parts / Labor</th>
-                  <th style={{ textAlign: 'right' }}>Total Cost</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th>{t("Date")}</th>
+                  <th>{t("Odometer")}</th>
+                  <th>{t("Category")}</th>
+                  <th>{t("Description")}</th>
+                  <th>{t("Service Provider")}</th>
+                  <th>{t("Parts / Labor")}</th>
+                  <th style={{ textAlign: 'right' }}>{t("Total Cost")}</th>
+                  <th style={{ textAlign: 'right' }}>{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,10 +225,10 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                       {formatDate(maint.date, settings.dateFormat)}
                     </td>
                     <td className="font-mono" style={{ fontWeight: 600 }}>
-                      {maint.odometer.toLocaleString()} km
+                      {maint.odometer.toLocaleString(getLanguage())} {t("km")}
                     </td>
                     <td>
-                      <span className="badge badge-blue">{maint.category}</span>
+                      <span className="badge badge-blue">{t(maint.category)}</span>
                     </td>
                     <td>
                       <div style={{ fontWeight: 600 }}>{maint.description}</div>
@@ -236,12 +239,12 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                       )}
                     </td>
                     <td style={{ color: 'var(--vault-text-secondary)' }}>
-                      {maint.serviceProvider || '—'}
+                      {maint.serviceProvider || ('—')}
                     </td>
                     <td className="font-mono" style={{ fontSize: '12.5px', color: 'var(--vault-text-secondary)' }}>
                       {maint.partsCost !== undefined || maint.laborCost !== undefined ? (
                         <span>
-                          P: ${maint.partsCost ?? 0} | L: ${maint.laborCost ?? 0}
+                          {t("P: $")}{maint.partsCost ?? (0)} {t("| L: $")}{maint.laborCost ?? (0)}
                         </span>
                       ) : (
                         '—'
@@ -256,7 +259,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                           type="button"
                           className="btn btn-secondary btn-icon btn-sm"
                           onClick={() => onEditMaintenance(maint)}
-                          title="Edit record"
+                          title={t("Edit record")}
                         >
                           <Edit2 size={13} />
                         </button>
@@ -264,7 +267,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                           type="button"
                           className="btn btn-secondary btn-icon btn-sm"
                           onClick={() => setRecordToDelete(maint)}
-                          title="Delete record"
+                          title={t("Delete record")}
                         >
                           <Trash2 size={13} color="var(--vault-danger)" />
                         </button>
@@ -280,9 +283,9 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
 
       <ConfirmDialog
         isOpen={Boolean(recordToDelete)}
-        title="Delete Service Record"
-        message={`Are you sure you want to delete this maintenance record: "${recordToDelete?.description}"?`}
-        confirmLabel="Delete Record"
+        title={t("Delete Service Record")}
+        message={t("Are you sure you want to delete this maintenance record: \"{0}\"?", { "0": recordToDelete?.description ?? '' })}
+        confirmLabel={t("Delete Record")}
         onConfirm={() => {
           if (recordToDelete) {
             deleteMaintenanceRecord(recordToDelete.id)

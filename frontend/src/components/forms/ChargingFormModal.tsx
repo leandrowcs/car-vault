@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import type { ChargingEntry, ChargingLocationType, ChargingSpeedType } from '../../types/fuel'
@@ -16,6 +17,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const t = useTranslation()
   const { activeVehicle } = useCarVault()
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -109,15 +111,15 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit EV Charge' : 'Log EV Charging Session'}
+      title={initialData ? t("Edit EV Charge") : t("Log EV Charging Session")}
       maxWidth="520px"
       footer={
         <>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="submit" form="charging-form" className="btn btn-primary">
-            {initialData ? 'Update Record' : 'Save Charge'}
+            {initialData ? t("Update Record") : t("Save Charge")}
           </button>
         </>
       }
@@ -125,7 +127,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
       <form id="charging-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Date *</label>
+            <label className="form-label">{t("Date *")}</label>
             <input
               type="date"
               required
@@ -135,7 +137,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Odometer (km) *</label>
+            <label className="form-label">{t("Odometer (km) *")}</label>
             <input
               type="number"
               required
@@ -149,26 +151,26 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Energy (kWh) *</label>
+            <label className="form-label">{t("Energy (kWh) *")}</label>
             <input
               type="number"
               required
               step="0.01"
               min="0.1"
               className="form-input font-mono"
-              placeholder="e.g. 52.0"
+              placeholder={t("e.g. 52.0")}
               value={kwh}
               onChange={(e) => handleKwhChange(e.target.value)}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Price per kWh ($ CAD)</label>
+            <label className="form-label">{t("Price per kWh ($ CAD)")}</label>
             <input
               type="number"
               step="0.001"
               min="0"
               className="form-input font-mono"
-              placeholder="e.g. 0.14"
+              placeholder={t("e.g. 0.14")}
               value={pricePerKwh}
               onChange={(e) => handlePriceChange(e.target.value)}
             />
@@ -177,7 +179,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Total Cost ($ CAD) *</label>
+            <label className="form-label">{t("Total Cost ($ CAD) *")}</label>
             <input
               type="number"
               required
@@ -189,39 +191,39 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Charging Speed</label>
+            <label className="form-label">{t("Charging Speed")}</label>
             <select
               className="form-select"
               value={chargingType}
               onChange={(e) => setChargingType(e.target.value as ChargingSpeedType)}
             >
-              <option value="Level 1">Level 1 (120V Home Outlet)</option>
-              <option value="Level 2">Level 2 (240V Wall Connector)</option>
-              <option value="DC Fast">DC Fast (CCS / NACS Supercharger)</option>
-              <option value="Other">Other</option>
+              <option value="Level 1">{t("Level 1 (120V Home Outlet)")}</option>
+              <option value="Level 2">{t("Level 2 (240V Wall Connector)")}</option>
+              <option value="DC Fast">{t("DC Fast (CCS / NACS Supercharger)")}</option>
+              <option value="Other">{t("Other")}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Location Type</label>
+            <label className="form-label">{t("Location Type")}</label>
             <select
               className="form-select"
               value={locationType}
               onChange={(e) => setLocationType(e.target.value as ChargingLocationType)}
             >
-              <option value="home">Home</option>
-              <option value="public">Public Station</option>
+              <option value="home">{t("Home")}</option>
+              <option value="public">{t("Public Station")}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Station / Location Name</label>
+            <label className="form-label">{t("Station / Location Name")}</label>
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. Electrify Canada, Tesla Supercharger"
+              placeholder={t("e.g. Electrify Canada, Tesla Supercharger")}
               value={chargingLocation}
               onChange={(e) => setChargingLocation(e.target.value)}
             />
@@ -229,11 +231,11 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label className="form-label">Notes</label>
+          <label className="form-label">{t("Notes")}</label>
           <input
             type="text"
             className="form-input"
-            placeholder="Starting state of charge (SoC), charging curve..."
+            placeholder={t("Starting state of charge (SoC), charging curve...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

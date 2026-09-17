@@ -1,3 +1,4 @@
+import { useTranslation } from './hooks/useTranslation'
 import React, { useState } from 'react'
 import { AccountProvider, useAccount } from './context/AccountContext'
 import { AccountPanel, SyncNotice } from './components/account/AccountPanel'
@@ -209,9 +210,9 @@ const CarVaultApp: React.FC = () => {
         />
       )}
 
-      {currentView === 'statistics' && <StatisticsView />}
+      {currentView === 'statistics' && (<StatisticsView />)}
 
-      {currentView === 'settings' && <SettingsView />}
+      {currentView === 'settings' && (<SettingsView />)}
 
       {/* Modals */}
       <VehicleFormModal
@@ -309,10 +310,11 @@ const CarVaultApp: React.FC = () => {
 }
 
 function VaultGate() {
+  const t = useTranslation()
   const { sync } = useCarVault()
   if (!sync.ready) return <main className="account-loading">
-    <h1>Car Vault</h1>
-    <p role="status">Connect to load your account for the first time on this device.</p>
+    <h1>{t("Car Vault")}</h1>
+    <p role="status">{t("Connect to load your account for the first time on this device.")}</p>
     <SyncNotice />
     <AccountPanel />
   </main>
@@ -320,8 +322,9 @@ function VaultGate() {
 }
 
 function AccountVault() {
+  const t = useTranslation()
   const { user, loading } = useAccount()
-  if (loading) return <main className="account-loading" role="status">Opening Car Vault…</main>
+  if (loading) return <main className="account-loading" role="status">{t("Opening Car Vault…")}</main>
   return <CarVaultProvider key={user?.uid ?? 'local'} uid={user?.uid}>
     <VaultGate />
   </CarVaultProvider>

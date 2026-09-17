@@ -1,3 +1,5 @@
+import { getLanguage } from '../services/language'
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useMemo } from 'react'
 import {
   Car,
@@ -48,6 +50,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onAddMaintenance,
   onAddReminder,
 }) => {
+  const t = useTranslation()
   const {
     activeVehicle,
     activeFuelEntries,
@@ -127,16 +130,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return (
       <div className="empty-state">
         <Car className="empty-state-icon" />
-        <h3 className="empty-state-title">No Vehicle in Your Garage</h3>
+        <h3 className="empty-state-title">{t("No Vehicle in Your Garage")}</h3>
         <p className="empty-state-desc">
-          Add your first vehicle to start tracking fuel economy, maintenance intervals, and expenses.
+          {t("Add your first vehicle to start tracking fuel economy, maintenance intervals, and expenses.")}
         </p>
         <button
           type="button"
           className="btn btn-primary"
           onClick={() => onNavigate('garage')}
         >
-          <Plus size={16} /> Add Vehicle
+          <Plus size={16} /> {t("Add Vehicle")}
         </button>
       </div>
     )
@@ -147,16 +150,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div style={{ display: 'grid', gap: '12px' }}>
       {/* Vehicle Hero Banner */}
-      <Card style={{ padding: '24px', borderLeft: '4px solid var(--vault-primary)' }}>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
+      <Card style={{ padding: '12px', borderLeft: '4px solid var(--vault-primary)' }}>
+        <div className="garage-hero-layout">
           <div>
             <div
               style={{
@@ -168,7 +163,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 marginBottom: '4px',
               }}
             >
-              Active Digital Garage • {new Date().getFullYear()}
+              {t("Active Digital Garage •")} {new Date().getFullYear()}
             </div>
             <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--vault-text)' }}>
               {activeVehicle.year} {activeVehicle.make} {activeVehicle.model}{' '}
@@ -184,6 +179,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 alignItems: 'center',
                 gap: '16px',
                 marginTop: '8px',
+                flexWrap: 'wrap',
                 fontSize: '13.5px',
                 color: 'var(--vault-text-secondary)',
               }}
@@ -200,40 +196,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </span>
               )}
               <span style={{ textTransform: 'capitalize' }}>
-                {activeVehicle.fuelType}
+                {t(activeVehicle.fuelType)}
               </span>
             </div>
           </div>
 
           {/* Quick Actions Row */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div className="garage-hero-actions">
             <button
               type="button"
               className="btn btn-primary btn-sm"
               onClick={onAddFuel}
             >
-              <Plus size={14} /> {isEv ? 'Log Charge' : 'Log Fuel'}
+              <Plus size={14} /> {isEv ? t("Log Charge") : t("Log Fuel")}
             </button>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={onAddExpense}
             >
-              <Plus size={14} /> Add Expense
+              <Plus size={14} /> {t("Add Expense")}
             </button>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={onAddMaintenance}
             >
-              <Plus size={14} /> Add Service
+              <Plus size={14} /> {t("Add Service")}
             </button>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={onAddReminder}
             >
-              <Plus size={14} /> Add Reminder
+              <Plus size={14} /> {t("Add Reminder")}
             </button>
           </div>
         </div>
@@ -243,50 +239,50 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="grid-metrics">
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Total Vehicle Cost</span>
+            <span>{t("Total Vehicle Cost")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalCosts.grandTotal, settings.currency)}
           </div>
-          <div className="metric-subtext">All historical spend</div>
+          <div className="metric-subtext">{t("All historical spend")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Fuel / Energy</span>
+            <span>{t("Fuel / Energy")}</span>
             <Fuel className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalCosts.totalFuel, settings.currency)}
           </div>
           <div className="metric-subtext">
-            {activeFuelEntries.length + activeChargingEntries.length} entries recorded
+            {activeFuelEntries.length + activeChargingEntries.length} {t("entries recorded")}
           </div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Maintenance</span>
+            <span>{t("Maintenance")}</span>
             <Wrench className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalCosts.totalMaintenance, settings.currency)}
           </div>
           <div className="metric-subtext">
-            {activeMaintenanceRecords.length} service records
+            {activeMaintenanceRecords.length} {t("service records")}
           </div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Other Expenses</span>
+            <span>{t("Other Expenses")}</span>
             <Receipt className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalCosts.totalOther, settings.currency)}
           </div>
-          <div className="metric-subtext">Insurance, tolls, parking...</div>
+          <div className="metric-subtext">{t("Insurance, tolls, parking...")}</div>
         </div>
       </div>
 
@@ -294,56 +290,46 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="grid-metrics">
         <div className="metric-card" style={{ borderLeft: '3px solid var(--vault-primary)' }}>
           <div className="metric-card-top">
-            <span>Average Consumption</span>
+            <span>{t("Average Consumption")}</span>
             <Gauge className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono" style={{ color: 'var(--vault-primary)' }}>
-            {isEv
-              ? evStats.kwhPer100Km !== null
-                ? `${evStats.kwhPer100Km} kWh/100 km`
-                : '—'
-              : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
+            {isEv ? evStats.kwhPer100Km !== null ? t("{0} kWh/100 km", { "0": evStats.kwhPer100Km ?? '' }) : '—' : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
           </div>
-          <div className="metric-subtext">Calculated over full tank intervals</div>
+          <div className="metric-subtext">{t("Calculated over full tank intervals")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Average Price</span>
+            <span>{t("Average Price")}</span>
             <TrendingDown className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
-            {isEv
-              ? evStats.averagePricePerKwh > 0
-                ? `$${evStats.averagePricePerKwh.toFixed(3)}/kWh`
-                : '—'
-              : fuelStats.averagePricePerLiter > 0
-              ? `$${fuelStats.averagePricePerLiter.toFixed(3)}/L`
-              : '—'}
+            {isEv ? evStats.averagePricePerKwh > 0 ? t("${0}/kWh", { "0": evStats.averagePricePerKwh.toFixed(3) ?? '' }) : '—' : fuelStats.averagePricePerLiter > 0 ? t("${0}/L", { "0": fuelStats.averagePricePerLiter.toFixed(3) ?? '' }) : '—'}
           </div>
-          <div className="metric-subtext">Weighted average fuel/energy price</div>
+          <div className="metric-subtext">{t("Weighted average fuel/energy price")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Cost Per KM</span>
+            <span>{t("Cost Per KM")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCostPerKm(totalCosts.costPerKm, settings.currency)}
           </div>
-          <div className="metric-subtext">Total cost / recorded km</div>
+          <div className="metric-subtext">{t("Total cost / recorded km")}</div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Total Logged KM</span>
+            <span>{t("Total Logged KM")}</span>
             <Car className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatDistance(fuelStats.totalDistanceKm || activeVehicle.currentOdometer, settings.distanceUnit)}
           </div>
-          <div className="metric-subtext">Distance tracked in vault</div>
+          <div className="metric-subtext">{t("Distance tracked in vault")}</div>
         </div>
       </div>
 
@@ -353,15 +339,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <Card>
           <div className="card-header">
             <div>
-              <h3 className="card-title">Spending History</h3>
-              <p className="card-subtitle">Monthly breakdown across categories</p>
+              <h3 className="card-title">{t("Spending History")}</h3>
+              <p className="card-subtitle">{t("Monthly breakdown across categories")}</p>
             </div>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={() => onNavigate('statistics')}
             >
-              Full Stats
+              {t("Full Stats")}
             </button>
           </div>
           <SimpleBarChart data={monthlySpending} currency={settings.currency} />
@@ -373,34 +359,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <h3 className="card-title">
                 <Bell size={18} color="var(--vault-primary)" />
-                Upcoming Reminders
+                {t("Upcoming Reminders")}
               </h3>
-              <p className="card-subtitle">Predictions, services and seasonal tire changes</p>
+              <p className="card-subtitle">{t("Predictions, services and seasonal tire changes")}</p>
             </div>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={() => onNavigate('reminders')}
             >
-              View All ({activeReminders.length})
+              {t("View All (")}{activeReminders.length})
             </button>
           </div>
 
           <div className="smart-reminders">
             {suggestions.map(r => <div className="smart-reminder" key={r.id}>
               <div className="smart-reminder-content">
-              <div className="smart-reminder-heading"><strong>{r.title}</strong>{r.id.endsWith('-summer') ? <span className="badge badge-slate">Optional</span> : <ReminderBadge status={evaluateReminderStatus(r, activeVehicle.currentOdometer)} />}</div>
-              <p className="smart-reminder-target">{r.dueDate && formatDate(r.dueDate, settings.dateFormat)}{r.daysRemaining !== undefined && ` (${r.daysRemaining > 0 ? `in ${r.daysRemaining} days` : r.daysRemaining === 0 ? 'today' : `${Math.abs(r.daysRemaining)} days ago`})`}{r.targetOdometer !== undefined && ` · ${r.targetOdometer.toLocaleString()} km (${Math.max(0, r.targetOdometer - activeVehicle.currentOdometer).toLocaleString()} km left)`}</p>
-              <details className="reminder-details"><summary>Details</summary><p>{r.reason}</p></details>
+              <div className="smart-reminder-heading"><strong>{t(r.title)}</strong>{r.id.endsWith('-summer') ? <span className="badge badge-slate">{t("Optional")}</span> : <ReminderBadge status={evaluateReminderStatus(r, activeVehicle.currentOdometer)} />}</div>
+              <p className="smart-reminder-target">{r.dueDate && (formatDate(r.dueDate, settings.dateFormat))}{r.daysRemaining !== undefined && (` (${r.daysRemaining > 0 ? t('in {0} days', { 0: r.daysRemaining }) : r.daysRemaining === 0 ? t('today') : t('{0} days ago', { 0: Math.abs(r.daysRemaining) })})`)}{r.targetOdometer !== undefined && (t(" · {0} km ({1} km left)", { "0": r.targetOdometer.toLocaleString(getLanguage()) ?? '', "1": Math.max(0, r.targetOdometer - activeVehicle.currentOdometer).toLocaleString(getLanguage()) ?? '' }))}</p>
+              <details className="reminder-details"><summary>{t("Details")}</summary><p>{t(r.reason, r.reasonValues)}</p></details>
               </div>
-              <button type="button" className="btn btn-secondary btn-icon reminder-log" aria-label={`${r.action === 'fuel' ? 'Log fill-up' : 'Log service'}: ${r.title}`} title={r.action === 'fuel' ? 'Log fill-up' : 'Log service'} onClick={r.action === 'fuel' ? onAddFuel : onAddMaintenance}>{r.action === 'fuel' ? <Fuel size={18} /> : <Wrench size={18} />}</button>
+              <button type="button" className="btn btn-secondary btn-icon reminder-log" aria-label={`${t(r.action === 'fuel' ? 'Log fill-up' : 'Log service')}: ${t(r.title)}`} title={r.action === 'fuel' ? t("Log fill-up") : t("Log service")} onClick={r.action === 'fuel' ? onAddFuel : onAddMaintenance}>{r.action === 'fuel' ? <Fuel size={18} /> : <Wrench size={18} />}</button>
             </div>)}
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onAddReminder}>Set oil / service mileage target</button>
-            <details className="reminder-details reminder-help"><summary>How reminders work</summary><p className="card-subtitle">Service predictions need two matching records. Otherwise, set a mileage target from your maintenance schedule. Record seasonal tires using Winter / Summer Tire Installation.</p></details>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={onAddReminder}>{t("Set oil / service mileage target")}</button>
+            <details className="reminder-details reminder-help"><summary>{t("How reminders work")}</summary><p className="card-subtitle">{t("Service predictions need two matching records. Otherwise, set a mileage target from your maintenance schedule. Record seasonal tires using Winter / Summer Tire Installation.")}</p></details>
           </div>
           {upcomingReminders.length === 0 ? (
             <div style={{ padding: '8px 0', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-              <p>No manually scheduled reminders.</p>
+              <p>{t("No manually scheduled reminders.")}</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gap: '10px' }}>
@@ -425,12 +411,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {r.title}
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--vault-text-muted)' }}>
-                      {r.dueDate && `Due ${formatDate(r.dueDate, settings.dateFormat)} `}
-                      {r.targetOdometer &&
-                        `• at ${r.targetOdometer.toLocaleString()} km (${Math.max(
+                      {r.dueDate && (t("Due {0} ", { "0": formatDate(r.dueDate, settings.dateFormat) ?? '' }))}
+                      {r.targetOdometer && (t("• at {0} km ({1} km left)", { "0": r.targetOdometer.toLocaleString(getLanguage()) ?? '', "1": Math.max(
                           0,
                           r.targetOdometer - activeVehicle.currentOdometer
-                        ).toLocaleString()} km left)`}
+                        ).toLocaleString(getLanguage()) ?? '' }))}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -438,7 +423,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <button
                       type="button"
                       className="btn btn-secondary btn-icon btn-sm"
-                      title="Mark complete"
+                      title={t("Mark complete")}
                       onClick={() => toggleReminderComplete(r.id)}
                     >
                       <CheckCircle2 size={16} />
@@ -455,8 +440,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <Card>
         <div className="card-header">
           <div>
-            <h3 className="card-title">Recent Transactions & Services</h3>
-            <p className="card-subtitle">Latest fill-ups, maintenance, and vehicle expenses</p>
+            <h3 className="card-title">{t("Recent Transactions & Services")}</h3>
+            <p className="card-subtitle">{t("Latest fill-ups, maintenance, and vehicle expenses")}</p>
           </div>
         </div>
 

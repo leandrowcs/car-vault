@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import { DEFAULT_EXPENSE_CATEGORIES, type Expense } from '../../types/expense'
@@ -16,6 +17,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const t = useTranslation()
   const { activeVehicle } = useCarVault()
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -80,15 +82,15 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Expense' : 'Add Vehicle Expense'}
+      title={initialData ? t("Edit Expense") : t("Add Vehicle Expense")}
       maxWidth="520px"
       footer={
         <>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="submit" form="expense-form" className="btn btn-primary">
-            {initialData ? 'Update Expense' : 'Save Expense'}
+            {initialData ? t("Update Expense") : t("Save Expense")}
           </button>
         </>
       }
@@ -96,7 +98,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
       <form id="expense-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Date *</label>
+            <label className="form-label">{t("Date *")}</label>
             <input
               type="date"
               required
@@ -106,7 +108,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Amount ($ CAD) *</label>
+            <label className="form-label">{t("Amount ($ CAD) *")}</label>
             <input
               type="number"
               required
@@ -122,7 +124,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Category *</label>
+            <label className="form-label">{t("Category *")}</label>
             <select
               className="form-select"
               value={category}
@@ -130,33 +132,33 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             >
               {DEFAULT_EXPENSE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t(cat)}
                 </option>
               ))}
-              <option value="Custom">+ Custom Category</option>
+              <option value="Custom">{t("+ Custom Category")}</option>
             </select>
           </div>
 
           {category === 'Custom' ? (
             <div className="form-group">
-              <label className="form-label">Custom Category Name</label>
+              <label className="form-label">{t("Custom Category Name")}</label>
               <input
                 type="text"
                 required
                 className="form-input"
-                placeholder="e.g. Parking Permit, Detailing"
+                placeholder={t("e.g. Parking Permit, Detailing")}
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
               />
             </div>
           ) : (
             <div className="form-group">
-              <label className="form-label">Odometer (km, Optional)</label>
+              <label className="form-label">{t("Odometer (km, Optional)")}</label>
               <input
                 type="number"
                 min="0"
                 className="form-input font-mono"
-                placeholder="Current odometer"
+                placeholder={t("Current odometer")}
                 value={odometer}
                 onChange={(e) => setOdometer(e.target.value)}
               />
@@ -165,34 +167,34 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label className="form-label">Description *</label>
+          <label className="form-label">{t("Description *")}</label>
           <input
             type="text"
             required
             className="form-input"
-            placeholder="e.g. Monthly insurance premium, Highway 407 toll"
+            placeholder={t("e.g. Monthly insurance premium, Highway 407 toll")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Vendor / Payee</label>
+          <label className="form-label">{t("Vendor / Payee")}</label>
           <input
             type="text"
             className="form-input"
-            placeholder="e.g. Intact Insurance, City Parking Authority"
+            placeholder={t("e.g. Intact Insurance, City Parking Authority")}
             value={vendor}
             onChange={(e) => setVendor(e.target.value)}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Notes</label>
+          <label className="form-label">{t("Notes")}</label>
           <input
             type="text"
             className="form-input"
-            placeholder="Policy number, receipt reference..."
+            placeholder={t("Policy number, receipt reference...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

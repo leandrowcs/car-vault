@@ -1,6 +1,9 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React from 'react'
+import { formatMonth } from '../../utils/formatters'
 
 interface MonthlyBarItem {
+  monthKey?: string
   label: string
   fuel: number
   maintenance: number
@@ -16,10 +19,11 @@ interface SimpleBarChartProps {
 export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
   data,
 }) => {
+  const t = useTranslation()
   if (!data || data.length === 0) {
     return (
       <div style={{ padding: '32px', textAlign: 'center', color: 'var(--vault-text-muted)' }}>
-        No spending history yet to display monthly trend.
+        {t("No spending history yet to display monthly trend.")}
       </div>
     )
   }
@@ -40,6 +44,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
         }}
       >
         {data.map((item, idx) => {
+          const monthLabel = item.monthKey ? formatMonth(item.monthKey, 'short') : item.label
           const totalHeightPercent = (item.total / maxTotal) * 100
           const fuelPercent = item.total > 0 ? (item.fuel / item.total) * 100 : 0
           const maintPercent = item.total > 0 ? (item.maintenance / item.total) * 100 : 0
@@ -57,7 +62,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
                 justifyContent: 'flex-end',
                 gap: '6px',
               }}
-              title={`${item.label}: $${item.total.toFixed(2)} (Fuel: $${item.fuel.toFixed(2)}, Maint: $${item.maintenance.toFixed(2)}, Other: $${item.expenses.toFixed(2)})`}
+              title={t("{0}: ${1} (Fuel: ${2}, Maint: ${3}, Other: ${4})", { "0": monthLabel ?? '', "1": item.total.toFixed(2) ?? '', "2": item.fuel.toFixed(2) ?? '', "3": item.maintenance.toFixed(2) ?? '', "4": item.expenses.toFixed(2) ?? '' })}
             >
               <div
                 style={{
@@ -114,7 +119,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
                   whiteSpace: 'nowrap',
                 }}
               >
-                {item.label}
+                {monthLabel}
               </div>
             </div>
           )
@@ -127,7 +132,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '20px',
+          gap: '12px',
           paddingTop: '8px',
           borderTop: '1px solid var(--vault-border)',
           fontSize: '12px',
@@ -142,7 +147,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
               background: 'var(--vault-primary)',
             }}
           />
-          <span>Fuel</span>
+          <span>{t("Fuel")}</span>
         </div>
         <div style={{ display: 'flex', alignContent: 'center', alignItems: 'center', gap: '6px' }}>
           <span
@@ -153,7 +158,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
               background: 'var(--vault-info)',
             }}
           />
-          <span>Maintenance</span>
+          <span>{t("Maintenance")}</span>
         </div>
         <div style={{ display: 'flex', alignContent: 'center', alignItems: 'center', gap: '6px' }}>
           <span
@@ -164,7 +169,7 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
               background: '#a855f7',
             }}
           />
-          <span>Other Expenses</span>
+          <span>{t("Other Expenses")}</span>
         </div>
       </div>
     </div>

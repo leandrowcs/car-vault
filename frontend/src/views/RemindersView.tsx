@@ -1,3 +1,5 @@
+import { getLanguage } from '../services/language'
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState, useMemo } from 'react'
 import {
   Bell,
@@ -27,6 +29,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
   onAddReminder,
   onEditReminder,
 }) => {
+  const t = useTranslation()
   const {
     activeVehicle,
     activeReminders,
@@ -53,9 +56,9 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
     return (
       <div className="empty-state">
         <Bell className="empty-state-icon" />
-        <h3 className="empty-state-title">Select or Add a Vehicle First</h3>
+        <h3 className="empty-state-title">{t("Select or Add a Vehicle First")}</h3>
         <p className="empty-state-desc">
-          You must have an active vehicle in your garage to set service reminders.
+          {t("You must have an active vehicle in your garage to set service reminders.")}
         </p>
       </div>
     )
@@ -89,7 +92,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ReminderBadge status={reminder.status} />
               {reminder.category && (
-                <span className="badge badge-slate">{reminder.category}</span>
+                <span className="badge badge-slate">{t(reminder.category)}</span>
               )}
             </div>
             <h4
@@ -110,15 +113,15 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
               type="button"
               className={`btn btn-sm ${isCompleted ? 'btn-secondary' : 'btn-primary'}`}
               onClick={() => toggleReminderComplete(reminder.id)}
-              title={isCompleted ? 'Mark as active' : 'Mark as completed'}
+              title={isCompleted ? t("Mark as active") : t("Mark as completed")}
             >
               {isCompleted ? (
                 <>
-                  <RotateCcw size={13} /> Reopen
+                  <RotateCcw size={13} /> {t("Reopen")}
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={13} /> Complete
+                  <CheckCircle2 size={13} /> {t("Complete")}
                 </>
               )}
             </button>
@@ -126,7 +129,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
               type="button"
               className="btn btn-secondary btn-icon btn-sm"
               onClick={() => onEditReminder(reminder)}
-              title="Edit reminder"
+              title={t("Edit reminder")}
             >
               <Edit2 size={13} />
             </button>
@@ -134,7 +137,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
               type="button"
               className="btn btn-secondary btn-icon btn-sm"
               onClick={() => setReminderToDelete(reminder)}
-              title="Delete reminder"
+              title={t("Delete reminder")}
             >
               <Trash2 size={13} color="var(--vault-danger)" />
             </button>
@@ -155,7 +158,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
           {reminder.dueDate && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Calendar size={14} color="var(--vault-primary)" />
-              <span>Due: {formatDate(reminder.dueDate, settings.dateFormat)}</span>
+              <span>{t("Due:")} {formatDate(reminder.dueDate, settings.dateFormat)}</span>
             </div>
           )}
 
@@ -163,7 +166,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Gauge size={14} color="var(--vault-primary)" />
               <span>
-                Target: {targetOdo.toLocaleString()} km
+                {t("Target:")} {targetOdo.toLocaleString(getLanguage())} {t("km")}
                 {remainingKm !== undefined && !isCompleted && (
                   <strong
                     style={{
@@ -176,7 +179,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
                           : 'var(--vault-text)',
                     }}
                   >
-                    ({remainingKm <= 0 ? `${Math.abs(remainingKm).toLocaleString()} km overdue` : `${remainingKm.toLocaleString()} km left`})
+                    ({remainingKm <= 0 ? t("{0} km overdue", { "0": Math.abs(remainingKm).toLocaleString(getLanguage()) ?? '' }) : t("{0} km left", { "0": remainingKm.toLocaleString(getLanguage()) ?? '' })})
                   </strong>
                 )}
               </span>
@@ -214,26 +217,26 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
         }}
       >
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Service Reminders</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Service Reminders")}</h2>
           <p className="card-subtitle">
-            Current vehicle mileage: <strong>{activeVehicle.currentOdometer.toLocaleString()} km</strong>
+            {t("Current vehicle mileage:")} <strong>{activeVehicle.currentOdometer.toLocaleString(getLanguage())} {t("km")}</strong>
           </p>
         </div>
 
         <button type="button" className="btn btn-primary" onClick={onAddReminder}>
-          <Plus size={16} /> Set Reminder
+          <Plus size={16} /> {t("Set Reminder")}
         </button>
       </div>
 
       {activeReminders.length === 0 ? (
         <div className="empty-state">
           <Bell className="empty-state-icon" />
-          <h3 className="empty-state-title">No Reminders Scheduled</h3>
+          <h3 className="empty-state-title">{t("No Reminders Scheduled")}</h3>
           <p className="empty-state-desc">
-            Set reminders for oil changes, tire rotations, inspections, or registration renewals by date, mileage, or both.
+            {t("Set reminders for oil changes, tire rotations, inspections, or registration renewals by date, mileage, or both.")}
           </p>
           <button type="button" className="btn btn-primary" onClick={onAddReminder}>
-            <Plus size={16} /> Create First Reminder
+            <Plus size={16} /> {t("Create First Reminder")}
           </button>
         </div>
       ) : (
@@ -242,7 +245,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
           {overdueList.length > 0 && (
             <div style={{ display: 'grid', gap: '10px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--vault-danger)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Clock size={16} /> Overdue ({overdueList.length})
+                <Clock size={16} /> {t("Overdue (")}{overdueList.length})
               </h3>
               <div style={{ display: 'grid', gap: '10px' }}>
                 {overdueList.map(renderReminderCard)}
@@ -254,7 +257,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
           {dueSoonList.length > 0 && (
             <div style={{ display: 'grid', gap: '10px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--vault-warning)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Clock size={16} /> Due Soon ({dueSoonList.length})
+                <Clock size={16} /> {t("Due Soon (")}{dueSoonList.length})
               </h3>
               <div style={{ display: 'grid', gap: '10px' }}>
                 {dueSoonList.map(renderReminderCard)}
@@ -266,7 +269,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
           {upcomingList.length > 0 && (
             <div style={{ display: 'grid', gap: '10px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--vault-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                Upcoming ({upcomingList.length})
+                {t("Upcoming (")}{upcomingList.length})
               </h3>
               <div style={{ display: 'grid', gap: '10px' }}>
                 {upcomingList.map(renderReminderCard)}
@@ -278,7 +281,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
           {completedList.length > 0 && (
             <div style={{ display: 'grid', gap: '10px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--vault-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                Completed ({completedList.length})
+                {t("Completed (")}{completedList.length})
               </h3>
               <div style={{ display: 'grid', gap: '10px' }}>
                 {completedList.map(renderReminderCard)}
@@ -290,9 +293,9 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
 
       <ConfirmDialog
         isOpen={Boolean(reminderToDelete)}
-        title="Delete Reminder"
-        message={`Are you sure you want to delete the reminder "${reminderToDelete?.title}"?`}
-        confirmLabel="Delete Reminder"
+        title={t("Delete Reminder")}
+        message={t("Are you sure you want to delete the reminder \"{0}\"?", { "0": reminderToDelete?.title ?? '' })}
+        confirmLabel={t("Delete Reminder")}
         onConfirm={() => {
           if (reminderToDelete) {
             deleteReminder(reminderToDelete.id)

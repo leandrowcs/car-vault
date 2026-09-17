@@ -1,3 +1,5 @@
+import { getLanguage } from '../services/language'
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState, useMemo } from 'react'
 import {
   Receipt,
@@ -20,6 +22,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   onAddExpense,
   onEditExpense,
 }) => {
+  const t = useTranslation()
   const { activeVehicle, activeExpenses, deleteExpense, settings } = useCarVault()
 
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null)
@@ -57,16 +60,16 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     return (
       <div className="empty-state">
         <Receipt className="empty-state-icon" />
-        <h3 className="empty-state-title">Select or Add a Vehicle First</h3>
+        <h3 className="empty-state-title">{t("Select or Add a Vehicle First")}</h3>
         <p className="empty-state-desc">
-          You must have an active vehicle in your garage to record expenses.
+          {t("You must have an active vehicle in your garage to record expenses.")}
         </p>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'grid', gap: '20px' }}>
+    <div style={{ display: 'grid', gap: '12px' }}>
       {/* Header */}
       <div
         style={{
@@ -78,14 +81,14 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         }}
       >
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Vehicle Expenses</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Vehicle Expenses")}</h2>
           <p className="card-subtitle">
-            Insurance, registration, tolls, parking, and miscellaneous costs
+            {t("Insurance, registration, tolls, parking, and miscellaneous costs")}
           </p>
         </div>
 
         <button type="button" className="btn btn-primary" onClick={onAddExpense}>
-          <Plus size={16} /> Add Expense
+          <Plus size={16} /> {t("Add Expense")}
         </button>
       </div>
 
@@ -93,20 +96,20 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       <div className="grid-metrics">
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>Filtered Expenses</span>
+            <span>{t("Filtered Expenses")}</span>
             <DollarSign className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
             {formatCurrency(totalAmount, settings.currency)}
           </div>
           <div className="metric-subtext">
-            {filteredExpenses.length} records matching filters
+            {filteredExpenses.length} {t("records matching filters")}
           </div>
         </div>
 
         <div className="metric-card">
           <div className="metric-card-top">
-            <span>All-Time Expenses</span>
+            <span>{t("All-Time Expenses")}</span>
             <Receipt className="metric-card-icon" />
           </div>
           <div className="metric-value font-mono">
@@ -115,7 +118,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               settings.currency
             )}
           </div>
-          <div className="metric-subtext">{activeExpenses.length} total expense entries</div>
+          <div className="metric-subtext">{activeExpenses.length} {t("total expense entries")}</div>
         </div>
       </div>
 
@@ -140,7 +143,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             className={`btn btn-sm ${selectedCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setSelectedCategory('all')}
           >
-            All Categories
+            {t("All Categories")}
           </button>
           {categories.map((cat) => (
             <button
@@ -149,7 +152,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               className={`btn btn-sm ${selectedCategory === cat ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setSelectedCategory(cat)}
             >
-              {cat}
+              {t(cat)}
             </button>
           ))}
         </div>
@@ -161,24 +164,22 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             type="text"
             className="form-input"
             style={{ padding: '6px 10px', fontSize: '13px' }}
-            placeholder="Search expenses..."
-            aria-label="Search expenses"
+            placeholder={t("Search expenses...")}
+            aria-label={t("Search expenses")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <section aria-label="Expense history">
+      <section aria-label={t("Expense history")}>
         <div className="record-history-heading">
-          <h3 className="card-title">Expense History</h3>
-          <span className="badge badge-slate">{filteredExpenses.length} records</span>
+          <h3 className="card-title">{t("Expense History")}</h3>
+          <span className="badge badge-slate">{filteredExpenses.length} {t("records")}</span>
         </div>
         {filteredExpenses.length === 0 ? (
           <div className="record-empty">
-            {activeExpenses.length === 0
-              ? 'No expenses logged yet for this vehicle.'
-              : 'No expenses found matching the selected criteria.'}
+            {activeExpenses.length === 0 ? t("No expenses logged yet for this vehicle.") : t("No expenses found matching the selected criteria.")}
           </div>
         ) : (
           <div className="record-grid">
@@ -186,15 +187,15 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
               <RecordCard
                 key={expense.id}
                 icon={<Receipt size={20} />}
-                title={expense.description || expense.category}
+                title={expense.description || (t(expense.category))}
                 date={formatDate(expense.date, settings.dateFormat)}
                 amount={formatCurrency(expense.amount, settings.currency)}
-                badge={<span className="badge badge-slate">{expense.category}</span>}
+                badge={<span className="badge badge-slate">{t(expense.category)}</span>}
                 metrics={[
                   { label: 'Vendor', value: expense.vendor || '—' },
-                  { label: 'Odometer', value: expense.odometer != null ? `${expense.odometer.toLocaleString()} km` : '—' },
+                  { label: 'Odometer', value: expense.odometer != null ? `${expense.odometer.toLocaleString(getLanguage())} km` : '—' },
                 ]}
-                actionLabel={`expense ${expense.description} on ${formatDate(expense.date, settings.dateFormat)}`}
+                actionLabel={t("expense {0} on {1}", { "0": expense.description ?? '', "1": formatDate(expense.date, settings.dateFormat) ?? '' })}
                 onEdit={() => onEditExpense(expense)}
                 onDelete={() => setExpenseToDelete(expense)}
               />
@@ -205,9 +206,9 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
       <ConfirmDialog
         isOpen={Boolean(expenseToDelete)}
-        title="Delete Expense"
-        message={`Are you sure you want to delete the expense "${expenseToDelete?.description}"?`}
-        confirmLabel="Delete Expense"
+        title={t("Delete Expense")}
+        message={t("Are you sure you want to delete the expense \"{0}\"?", { "0": expenseToDelete?.description ?? '' })}
+        confirmLabel={t("Delete Expense")}
         onConfirm={() => {
           if (expenseToDelete) {
             deleteExpense(expenseToDelete.id)

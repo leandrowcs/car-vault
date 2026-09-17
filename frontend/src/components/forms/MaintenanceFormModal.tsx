@@ -1,3 +1,4 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import {
@@ -19,6 +20,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const t = useTranslation()
   const { activeVehicle } = useCarVault()
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -111,15 +113,15 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Service Record' : 'Log Maintenance / Service'}
+      title={initialData ? t("Edit Service Record") : t("Log Maintenance / Service")}
       maxWidth="560px"
       footer={
         <>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="submit" form="maint-form" className="btn btn-primary">
-            {initialData ? 'Update Record' : 'Save Service'}
+            {initialData ? t("Update Record") : t("Save Service")}
           </button>
         </>
       }
@@ -127,7 +129,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
       <form id="maint-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px' }}>
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Date *</label>
+            <label className="form-label">{t("Date *")}</label>
             <input
               type="date"
               required
@@ -137,13 +139,13 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Odometer (km) *</label>
+            <label className="form-label">{t("Odometer (km) *")}</label>
             <input
               type="number"
               required
               min="0"
               className="form-input font-mono"
-              placeholder="e.g. 28500"
+              placeholder={t("e.g. 28500")}
               value={odometer}
               onChange={(e) => setOdometer(e.target.value)}
             />
@@ -152,7 +154,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Category *</label>
+            <label className="form-label">{t("Category *")}</label>
             <select
               className="form-select"
               value={category}
@@ -160,32 +162,32 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
             >
               {DEFAULT_MAINTENANCE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t(cat)}
                 </option>
               ))}
-              <option value="Custom">+ Custom Category</option>
+              <option value="Custom">{t("+ Custom Category")}</option>
             </select>
           </div>
 
           {category === 'Custom' ? (
             <div className="form-group">
-              <label className="form-label">Custom Category</label>
+              <label className="form-label">{t("Custom Category")}</label>
               <input
                 type="text"
                 required
                 className="form-input"
-                placeholder="e.g. Spark Plugs, Rustproofing"
+                placeholder={t("e.g. Spark Plugs, Rustproofing")}
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
               />
             </div>
           ) : (
             <div className="form-group">
-              <label className="form-label">Service Provider / Shop</label>
+              <label className="form-label">{t("Service Provider / Shop")}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. Dealership, Midas, DIY Garage"
+                placeholder={t("e.g. Dealership, Midas, DIY Garage")}
                 value={serviceProvider}
                 onChange={(e) => setServiceProvider(e.target.value)}
               />
@@ -194,12 +196,12 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label className="form-label">Description *</label>
+          <label className="form-label">{t("Description *")}</label>
           <input
             type="text"
             required
             className="form-input"
-            placeholder="e.g. 0W-20 Full synthetic oil change & OEM filter"
+            placeholder={t("e.g. 0W-20 Full synthetic oil change & OEM filter")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -207,7 +209,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
 
         <div className="form-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
           <div className="form-group">
-            <label className="form-label">Total Cost ($ CAD) *</label>
+            <label className="form-label">{t("Total Cost ($ CAD) *")}</label>
             <input
               type="number"
               required
@@ -219,7 +221,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Parts Cost ($)</label>
+            <label className="form-label">{t("Parts Cost ($)")}</label>
             <input
               type="number"
               step="0.01"
@@ -231,7 +233,7 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Labor Cost ($)</label>
+            <label className="form-label">{t("Labor Cost ($)")}</label>
             <input
               type="number"
               step="0.01"
@@ -245,10 +247,10 @@ export const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label className="form-label">Notes & Part Numbers</label>
+          <label className="form-label">{t("Notes & Part Numbers")}</label>
           <textarea
             className="form-textarea"
-            placeholder="Oil spec, tire tread depth, part codes, inspection notes..."
+            placeholder={t("Oil spec, tire tread depth, part codes, inspection notes...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

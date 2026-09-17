@@ -1,3 +1,4 @@
+import { useTranslation } from '../hooks/useTranslation'
 import React, { useState } from 'react'
 import {
   FileText,
@@ -20,6 +21,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
   onAddDocument,
   onEditDocument,
 }) => {
+  const t = useTranslation()
   const { activeVehicle, activeDocuments, deleteDocument, settings } = useCarVault()
 
   const [docToDelete, setDocToDelete] = useState<VehicleDocument | null>(null)
@@ -28,9 +30,9 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
     return (
       <div className="empty-state">
         <FileText className="empty-state-icon" />
-        <h3 className="empty-state-title">Select or Add a Vehicle First</h3>
+        <h3 className="empty-state-title">{t("Select or Add a Vehicle First")}</h3>
         <p className="empty-state-desc">
-          You must have an active vehicle in your garage to record documents.
+          {t("You must have an active vehicle in your garage to record documents.")}
         </p>
       </div>
     )
@@ -43,16 +45,16 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
     const daysLeft = Math.ceil((expTime - nowTime) / (1000 * 60 * 60 * 24))
 
     if (daysLeft < 0) {
-      return <span className="badge badge-rose">Expired ({Math.abs(daysLeft)}d ago)</span>
+      return <span className="badge badge-rose">{t("Expired (")}{Math.abs(daysLeft)}{t("d ago)")}</span>
     }
     if (daysLeft <= 30) {
-      return <span className="badge badge-amber">Expires in {daysLeft} days</span>
+      return <span className="badge badge-amber">{t("Expires in")} {daysLeft} {t("days")}</span>
     }
-    return <span className="badge badge-emerald">Valid</span>
+    return <span className="badge badge-emerald">{t("Valid")}</span>
   }
 
   return (
-    <div style={{ display: 'grid', gap: '20px' }}>
+    <div style={{ display: 'grid', gap: '12px' }}>
       {/* Header */}
       <div
         style={{
@@ -64,26 +66,26 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
         }}
       >
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Vehicle Documents & Records</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{t("Vehicle Documents & Records")}</h2>
           <p className="card-subtitle">
-            Ownership, insurance policies, safety inspections, warranties, and receipts
+            {t("Ownership, insurance policies, safety inspections, warranties, and receipts")}
           </p>
         </div>
 
         <button type="button" className="btn btn-primary" onClick={onAddDocument}>
-          <Plus size={16} /> Record Document
+          <Plus size={16} /> {t("Record Document")}
         </button>
       </div>
 
       {activeDocuments.length === 0 ? (
         <div className="empty-state">
           <FileText className="empty-state-icon" />
-          <h3 className="empty-state-title">No Documents Tracked</h3>
+          <h3 className="empty-state-title">{t("No Documents Tracked")}</h3>
           <p className="empty-state-desc">
-            Keep references for your vehicle ownership, annual insurance renewal policy, or warranty numbers in one safe place.
+            {t("Keep references for your vehicle ownership, annual insurance renewal policy, or warranty numbers in one safe place.")}
           </p>
           <button type="button" className="btn btn-primary" onClick={onAddDocument}>
-            <Plus size={16} /> Add First Document
+            <Plus size={16} /> {t("Add First Document")}
           </button>
         </div>
       ) : (
@@ -103,7 +105,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                      <span className="badge badge-slate">{doc.category}</span>
+                      <span className="badge badge-slate">{t(doc.category)}</span>
                       {expiryBadge}
                     </div>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--vault-text)' }}>
@@ -116,7 +118,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                       type="button"
                       className="btn btn-secondary btn-icon btn-sm"
                       onClick={() => onEditDocument(doc)}
-                      title="Edit document"
+                      title={t("Edit document")}
                     >
                       <Edit2 size={13} />
                     </button>
@@ -124,7 +126,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                       type="button"
                       className="btn btn-secondary btn-icon btn-sm"
                       onClick={() => setDocToDelete(doc)}
-                      title="Delete document"
+                      title={t("Delete document")}
                     >
                       <Trash2 size={13} color="var(--vault-danger)" />
                     </button>
@@ -141,7 +143,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                     }}
                   >
                     <span style={{ color: 'var(--vault-text-muted)', display: 'block', fontSize: '11px' }}>
-                      Document / Policy #
+                      {t("Document / Policy #")}
                     </span>
                     <strong className="font-mono" style={{ color: 'var(--vault-primary)' }}>
                       {doc.documentNumber}
@@ -152,14 +154,14 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '12.5px', color: 'var(--vault-text-secondary)' }}>
                   {doc.issueDate && (
                     <div>
-                      <span>Issued: </span>
+                      <span>{t("Issued:")} </span>
                       <strong className="font-mono">{formatDate(doc.issueDate, settings.dateFormat)}</strong>
                     </div>
                   )}
 
                   {doc.expiryDate && (
                     <div>
-                      <span>Expires: </span>
+                      <span>{t("Expires:")} </span>
                       <strong className="font-mono">{formatDate(doc.expiryDate, settings.dateFormat)}</strong>
                     </div>
                   )}
@@ -178,9 +180,9 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
       <ConfirmDialog
         isOpen={Boolean(docToDelete)}
-        title="Delete Document Record"
-        message={`Are you sure you want to delete the record for "${docToDelete?.title}"?`}
-        confirmLabel="Delete Document"
+        title={t("Delete Document Record")}
+        message={t("Are you sure you want to delete the record for \"{0}\"?", { "0": docToDelete?.title ?? '' })}
+        confirmLabel={t("Delete Document")}
         onConfirm={() => {
           if (docToDelete) {
             deleteDocument(docToDelete.id)
