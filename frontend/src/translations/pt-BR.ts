@@ -534,7 +534,7 @@ export const ptBR: Record<string, string> = {
   "Due {0} ": "Prazo {0} ",
   "Log Maintenance / Service": "Registrar manutenção",
   "Trip notes, fuel grade (87/91)...": "Notas da viagem, octanagem (87/91)...",
-  "View All (": "Ver todos (",
+  "All Reminders (": "Todos os Lembretes (",
   "You must have an active vehicle in your garage to log fuel and EV charging.": "Selecione um veículo para registrar abastecimentos e recargas.",
   "You must have an active vehicle in your garage to log maintenance records.": "Selecione um veículo para registrar manutenções.",
   "You must have an active vehicle in your garage to record documents.": "Selecione um veículo para registrar documentos.",

@@ -404,7 +404,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="btn btn-secondary btn-sm"
               onClick={() => onNavigate('reminders')}
             >
-              {t("View All (")}{activeReminders.length})
+              {t("All Reminders (")}{activeReminders.length})
             </button>
           </div>
 
