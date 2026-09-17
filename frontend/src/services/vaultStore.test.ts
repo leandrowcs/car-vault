@@ -34,6 +34,39 @@ beforeEach(() => {
 })
 
 describe('cloud vault synchronization', () => {
+  it('preserves sold status through serialization and allows reactivation without losing history', () => {
+    const c = cloud()
+    const original = vault(car('a'))
+    original.expenses.push({ id: 'expense', vehicleId: 'a', date: '2026-09-16', category: 'other', description: 'Parking', amount: 10, createdAt: '2026-09-16' })
+    c.emit(original)
+    c.store.update(previous => ({ ...previous, vehicles: previous.vehicles.map(vehicle => ({ ...vehicle, isSold: true })) }))
+    expect(c.store.getSnapshot().data.expenses).toEqual(original.expenses)
+    const sold = structuredClone(c.store.getSnapshot().data)
+    c.emit(sold)
+    expect(c.store.getSnapshot().data.vehicles[0].isSold).toBe(true)
+    c.store.update(previous => ({ ...previous, vehicles: previous.vehicles.map(vehicle => ({ ...vehicle, isSold: false })) }))
+    expect(c.store.getSnapshot().data.vehicles[0].isSold).toBe(false)
+    expect(c.store.getSnapshot().data.expenses).toEqual(original.expenses)
+  })
+
+  it('rejects new records for sold cars without changing saved history', () => {
+    const c = cloud()
+    c.emit(vault({ ...car('a'), isSold: true }))
+    c.store.update(previous => ({ ...previous, documents: [{ id: 'new', vehicleId: 'a', title: 'New document', category: 'other', createdAt: '2026-09-16' }] }))
+    expect(c.store.getSnapshot().data.documents).toHaveLength(0)
+    expect(c.store.getSnapshot().error).toContain('sold')
+    expect(c.adapter.commit).not.toHaveBeenCalled()
+  })
+
+  it('enforces the same sold-car policy in local storage', () => {
+    const store = new VaultStore()
+    store.update(vault({ ...car('a'), isSold: true }))
+    const saved = localStorage.getItem('car_vault_data_v1')
+    store.update(previous => ({ ...previous, documents: [{ id: 'new', vehicleId: 'a', title: 'New document', category: 'other', createdAt: '2026-09-16' }] }))
+    expect(store.getSnapshot().error).toContain('sold')
+    expect(store.getSnapshot().data.documents).toHaveLength(0)
+    expect(localStorage.getItem('car_vault_data_v1')).toBe(saved)
+  })
   it('waits for server rather than treating an empty offline cache as an empty account', () => {
     const c = cloud(); c.emptyCache()
     expect(c.store.getSnapshot().ready).toBe(false)

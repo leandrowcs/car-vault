@@ -17,6 +17,17 @@ function row(patch: Partial<Record<number, string>> = {}): string[] {
 const file = (...rows: string[][]) => '\uFEFF' + [['##Refuelling', ...Array<string>(29).fill('')], DRIVVO_HEADERS, ...rows].map(values => values.map(cell).join(',')).join('\r\n')
 
 describe('Drivvo refuelling CSV', () => {
+  it('blocks sold vehicles for explicit mappings, name-derived IDs and stale previews', async () => {
+    const preview = parseDrivvoCsv(file(row()))
+    const incoming = await prepareDrivvoImport(preview, [mapping], empty())
+    const current = structuredClone(incoming)
+    current.vehicles[0].isSold = true
+    await expect(prepareDrivvoImport(preview, [{ ...mapping, existingId: current.vehicles[0].id }], current)).rejects.toThrow('sold')
+    await expect(prepareDrivvoImport(preview, [mapping], current)).rejects.toThrow('sold')
+    expect(() => mergeDrivvoImport(current, incoming)).toThrow('sold')
+    current.vehicles[0].isSold = false
+    expect(() => mergeDrivvoImport(current, incoming)).not.toThrow()
+  })
   it('parses accents, quoted commas, newlines, quotes, BOM and precise decimals', () => {
     const preview = parseDrivvoCsv(file(row({ 23: 'Station, East', 27: 'First line\nSecond "quoted" line', 6: 'Não' })))
     expect(preview.rows[0].entry).toMatchObject({ date: '2026-09-15', odometer: 1234, liters: 45.527, totalCost: 89.643,

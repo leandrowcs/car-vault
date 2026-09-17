@@ -13,7 +13,7 @@ export function isVaultRecord(id: string, record: unknown): record is VaultRecor
   const optionalNumbers = ['odometer', 'purchasePrice', 'partsCost', 'laborCost', 'dueMileage', 'targetOdometer']
   if (optionalStrings.some(key => key in value && typeof value[key] !== 'string') ||
       optionalNumbers.some(key => key in value && (typeof value[key] !== 'number' || !Number.isFinite(value[key]) || Number(value[key]) < 0)) ||
-      ['isPrimary', 'missedPreviousFillUp'].some(key => key in value && typeof value[key] !== 'boolean')) return false
+      ['isPrimary', 'isSold', 'missedPreviousFillUp'].some(key => key in value && typeof value[key] !== 'boolean')) return false
   const strings = (...keys: string[]) => keys.every(key => typeof value[key] === 'string')
   const numbers = (...keys: string[]) => keys.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]) && Number(value[key]) >= 0)
   if (record.kind === 'settings') {

@@ -24,10 +24,11 @@ export const GarageView: React.FC<GarageViewProps> = ({
   onEditVehicle,
 }) => {
   const t = useTranslation()
-  const { vehicles, activeVehicleId, setActiveVehicleId, deleteVehicle, settings } =
+  const { vehicles, activeVehicleId, setActiveVehicleId, deleteVehicle, updateVehicle, settings } =
     useCarVault()
 
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
+  const [vehicleToSell, setVehicleToSell] = useState<Vehicle | null>(null)
 
   return (
     <div style={{ display: 'grid', gap: '12px' }}>
@@ -87,7 +88,8 @@ export const GarageView: React.FC<GarageViewProps> = ({
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '4px' }}>
                       <FuelTypeBadge fuelType={vehicle.fuelType} />
-                      {isActive && (<span className="badge badge-amber">{t("Active Vehicle")}</span>)}
+                      {vehicle.isSold && <span className="badge badge-slate">{t('Sold')}</span>}
+                      {isActive && (<span className="badge badge-amber">{t(vehicle.isSold ? 'Viewing history' : 'Active Vehicle')}</span>)}
                     </div>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--vault-text)' }}>
                       {vehicle.year} {vehicle.make} {vehicle.model}
@@ -172,6 +174,9 @@ export const GarageView: React.FC<GarageViewProps> = ({
                 )}
 
                 {/* Footer Action */}
+                <button type="button" className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => vehicle.isSold ? updateVehicle(vehicle.id, { isSold: false }) : setVehicleToSell(vehicle)}>
+                  {t(vehicle.isSold ? 'Reactivate vehicle' : 'Mark as sold')}
+                </button>
                 {!isActive && (
                   <button
                     type="button"
@@ -179,7 +184,7 @@ export const GarageView: React.FC<GarageViewProps> = ({
                     style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
                     onClick={() => setActiveVehicleId(vehicle.id)}
                   >
-                    <CheckCircle2 size={14} color="var(--vault-primary)" /> {t("Set as Active Vehicle")}
+                    <CheckCircle2 size={14} color="var(--vault-primary)" /> {t(vehicle.isSold ? 'View history' : 'Set as Active Vehicle')}
                   </button>
                 )}
               </Card>
@@ -189,6 +194,17 @@ export const GarageView: React.FC<GarageViewProps> = ({
       )}
 
       {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(vehicleToSell)}
+        title={t('Mark as sold')}
+        message={t('Mark this vehicle as sold? Its history will be preserved, but new records and imports will be blocked. You can reactivate it later.')}
+        confirmLabel={t('Mark as sold')}
+        onConfirm={() => {
+          if (vehicleToSell) updateVehicle(vehicleToSell.id, { isSold: true })
+          setVehicleToSell(null)
+        }}
+        onCancel={() => setVehicleToSell(null)}
+      />
       <ConfirmDialog
         isOpen={Boolean(vehicleToDelete)}
         title={t("Delete Vehicle")}

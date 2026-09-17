@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
+import { initialVaultData } from '../services/storage'
 import {
   calculateFuelStats,
+  calculateVehicleComparisons,
   calculateSuggestedReminders,
   calculateRefillInterval,
   calculateActivityTimeline,
@@ -14,6 +16,33 @@ import type { FuelEntry, ChargingEntry } from '../types/fuel'
 import type { Expense } from '../types/expense'
 import type { MaintenanceRecord } from '../types/maintenance'
 import type { Reminder } from '../types/reminder'
+
+describe('calculateVehicleComparisons', () => {
+  it('keeps sold and owned vehicles separate and uses recorded distance instead of lifetime mileage', () => {
+    const data = structuredClone(initialVaultData)
+    data.vehicles = ['sold', 'owned'].map(id => ({ id, name: id, make: 'Honda', model: 'Civic', year: 2020, fuelType: 'gasoline', currentOdometer: 100000, isSold: id === 'sold', createdAt: '', updatedAt: '' }))
+    data.fuelEntries = [90000, 90500].map((odometer, index) => ({ id: String(index), vehicleId: 'sold', date: '2026-01-01', odometer, liters: 40, pricePerLiter: 2, totalCost: 80, fullTank: true, createdAt: '' }))
+    data.maintenanceRecords = [{ id: 'm', vehicleId: 'sold', date: '2026-01-01', odometer: 90000, category: 'other', description: 'Service', cost: 40, createdAt: '' }]
+    const [sold, owned] = calculateVehicleComparisons(data)
+    expect(sold.costs.totalDistanceKm).toBe(500)
+    expect(sold.costs.grandTotal).toBe(200)
+    expect(sold.costs.costPerKm).toBe(0.4)
+    expect(sold.fuel.averageLPer100Km).toBe(8)
+    expect(owned.costs.grandTotal).toBe(0)
+    expect(owned.costs.costPerKm).toBeNull()
+    expect(owned.fuel.averageLPer100Km).toBeNull()
+  })
+
+  it('compares EV charging costs and leaves distance rates unavailable with one reading', () => {
+    const data = structuredClone(initialVaultData)
+    data.vehicles = [{ id: 'ev', name: 'EV', make: 'Example', model: 'EV', year: 2026, fuelType: 'electric', currentOdometer: 50000, createdAt: '', updatedAt: '' }]
+    data.chargingEntries = [{ id: 'c', vehicleId: 'ev', date: '2026-01-01', odometer: 50000, kwh: 50, pricePerKwh: 0.2, totalCost: 10, createdAt: '' }]
+    const [result] = calculateVehicleComparisons(data)
+    expect(result.costs.grandTotal).toBe(10)
+    expect(result.costs.costPerKm).toBeNull()
+    expect(result.energy.kwhPer100Km).toBeNull()
+  })
+})
 
 describe('calculateFuelStats', () => {
   it('handles empty entries gracefully', () => {

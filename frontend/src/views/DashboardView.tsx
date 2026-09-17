@@ -131,7 +131,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const upcomingReminders = evaluatedReminders.filter((r) => !r.isCompleted)
 
-  const suggestions = activeVehicle ? calculateSuggestedReminders(activeVehicle, activeFuelEntries, activeMaintenanceRecords, activeReminders) : []
+  const suggestions = activeVehicle && !activeVehicle.isSold ? calculateSuggestedReminders(activeVehicle, activeFuelEntries, activeMaintenanceRecords, activeReminders) : []
 
   if (!activeVehicle) {
     return (

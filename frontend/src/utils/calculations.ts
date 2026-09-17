@@ -2,6 +2,22 @@ import type { FuelEntry, ChargingEntry, FuelConsumptionStat } from '../types/fue
 import type { Expense } from '../types/expense'
 import type { MaintenanceRecord } from '../types/maintenance'
 import type { Reminder, ReminderStatus } from '../types/reminder'
+import type { CarVaultData } from '../types'
+
+/** Compare operating costs over recorded odometer intervals, never lifetime odometer. */
+export function calculateVehicleComparisons(data: CarVaultData) {
+  return data.vehicles.map(vehicle => {
+    const fuel = data.fuelEntries.filter(entry => entry.vehicleId === vehicle.id)
+    const charging = data.chargingEntries.filter(entry => entry.vehicleId === vehicle.id)
+    const maintenance = data.maintenanceRecords.filter(entry => entry.vehicleId === vehicle.id)
+    const expenses = data.expenses.filter(entry => entry.vehicleId === vehicle.id)
+    const odometers = [...fuel, ...charging, ...maintenance, ...expenses]
+      .flatMap(entry => entry.odometer === undefined ? [] : [entry.odometer])
+    const distance = odometers.length > 1 ? Math.max(...odometers) - Math.min(...odometers) : 0
+    const costs = calculateTotalVehicleCosts(fuel, charging, maintenance, expenses, 0, distance)
+    return { vehicle, costs, fuel: calculateFuelStats(fuel), energy: calculateEvStats(charging) }
+  })
+}
 
 export interface FuelStatsSummary {
   totalFuelCost: number

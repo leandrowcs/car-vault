@@ -22,6 +22,7 @@ import {
 } from '../utils/formatters'
 import { Card } from '../components/common/Card'
 import { SimpleBarChart } from '../components/charts/SimpleBarChart'
+import { VehicleComparison } from '../components/VehicleComparison'
 
 export const StatisticsView: React.FC = () => {
   const t = useTranslation()
@@ -167,6 +168,7 @@ export const StatisticsView: React.FC = () => {
 
   return (
     <div style={{ display: 'grid', gap: '12px' }}>
+      <VehicleComparison />
       {/* Top Header & Period Filter */}
       <div
         style={{

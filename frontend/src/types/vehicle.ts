@@ -31,6 +31,7 @@ export interface Vehicle {
   notes?: string
   photoUrl?: string
   isPrimary?: boolean
+  isSold?: boolean
   createdAt: string
   updatedAt: string
 }

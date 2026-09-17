@@ -88,7 +88,7 @@ export function DrivvoTransfer() {
         <label className="form-group">{t("Destination vehicle")}
           <select className="form-select" value={mapping.existingId} onChange={event => update(index, { existingId: event.target.value })}>
             <option value="">{t("Create vehicle — review details below")}</option>
-            {data.vehicles.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} ({vehicle.year})</option>)}
+            {data.vehicles.map(vehicle => <option key={vehicle.id} value={vehicle.id} disabled={vehicle.isSold}>{vehicle.name} ({vehicle.year}){vehicle.isSold ? ` — ${t('Sold')}` : ''}</option>)}
           </select>
         </label>
         {!mapping.existingId && <div className="form-row" style={{ marginTop: 12 }}>

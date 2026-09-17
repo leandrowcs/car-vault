@@ -1,4 +1,5 @@
 import type { CarVaultData } from '../types'
+import { validateVehicleRecordAdditions } from './vehicleLifecycle'
 import { CarVaultStorage, initialVaultData } from './storage'
 import { decodeVault, diffVault, type RecordChange, type VaultRecord } from './vaultRecords'
 
@@ -83,7 +84,10 @@ export class VaultStore {
   update = (action: CarVaultData | ((previous: CarVaultData) => CarVaultData)): void => {
     if (!this.running || !this.state.ready || this.state.error) return
     let next: CarVaultData
-    try { next = typeof action === 'function' ? action(this.state.data) : action }
+    try {
+      next = typeof action === 'function' ? action(this.state.data) : action
+      validateVehicleRecordAdditions(this.state.data, next)
+    }
     catch (error) {
       this.publish({ error: error instanceof Error ? error.message : 'Invalid data. No changes were saved.' })
       return

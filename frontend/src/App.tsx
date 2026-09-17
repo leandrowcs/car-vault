@@ -16,6 +16,8 @@ import { RemindersView } from './views/RemindersView'
 import { DocumentsView } from './views/DocumentsView'
 import { StatisticsView } from './views/StatisticsView'
 import { SettingsView } from './views/SettingsView'
+import { Modal } from './components/common/Modal'
+import { soldVehicleMessage } from './services/vehicleLifecycle'
 
 // Form Modals
 import { VehicleFormModal } from './components/forms/VehicleFormModal'
@@ -35,9 +37,11 @@ import type { Reminder } from './types/reminder'
 import type { VehicleDocument } from './types/document'
 
 const CarVaultApp: React.FC = () => {
+  const t = useTranslation()
   const [currentView, setCurrentView] = useState<NavView>('dashboard')
 
   const {
+    activeVehicle,
     addVehicle,
     updateVehicle,
     addFuelEntry,
@@ -156,6 +160,7 @@ const CarVaultApp: React.FC = () => {
       onQuickAddMaintenance={handleOpenAddMaintenance}
     >
       {/* View routing */}
+      {activeVehicle?.isSold && <p role="status" className="card-subtitle" style={{ marginBottom: 12 }}>{t(soldVehicleMessage)}</p>}
       {currentView === 'dashboard' && (
         <DashboardView
           onNavigate={setCurrentView}
@@ -214,6 +219,13 @@ const CarVaultApp: React.FC = () => {
 
       {currentView === 'settings' && (<SettingsView />)}
 
+      <Modal
+        isOpen={Boolean(activeVehicle?.isSold && ((fuelModalOpen && !editingFuel) || (chargingModalOpen && !editingCharge) || (expenseModalOpen && !editingExpense) || (maintenanceModalOpen && !editingMaintenance) || (reminderModalOpen && !editingReminder) || (documentModalOpen && !editingDocument)))}
+        title={t('Sold')}
+        onClose={() => { setFuelModalOpen(false); setChargingModalOpen(false); setExpenseModalOpen(false); setMaintenanceModalOpen(false); setReminderModalOpen(false); setDocumentModalOpen(false) }}
+      >
+        <p>{t(soldVehicleMessage)}</p>
+      </Modal>
       {/* Modals */}
       <VehicleFormModal
         isOpen={vehicleModalOpen}
@@ -229,7 +241,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <FuelFormModal
-        isOpen={fuelModalOpen}
+        isOpen={fuelModalOpen && (!activeVehicle?.isSold || Boolean(editingFuel))}
         onClose={() => setFuelModalOpen(false)}
         initialData={editingFuel}
         onSave={(fuelData) => {
@@ -242,7 +254,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <ChargingFormModal
-        isOpen={chargingModalOpen}
+        isOpen={chargingModalOpen && (!activeVehicle?.isSold || Boolean(editingCharge))}
         onClose={() => setChargingModalOpen(false)}
         initialData={editingCharge}
         onSave={(chargeData) => {
@@ -255,7 +267,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <ExpenseFormModal
-        isOpen={expenseModalOpen}
+        isOpen={expenseModalOpen && (!activeVehicle?.isSold || Boolean(editingExpense))}
         onClose={() => setExpenseModalOpen(false)}
         initialData={editingExpense}
         onSave={(expData) => {
@@ -268,7 +280,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <MaintenanceFormModal
-        isOpen={maintenanceModalOpen}
+        isOpen={maintenanceModalOpen && (!activeVehicle?.isSold || Boolean(editingMaintenance))}
         onClose={() => setMaintenanceModalOpen(false)}
         initialData={editingMaintenance}
         onSave={(maintData) => {
@@ -281,7 +293,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <ReminderFormModal
-        isOpen={reminderModalOpen}
+        isOpen={reminderModalOpen && (!activeVehicle?.isSold || Boolean(editingReminder))}
         onClose={() => setReminderModalOpen(false)}
         initialData={editingReminder}
         onSave={(remData) => {
@@ -294,7 +306,7 @@ const CarVaultApp: React.FC = () => {
       />
 
       <DocumentFormModal
-        isOpen={documentModalOpen}
+        isOpen={documentModalOpen && (!activeVehicle?.isSold || Boolean(editingDocument))}
         onClose={() => setDocumentModalOpen(false)}
         initialData={editingDocument}
         onSave={(docData) => {

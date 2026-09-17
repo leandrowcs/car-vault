@@ -2,6 +2,7 @@ import type { CarVaultData, FuelEntry, Vehicle } from '../types'
 import { initialVaultData } from './storage'
 import { encodeVault } from './vaultRecords'
 import { downloadFile } from './exportImport'
+import { assertVehicleAcceptsRecords } from './vehicleLifecycle'
 
 export const DRIVVO_HEADERS = ['Odômetro (km)', 'Data', 'Combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque', 'Segundo combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque 2', 'Terceiro combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque 3', 'Média', 'Distância', 'Tipo de recarga', 'Bateria inicial (%)', 'Bateria final (%)', 'Duração (min)', 'Posto de combustível', 'Motorista', 'Motivo', 'Forma de pagamento', 'Observação', 'Desconto', 'Veiculo']
 const normalize = (value: string) => value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -113,6 +114,7 @@ export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: Vehi
       vehicle = { id: await stableId('drivvo-vehicle', source), name: source, make: mapping.make.trim(), model: mapping.model.trim(),
         year: mapping.year, fuelType: mapping.fuelType, currentOdometer: 0, createdAt: now, updatedAt: now }
     }
+    assertVehicleAcceptsRecords(current, vehicle.id)
     for (const row of preview.rows.filter(item => item.vehicle === source)) {
       const entry = { ...row.entry, vehicleId: vehicle.id, createdAt: now }
       incoming.fuelEntries.push({ ...entry, id: await stableId('drivvo-fuel', signature(entry)) })
@@ -134,6 +136,8 @@ export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: Vehi
 }
 
 export function mergeDrivvoImport(current: CarVaultData, incoming: CarVaultData): CarVaultData {
+  for (const vehicle of incoming.vehicles) assertVehicleAcceptsRecords(current, vehicle.id)
+  for (const entry of incoming.fuelEntries) assertVehicleAcceptsRecords(current, entry.vehicleId)
   const next = { ...current, vehicles: [...current.vehicles], fuelEntries: [...current.fuelEntries] }
   const known = new Set(current.fuelEntries.map(signature))
   const ids = new Set(current.fuelEntries.map(entry => entry.id))
