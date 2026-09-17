@@ -1,4 +1,6 @@
 export const ptBR: Record<string, string> = {
+  "Costs & consumption summary": "Resumo de custos e consumo",
+  "View statistics": "Ver estatísticas",
   "Language": "Idioma",
   "Theme": "Tema",
   "Light": "Claro",

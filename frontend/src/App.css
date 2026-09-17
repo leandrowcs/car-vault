@@ -40,15 +40,15 @@
 .theme-switcher { display: flex; gap: 8px; padding: 16px 0; }
 .language-switcher { display: flex; align-items: center; gap: 8px; padding: 0 0 16px; color: var(--vault-text-secondary); }
 .language-switcher .btn { flex: 1; min-height: 40px; white-space: nowrap; }
-.garage-hero-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: center; gap: 16px; }
+.garage-hero-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: center; gap: 12px; }
 .garage-hero-layout > div { min-width: 0; }
-.garage-hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.garage-hero-actions { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 6px; }
 .garage-hero-layout h2 { overflow-wrap: anywhere; }
 .garage-hero-actions .btn svg { flex-shrink: 0; }
 .garage-hero-actions .btn { width: 100%; min-height: 36px; white-space: normal; }
 @media (max-width: 600px) {
-  .garage-hero-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .garage-hero-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .garage-hero-layout { grid-template-columns: minmax(2, 1fr); gap: 6px; }
+  .garage-hero-actions { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 }
 .theme-switcher .btn { flex: 1; min-height: 40px; }
 :root[data-theme='light'] .sidebar,
@@ -304,11 +304,21 @@
 }
 
 /* Metric Cards & Grids */
+.dashboard-metrics { border: 1px solid var(--vault-border); border-radius: var(--radius-md); background: var(--vault-surface); min-width: 0; }
+.dashboard-metrics > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; min-height: 48px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 700; border-radius: var(--radius-md); }
+.dashboard-metrics > summary::-webkit-details-marker { display: none; }
+.dashboard-metrics > summary svg { flex-shrink: 0; color: var(--vault-primary); }
+.dashboard-metrics > summary:hover { background: var(--vault-surface-2); }
+.dashboard-metrics > summary:focus-visible { outline: 2px solid var(--vault-focus); outline-offset: 2px; }
+.dashboard-metrics-chevron { margin-left: auto; }
+.dashboard-metrics[open] .dashboard-metrics-chevron { transform: rotate(180deg); }
+.dashboard-metrics-content { display: grid; gap: 12px; padding: 0 12px 12px; }
+.dashboard-metrics-link { justify-self: end; }
+
 .grid-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
 }
 
 .metric-card {

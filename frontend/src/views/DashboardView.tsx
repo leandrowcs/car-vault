@@ -1,6 +1,7 @@
 import { getLanguage } from '../services/language'
 import { useTranslation } from '../hooks/useTranslation'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
+import { getDashboardMetricsExpanded, saveDashboardMetricsExpanded } from '../services/dashboardPreferences'
 import {
   Car,
   Fuel,
@@ -12,6 +13,7 @@ import {
   Bell,
   Plus,
   CheckCircle2,
+  ChevronDown,
 } from 'lucide-react'
 import { useCarVault } from '../context/CarVaultContext'
 import {
@@ -51,6 +53,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onAddReminder,
 }) => {
   const t = useTranslation()
+  const [metricsExpanded, setMetricsExpanded] = useState(getDashboardMetricsExpanded)
   const {
     activeVehicle,
     activeFuelEntries,
@@ -235,103 +238,124 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </Card>
 
-      {/* Primary Automotive Cost & Consumption Metrics Grid */}
-      <div className="grid-metrics">
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Total Vehicle Cost")}</span>
-            <DollarSign className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono">
-            {formatCurrency(totalCosts.grandTotal, settings.currency)}
-          </div>
-          <div className="metric-subtext">{t("All historical spend")}</div>
-        </div>
+      <details
+        className="dashboard-metrics"
+        open={metricsExpanded}
+        onToggle={(event) => {
+          const expanded = event.currentTarget.open
+          setMetricsExpanded(expanded)
+          saveDashboardMetricsExpanded(expanded)
+        }}
+      >
+        <summary>
+          <Gauge size={18} aria-hidden="true" />
+          <span>{t('Costs & consumption summary')}</span>
+          <ChevronDown size={18} className="dashboard-metrics-chevron" aria-hidden="true" />
+        </summary>
+        <div className="dashboard-metrics-content">
+          {/* Primary Automotive Cost & Consumption Metrics Grid */}
+          <div className="grid-metrics">
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Total Vehicle Cost")}</span>
+                <DollarSign className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatCurrency(totalCosts.grandTotal, settings.currency)}
+              </div>
+              <div className="metric-subtext">{t("All historical spend")}</div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Fuel / Energy")}</span>
-            <Fuel className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono">
-            {formatCurrency(totalCosts.totalFuel, settings.currency)}
-          </div>
-          <div className="metric-subtext">
-            {activeFuelEntries.length + activeChargingEntries.length} {t("entries recorded")}
-          </div>
-        </div>
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Fuel / Energy")}</span>
+                <Fuel className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatCurrency(totalCosts.totalFuel, settings.currency)}
+              </div>
+              <div className="metric-subtext">
+                {activeFuelEntries.length + activeChargingEntries.length} {t("entries recorded")}
+              </div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Maintenance")}</span>
-            <Wrench className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono">
-            {formatCurrency(totalCosts.totalMaintenance, settings.currency)}
-          </div>
-          <div className="metric-subtext">
-            {activeMaintenanceRecords.length} {t("service records")}
-          </div>
-        </div>
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Maintenance")}</span>
+                <Wrench className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatCurrency(totalCosts.totalMaintenance, settings.currency)}
+              </div>
+              <div className="metric-subtext">
+                {activeMaintenanceRecords.length} {t("service records")}
+              </div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Other Expenses")}</span>
-            <Receipt className="metric-card-icon" />
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Other Expenses")}</span>
+                <Receipt className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatCurrency(totalCosts.totalOther, settings.currency)}
+              </div>
+              <div className="metric-subtext">{t("Insurance, tolls, parking...")}</div>
+            </div>
           </div>
-          <div className="metric-value font-mono">
-            {formatCurrency(totalCosts.totalOther, settings.currency)}
-          </div>
-          <div className="metric-subtext">{t("Insurance, tolls, parking...")}</div>
-        </div>
-      </div>
 
-      {/* Automotive Efficiency Strip */}
-      <div className="grid-metrics">
-        <div className="metric-card" style={{ borderLeft: '3px solid var(--vault-primary)' }}>
-          <div className="metric-card-top">
-            <span>{t("Average Consumption")}</span>
-            <Gauge className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono" style={{ color: 'var(--vault-primary)' }}>
-            {isEv ? evStats.kwhPer100Km !== null ? t("{0} kWh/100 km", { "0": evStats.kwhPer100Km ?? '' }) : '—' : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
-          </div>
-          <div className="metric-subtext">{t("Calculated over full tank intervals")}</div>
-        </div>
+          {/* Automotive Efficiency Strip */}
+          <div className="grid-metrics">
+            <div className="metric-card" style={{ borderLeft: '3px solid var(--vault-primary)' }}>
+              <div className="metric-card-top">
+                <span>{t("Average Consumption")}</span>
+                <Gauge className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono" style={{ color: 'var(--vault-primary)' }}>
+                {isEv ? evStats.kwhPer100Km !== null ? t("{0} kWh/100 km", { "0": evStats.kwhPer100Km ?? '' }) : '—' : formatConsumption(fuelStats.averageLPer100Km, settings.fuelEconomyUnit)}
+              </div>
+              <div className="metric-subtext">{t("Calculated over full tank intervals")}</div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Average Price")}</span>
-            <TrendingDown className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono">
-            {isEv ? evStats.averagePricePerKwh > 0 ? t("${0}/kWh", { "0": evStats.averagePricePerKwh.toFixed(3) ?? '' }) : '—' : fuelStats.averagePricePerLiter > 0 ? t("${0}/L", { "0": fuelStats.averagePricePerLiter.toFixed(3) ?? '' }) : '—'}
-          </div>
-          <div className="metric-subtext">{t("Weighted average fuel/energy price")}</div>
-        </div>
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Average Price")}</span>
+                <TrendingDown className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {isEv ? evStats.averagePricePerKwh > 0 ? t("${0}/kWh", { "0": evStats.averagePricePerKwh.toFixed(3) ?? '' }) : '—' : fuelStats.averagePricePerLiter > 0 ? t("${0}/L", { "0": fuelStats.averagePricePerLiter.toFixed(3) ?? '' }) : '—'}
+              </div>
+              <div className="metric-subtext">{t("Weighted average fuel/energy price")}</div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Cost Per KM")}</span>
-            <DollarSign className="metric-card-icon" />
-          </div>
-          <div className="metric-value font-mono">
-            {formatCostPerKm(totalCosts.costPerKm, settings.currency)}
-          </div>
-          <div className="metric-subtext">{t("Total cost / recorded km")}</div>
-        </div>
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Cost Per KM")}</span>
+                <DollarSign className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatCostPerKm(totalCosts.costPerKm, settings.currency)}
+              </div>
+              <div className="metric-subtext">{t("Total cost / recorded km")}</div>
+            </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <span>{t("Total Logged KM")}</span>
-            <Car className="metric-card-icon" />
+            <div className="metric-card">
+              <div className="metric-card-top">
+                <span>{t("Total Logged KM")}</span>
+                <Car className="metric-card-icon" />
+              </div>
+              <div className="metric-value font-mono">
+                {formatDistance(fuelStats.totalDistanceKm || activeVehicle.currentOdometer, settings.distanceUnit)}
+              </div>
+              <div className="metric-subtext">{t("Distance tracked in vault")}</div>
+            </div>
           </div>
-          <div className="metric-value font-mono">
-            {formatDistance(fuelStats.totalDistanceKm || activeVehicle.currentOdometer, settings.distanceUnit)}
-          </div>
-          <div className="metric-subtext">{t("Distance tracked in vault")}</div>
+
+          <button type="button" className="btn btn-secondary btn-sm dashboard-metrics-link" onClick={() => onNavigate('statistics')}>
+            {t('View statistics')}
+          </button>
         </div>
-      </div>
+      </details>
 
       {/* Main 2-Column Section: Spending Trends + Reminders */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '12px' }}>
