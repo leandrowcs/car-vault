@@ -54,6 +54,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 }) => {
   const t = useTranslation()
   const [metricsExpanded, setMetricsExpanded] = useState(getDashboardMetricsExpanded)
+  const [spendingExpanded, setSpendingExpanded] = useState(true)
+  const [remindersExpanded, setRemindersExpanded] = useState(true)
   const {
     activeVehicle,
     activeFuelEntries,
@@ -125,7 +127,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       })
   }, [activeReminders, activeVehicle?.currentOdometer])
 
-  const upcomingReminders = evaluatedReminders.filter((r) => !r.isCompleted).slice(0, 4)
+  const upcomingReminders = evaluatedReminders.filter((r) => !r.isCompleted)
 
   const suggestions = activeVehicle ? calculateSuggestedReminders(activeVehicle, activeFuelEntries, activeMaintenanceRecords, activeReminders) : []
 
@@ -358,13 +360,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </details>
 
       {/* Main 2-Column Section: Spending Trends + Reminders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '12px', alignItems: 'start' }}>
         {/* Monthly Spending Trend Chart */}
         <Card>
-          <div className="card-header">
+          <div className={`card-header dashboard-card-header ${spendingExpanded ? '' : 'is-collapsed'}`}>
             <div>
-              <h3 className="card-title">{t("Spending History")}</h3>
-              <p className="card-subtitle">{t("Monthly breakdown across categories")}</p>
+              <h3 className="card-title">
+                <button type="button" className="dashboard-card-toggle" aria-expanded={spendingExpanded} aria-controls="dashboard-spending-content" onClick={() => setSpendingExpanded(!spendingExpanded)}>
+                  {t("Spending History")}
+                  <ChevronDown size={18} aria-hidden="true" />
+                </button>
+              </h3>
+              {spendingExpanded && <p className="card-subtitle">{t("Monthly breakdown across categories")}</p>}
             </div>
             <button
               type="button"
@@ -374,18 +381,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {t("Full Stats")}
             </button>
           </div>
-          <SimpleBarChart data={monthlySpending} currency={settings.currency} />
+          <div id="dashboard-spending-content" hidden={!spendingExpanded}>
+            {spendingExpanded && <SimpleBarChart data={monthlySpending} currency={settings.currency} />}
+          </div>
         </Card>
 
         {/* Upcoming Reminders Card */}
         <Card>
-          <div className="card-header">
+          <div className="card-header dashboard-card-header">
             <div>
               <h3 className="card-title">
-                <Bell size={18} color="var(--vault-primary)" />
-                {t("Upcoming Reminders")}
+                <button type="button" className="dashboard-card-toggle" aria-expanded={remindersExpanded} aria-controls="dashboard-reminders-content" onClick={() => setRemindersExpanded(!remindersExpanded)}>
+                  <Bell size={18} color="var(--vault-primary)" aria-hidden="true" />
+                  {t("Upcoming Reminders")}
+                  <ChevronDown size={18} aria-hidden="true" />
+                </button>
               </h3>
-              <p className="card-subtitle">{t("Predictions, services and seasonal tire changes")}</p>
+              {remindersExpanded && <p className="card-subtitle">{t("Predictions, services and seasonal tire changes")}</p>}
             </div>
             <button
               type="button"
@@ -396,6 +408,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
 
+          {!remindersExpanded && (
+            <div className="dashboard-reminder-summaries">
+              {[
+                ...suggestions.map(r => ({ ...r, title: t(r.title), status: evaluateReminderStatus(r, activeVehicle.currentOdometer), optional: r.id.endsWith('-summer') })),
+                ...upcomingReminders.map(r => ({ ...r, optional: false })),
+              ].map(r => (
+                <button type="button" key={r.id} className="dashboard-reminder-summary" onClick={() => setRemindersExpanded(true)} aria-expanded={false} aria-controls="dashboard-reminders-content">
+                  <span className="dashboard-reminder-summary-heading"><strong>{r.title}</strong>{r.optional ? <span className="badge badge-slate">{t("Optional")}</span> : <ReminderBadge status={r.status} />}</span>
+                  {(r.dueDate || r.targetOdometer !== undefined) && (
+                    <span className="dashboard-reminder-summary-target">
+                      {r.dueDate && formatDate(r.dueDate, settings.dateFormat)}
+                      {r.dueDate && r.targetOdometer !== undefined && ' · '}
+                      {r.targetOdometer !== undefined && formatDistance(r.targetOdometer, settings.distanceUnit)}
+                    </span>
+                  )}
+                </button>
+              ))}
+              {suggestions.length === 0 && upcomingReminders.length === 0 && <p className="card-subtitle">{t("No manually scheduled reminders.")}</p>}
+            </div>
+          )}
+          <div id="dashboard-reminders-content" hidden={!remindersExpanded}>
           <div className="smart-reminders">
             {suggestions.map(r => <div className="smart-reminder" key={r.id}>
               <div className="smart-reminder-content">
@@ -457,6 +490,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ))}
             </div>
           )}
+          </div>
         </Card>
       </div>
 

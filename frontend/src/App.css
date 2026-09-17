@@ -313,6 +313,19 @@
 .dashboard-metrics[open] .dashboard-metrics-chevron { transform: rotate(180deg); }
 .dashboard-metrics-content { display: grid; gap: 12px; padding: 0 12px 12px; }
 .dashboard-metrics-link { justify-self: end; }
+.dashboard-card-header { flex-wrap: wrap; gap: 8px; }
+.dashboard-card-header.is-collapsed { margin-bottom: 0; }
+.dashboard-card-header > div { min-width: 0; }
+.dashboard-card-toggle { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.dashboard-card-toggle svg { flex-shrink: 0; }
+.dashboard-card-toggle[aria-expanded="true"] > svg:last-child { transform: rotate(180deg); }
+.dashboard-card-toggle:hover { color: var(--vault-primary); }
+.dashboard-card-toggle:focus-visible, .dashboard-reminder-summary:focus-visible { outline: 2px solid var(--vault-focus); outline-offset: 3px; }
+.dashboard-reminder-summaries { display: flex; flex-wrap: wrap; gap: 8px; }
+.dashboard-reminder-summary { flex: 1 1 180px; min-width: 0; max-width: 100%; min-height: 44px; display: grid; gap: 5px; padding: 10px 12px; border: 1px solid var(--vault-border); border-left: 3px solid var(--vault-primary); border-radius: var(--radius-sm); background: var(--vault-surface-2); color: var(--vault-text); font: inherit; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.dashboard-reminder-summary:hover { border-color: var(--vault-primary); }
+.dashboard-reminder-summary-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.dashboard-reminder-summary-target { font-size: 12px; color: var(--vault-text-secondary); font-variant-numeric: tabular-nums; }
 
 .grid-metrics {
   display: grid;
