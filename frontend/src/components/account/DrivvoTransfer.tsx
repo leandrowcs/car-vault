@@ -50,7 +50,7 @@ export function DrivvoTransfer() {
       const incoming = await prepareDrivvoImport(preview, mappings, data)
       if (version !== request.current) return
       const added = importDrivvoData(incoming, mappings.map(mapping => mapping.existingId).filter(Boolean))
-      setMessage(t('{0} refuelling records added; {1} duplicates skipped.{2}', { 0: added, 1: preview.rows.length - added, 2: user ? t(' Check the cloud sync status above.') : '' }))
+      setMessage(t('{0} records added; {1} duplicates skipped.{2}', { 0: added, 1: preview.rows.length + preview.services.length - added, 2: user ? t(' Check the cloud sync status above.') : '' }))
       setPreview(null)
     } catch (reason) {
       if (version === request.current) setError(reason instanceof Error ? reason.message : 'Import failed.')
@@ -64,7 +64,7 @@ export function DrivvoTransfer() {
 
   return <Card>
     <div className="card-header"><h3 className="card-title">{t("Drivvo CSV")}</h3></div>
-    <p className="card-subtitle">{t("Import or export refuelling using the Portuguese Drivvo format (km / liters). Use JSON backup for the complete garage, including EV charging, expenses, maintenance and documents.")}</p>
+    <p className="card-subtitle">{t("Import refuelling and services using the Portuguese Drivvo format (km / liters). CSV export includes refuelling only; use JSON backup for the complete garage.")}</p>
     <div className="account-actions">
       <label className="form-group">{t("Choose Drivvo CSV")}
         <input type="file" accept=".csv,text/csv" disabled={busy || blocked} onChange={event => {
@@ -80,9 +80,9 @@ export function DrivvoTransfer() {
     {error && (<p role="alert" className="account-error">{t(error)}</p>)}
     {message && (<p role="status">{t(message)}</p>)}
     {preview && (<div style={{ display: 'grid', gap: 16, marginTop: 20 }}>
-      <p><strong>{preview.rows.length} {t("refuelling records")}</strong> · {preview.totalLiters.toFixed(3)} {t("L ·")} {preview.totalCost.toFixed(3)} {t("total in the file’s currency")}</p>
-      <p className="card-subtitle">{t("Dates:")} {preview.rows.map(row => row.entry.date).sort()[0]} — {preview.rows.map(row => row.entry.date).sort().at(-1)}{t(". Odometer range:")} {Math.min(...preview.rows.map(row => row.entry.odometer))} — {Math.max(...preview.rows.map(row => row.entry.odometer))} {t("km.")}</p>
-      <p className="card-subtitle">{t("Review the vehicle details below. Existing entries are preserved; matching date, odometer, volume, price and total for the same vehicle are skipped. Odometers only increase.")}</p>
+      <p><strong>{preview.rows.length} {t("refuelling records")} · {preview.services.length} {t("service records")}</strong> · {preview.totalLiters.toFixed(3)} {t("L ·")} {preview.totalCost.toFixed(3)} {t("total in the file’s currency")}</p>
+      <p className="card-subtitle">{t("Dates:")} {[...preview.rows, ...preview.services].map(row => row.entry.date).sort()[0]} — {[...preview.rows, ...preview.services].map(row => row.entry.date).sort().at(-1)}{t(". Odometer range:")} {Math.min(...[...preview.rows, ...preview.services].map(row => row.entry.odometer))} — {Math.max(...[...preview.rows, ...preview.services].map(row => row.entry.odometer))} {t("km.")}</p>
+      <p className="card-subtitle">{t("Review the destination vehicles. Existing records are preserved and duplicate refuelling and services are skipped. Odometers only increase.")}</p>
       {mappings.map((mapping, index) => <fieldset key={mapping.source} style={{ border: '1px solid var(--vault-border)', borderRadius: 10, padding: 12, minWidth: 0 }} disabled={busy}>
         <legend>{mapping.source}</legend>
         <label className="form-group">{t("Destination vehicle")}
@@ -104,7 +104,7 @@ export function DrivvoTransfer() {
         {t("I reviewed the vehicles. Amounts are in")} {data.settings.currency}{t("; the file uses km and liters. No currency conversion will be applied.")}
       </label>
       <div className="account-actions">
-        <button type="button" className="btn btn-primary" disabled={busy || blocked || !confirmed} onClick={() => void applyImport()}>{t("Import refuelling")}</button>
+        <button type="button" className="btn btn-primary" disabled={busy || blocked || !confirmed} onClick={() => void applyImport()}>{t("Import records")}</button>
         <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => setPreview(null)}>{t("Cancel")}</button>
       </div>
     </div>)}

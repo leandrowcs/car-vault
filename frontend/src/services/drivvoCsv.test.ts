@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { DRIVVO_HEADERS, mergeDrivvoImport, parseCsv, parseDrivvoCsv, prepareDrivvoImport, serializeDrivvoCsv, type VehicleMapping } from './drivvoCsv'
+import { DRIVVO_HEADERS, DRIVVO_SERVICE_HEADERS, mergeDrivvoImport, parseCsv, parseDrivvoCsv, prepareDrivvoImport, serializeDrivvoCsv, type VehicleMapping } from './drivvoCsv'
 import { initialVaultData } from './storage'
 import { encodeVault } from './vaultRecords'
 
@@ -15,6 +15,48 @@ function row(patch: Partial<Record<number, string>> = {}): string[] {
   return columns
 }
 const file = (...rows: string[][]) => '\uFEFF' + [['##Refuelling', ...Array<string>(29).fill('')], DRIVVO_HEADERS, ...rows].map(values => values.map(cell).join(',')).join('\r\n')
+const service = (patch: Partial<Record<number, string>> = {}) => Object.assign(['1500', '2026-09-16 9:05', '57.44', 'Pneus - Rodízio', 'Example garage', 'Example driver', 'Credit', 'Note', '', '0', vehicleName], patch)
+const servicesFile = (...rows: string[][]) => [['##Service'], DRIVVO_SERVICE_HEADERS, ...rows].map(values => [...values, ...Array<string>(Math.max(0, 30 - values.length)).fill('')].map(cell).join(',')).join('\r\n')
+
+describe('Drivvo service imports', () => {
+  it('imports mixed sections and keeps different services on the same date separate', async () => {
+    const preview = parseDrivvoCsv(file(row()) + '\r\n' + servicesFile(service(), service({ 2: '0', 3: 'Pneus - Alinhamento' }), service()))
+    expect(preview.services).toHaveLength(3)
+    expect(preview.services[0].entry).toMatchObject({ category: 'Pneus - Rodízio', description: 'Pneus - Rodízio', cost: 57.44, serviceProvider: 'Example garage' })
+    expect(preview.services[0].entry.notes).toContain('Example driver')
+    const incoming = await prepareDrivvoImport(preview, [mapping], empty())
+    expect(incoming.fuelEntries).toHaveLength(1)
+    expect(incoming.maintenanceRecords).toHaveLength(2)
+    expect(incoming.vehicles[0].currentOdometer).toBe(1500)
+    const merged = mergeDrivvoImport(empty(), incoming)
+    merged.maintenanceRecords[0].notes = 'Edited note'
+    const repeated = mergeDrivvoImport(merged, incoming)
+    expect(repeated.maintenanceRecords).toHaveLength(2)
+    expect(repeated.maintenanceRecords[0].notes).toBe('Edited note')
+  })
+
+  it('supports services-only files, title fallback and multiple vehicles', async () => {
+    const preview = parseDrivvoCsv(servicesFile(service({ 8: 'Service title' }), service({ 10: 'Second car' })))
+    expect(preview.rows).toHaveLength(0)
+    expect(preview.totalCost).toBeCloseTo(114.88)
+    expect(preview.services[0].entry.description).toBe('Service title')
+    const incoming = await prepareDrivvoImport(preview, preview.vehicles.map(source => ({ ...mapping, source })), empty())
+    expect(new Set(incoming.maintenanceRecords.map(entry => entry.vehicleId)).size).toBe(2)
+    expect(incoming.vehicles).toHaveLength(2)
+  })
+
+  it.each([{ 1: '2026-02-30' }, { 2: '-1' }, { 10: '' }, { 3: '' }, { 11: 'unexpected data' }])('rejects invalid services without importing the valid fuel section: %j', patch => {
+    expect(() => parseDrivvoCsv(file(row()) + '\r\n' + servicesFile(service(patch)))).toThrow()
+  })
+
+  it('rejects malformed service headers and sold destinations', async () => {
+    expect(() => parseDrivvoCsv(servicesFile(service()).replace('Tipo de serviço', 'Unknown'))).toThrow('columns')
+    const incoming = await prepareDrivvoImport(parseDrivvoCsv(servicesFile(service())), [mapping], empty())
+    const current = structuredClone(incoming)
+    current.vehicles[0].isSold = true
+    expect(() => mergeDrivvoImport(current, incoming)).toThrow('sold')
+  })
+})
 
 describe('Drivvo refuelling CSV', () => {
   it('blocks sold vehicles for explicit mappings, name-derived IDs and stale previews', async () => {
@@ -46,7 +88,7 @@ describe('Drivvo refuelling CSV', () => {
   it('rejects malformed quoting and unknown sections instead of silently discarding data', () => {
     expect(() => parseCsv('"unclosed')).toThrow('Unclosed')
     expect(() => parseCsv('"closed"trailing')).toThrow('Invalid')
-    expect(() => parseDrivvoCsv(file(row(), ['##Expenses']))).toThrow('other sections')
+    expect(() => parseDrivvoCsv(file(row(), ['##Expenses']))).toThrow('Unsupported Drivvo section')
     expect(() => parseDrivvoCsv(file(row({ 7: 'Ethanol', 10: '5' })))).toThrow('multiple fuels')
     expect(() => parseDrivvoCsv(file(row({ 19: 'Level 2' })))).toThrow('EV charging')
   })
@@ -112,6 +154,25 @@ describe('Drivvo refuelling CSV', () => {
 })
 
 // Optional private acceptance sample: the user's CSV is never copied into the repository.
+it.skipIf(!process.env.DRIVVO_SERVICE_SAMPLES)('imports supplied mixed samples and reimports without duplicates', async () => {
+  let current = empty()
+  for (const path of process.env.DRIVVO_SERVICE_SAMPLES!.split('|')) {
+    const text = readFileSync(path, 'utf8')
+    const csv = parseCsv(text)
+    const serviceStart = csv.findIndex(row => row[0] === '##Service')
+    const preview = parseDrivvoCsv(text)
+    expect(preview.rows).toHaveLength(serviceStart - 2)
+    expect(preview.services).toHaveLength(csv.length - serviceStart - 2)
+    expect(preview.services.length).toBeGreaterThan(0)
+    expect(preview.services.reduce((total, row) => total + row.entry.cost, 0)).toBeCloseTo(csv.slice(serviceStart + 2).reduce((total, row) => total + Number(row[2]), 0), 6)
+    const incoming = await prepareDrivvoImport(preview, preview.vehicles.map(source => ({ ...mapping, source })), current)
+    current = mergeDrivvoImport(current, incoming)
+    expect(mergeDrivvoImport(current, incoming)).toEqual(current)
+    expect(encodeVault(current).size).toBeGreaterThan(0)
+  }
+  expect(current.vehicles).toHaveLength(2)
+})
+
 it.skipIf(!process.env.DRIVVO_SAMPLE_FILE)('imports the supplied Drivvo sample without precision loss', async () => {
   const text = readFileSync(process.env.DRIVVO_SAMPLE_FILE!, 'utf8')
   const source = parseCsv(text).slice(2)

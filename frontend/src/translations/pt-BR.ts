@@ -1,4 +1,12 @@
 export const ptBR: Record<string, string> = {
+  "Import records": "Importar registros",
+  "{0} records added; {1} duplicates skipped.{2}": "{0} registros adicionados; {1} duplicados ignorados.{2}",
+  "Import refuelling and services using the Portuguese Drivvo format (km / liters). CSV export includes refuelling only; use JSON backup for the complete garage.": "Importe abastecimentos e serviços no formato Drivvo em português (km / litros). A exportação CSV inclui apenas abastecimentos; use o backup JSON para a garagem completa.",
+  "Review the destination vehicles. Existing records are preserved and duplicate refuelling and services are skipped. Odometers only increase.": "Revise os veículos de destino. Os registros existentes são preservados e abastecimentos e serviços duplicados são ignorados. A quilometragem só aumenta.",
+  "Unsupported Drivvo section. Only refuelling and services are supported; no records were imported.": "Seção Drivvo não suportada. Apenas abastecimentos e serviços são aceitos; nenhum registro foi importado.",
+  "Unsupported Drivvo columns. Use the Portuguese export in km and liters.": "Colunas Drivvo não suportadas. Use a exportação em português, em km e litros.",
+  "Expected a Drivvo ##Refuelling or ##Service section.": "Era esperada uma seção Drivvo ##Refuelling ou ##Service.",
+  "No refuelling or service records found.": "Nenhum abastecimento ou serviço encontrado.",
   "Sold": "Vendido",
   "Owned": "Em posse",
   "Mark as sold": "Marcar como vendido",

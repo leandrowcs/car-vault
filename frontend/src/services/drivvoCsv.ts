@@ -1,4 +1,4 @@
-import type { CarVaultData, FuelEntry, Vehicle } from '../types'
+import type { CarVaultData, FuelEntry, MaintenanceRecord, Vehicle } from '../types'
 import { initialVaultData } from './storage'
 import { encodeVault } from './vaultRecords'
 import { downloadFile } from './exportImport'
@@ -6,6 +6,7 @@ import { assertVehicleAcceptsRecords } from './vehicleLifecycle'
 
 export const DRIVVO_HEADERS = ['Odômetro (km)', 'Data', 'Combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque', 'Segundo combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque 2', 'Terceiro combustível', 'Preço / L', 'Valor total', 'Volume', 'Completou o tanque 3', 'Média', 'Distância', 'Tipo de recarga', 'Bateria inicial (%)', 'Bateria final (%)', 'Duração (min)', 'Posto de combustível', 'Motorista', 'Motivo', 'Forma de pagamento', 'Observação', 'Desconto', 'Veiculo']
 const normalize = (value: string) => value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+export const DRIVVO_SERVICE_HEADERS = ['Odômetro (km)', 'Data', 'Valor total', 'Tipo de serviço', 'Local do serviço', 'Motorista', 'Forma de pagamento', 'Observação', 'Título', 'Desconto', 'Veiculo']
 
 /** Quoted separators, escaped quotes, CRLF and multiline fields. No evaluation of cell content. */
 export function parseCsv(text: string): string[][] {
@@ -55,18 +56,35 @@ export interface DrivvoRow {
   vehicle: string
   entry: Omit<FuelEntry, 'id' | 'vehicleId' | 'createdAt'>
 }
-export interface DrivvoPreview { rows: DrivvoRow[]; vehicles: string[]; totalCost: number; totalLiters: number }
+export interface DrivvoServiceRow {
+  vehicle: string
+  entry: Omit<MaintenanceRecord, 'id' | 'vehicleId' | 'createdAt'>
+}
+export interface DrivvoPreview { rows: DrivvoRow[]; services: DrivvoServiceRow[]; vehicles: string[]; totalCost: number; totalLiters: number }
 export interface VehicleMapping { source: string; existingId: string; make: string; model: string; year: number; fuelType: Vehicle['fuelType'] }
 
 export function parseDrivvoCsv(text: string): DrivvoPreview {
   const csv = parseCsv(text)
-  if (csv[0]?.[0] !== '##Refuelling') throw new Error('Expected the Drivvo ##Refuelling section.')
-  if (csv[1]?.length !== 30 || csv[1].some((value, i) => normalize(value) !== normalize(DRIVVO_HEADERS[i]))) {
-    throw new Error('Unsupported Drivvo columns. Use the Portuguese refuelling export in km and liters.')
+  const fuelRows: { columns: string[]; line: number }[] = []
+  const serviceRows: { columns: string[]; line: number }[] = []
+  let section = ''
+  for (let index = 0; index < csv.length; index++) {
+    const columns = csv[index]
+    if (columns[0].startsWith('##')) {
+      section = columns[0]
+      if (!['##Refuelling', '##Service'].includes(section)) throw new Error('Unsupported Drivvo section. Only refuelling and services are supported; no records were imported.')
+      const expected = section === '##Service' ? DRIVVO_SERVICE_HEADERS : DRIVVO_HEADERS
+      const header = csv[++index]
+      if (!header || header.length < expected.length || expected.some((value, i) => normalize(header[i]) !== normalize(value)) || header.slice(expected.length).some(value => value.trim())) {
+        throw new Error('Unsupported Drivvo columns. Use the Portuguese export in km and liters.')
+      }
+      continue
+    }
+    if (!section) throw new Error('Expected a Drivvo ##Refuelling or ##Service section.')
+    if (columns.some(value => value.length > 10000)) throw new Error(`Record ${index + 1}: a field exceeds 10,000 characters.`)
+    ;(section === '##Service' ? serviceRows : fuelRows).push({ columns, line: index + 1 })
   }
-  const rows = csv.slice(2).map((columns, index): DrivvoRow => {
-    const line = index + 3
-    if (columns[0].startsWith('##')) throw new Error('This CSV contains other sections. Import a refuelling-only file; no records were imported.')
+  const rows = fuelRows.map(({ columns, line }): DrivvoRow => {
     if (columns.length !== 30) throw new Error(`Record ${line}: expected 30 columns.`)
     if (columns.some(value => value.length > 10000)) throw new Error(`Record ${line}: a field exceeds 10,000 characters.`)
     if ([7, 12, 19, 20, 21, 22].some(i => columns[i].trim()) || [8, 9, 10, 13, 14, 15].some(i => columns[i].trim() && numeric(columns[i], 'secondary fuel', line) !== 0)) {
@@ -83,9 +101,20 @@ export function parseDrivvoCsv(text: string): DrivvoPreview {
       drivvo: { columns },
     } }
   })
-  if (!rows.length) throw new Error('No refuelling records found.')
-  return { rows, vehicles: [...new Set(rows.map(row => row.vehicle))],
-    totalCost: rows.reduce((sum, row) => sum + row.entry.totalCost, 0), totalLiters: rows.reduce((sum, row) => sum + row.entry.liters, 0) }
+  const services = serviceRows.map(({ columns, line }): DrivvoServiceRow => {
+    if (columns.length < 11 || columns.slice(11).some(value => value.trim())) throw new Error(`Record ${line}: invalid service columns.`)
+    if (!columns[10].trim() || !columns[3].trim()) throw new Error(`Record ${line}: vehicle and service type are required.`)
+    if (columns[9].trim()) numeric(columns[9], 'discount', line)
+    const notes = [columns[7], ...[5, 6, 9].filter(i => columns[i].trim()).map(i => `${DRIVVO_SERVICE_HEADERS[i]}: ${columns[i]}`)].filter(Boolean).join('\n')
+    return { vehicle: columns[10].trim(), entry: {
+      date: dateValue(columns[1], line), odometer: numeric(columns[0], 'odometer', line),
+      cost: numeric(columns[2], 'service cost', line), category: columns[3].trim(),
+      description: columns[8].trim() || columns[3].trim(), serviceProvider: columns[4], notes,
+    } }
+  })
+  if (!rows.length && !services.length) throw new Error('No refuelling or service records found.')
+  return { rows, services, vehicles: [...new Set([...rows, ...services].map(row => row.vehicle))],
+    totalCost: rows.reduce((sum, row) => sum + row.entry.totalCost, 0) + services.reduce((sum, row) => sum + row.entry.cost, 0), totalLiters: rows.reduce((sum, row) => sum + row.entry.liters, 0) }
 }
 
 async function stableId(prefix: string, value: string): Promise<string> {
@@ -96,6 +125,10 @@ async function stableId(prefix: string, value: string): Promise<string> {
 // A source file has no IDs; use business values rather than row order or notes.
 function signature(entry: Pick<FuelEntry, 'vehicleId' | 'date' | 'odometer' | 'liters' | 'pricePerLiter' | 'totalCost'>): string {
   return JSON.stringify([entry.vehicleId, entry.date.slice(0, 10), entry.odometer, entry.liters, entry.pricePerLiter, entry.totalCost])
+}
+
+function serviceSignature(entry: Omit<MaintenanceRecord, 'id' | 'createdAt'>): string {
+  return JSON.stringify([entry.vehicleId, entry.date.slice(0, 10), entry.odometer, normalize(entry.category), normalize(entry.description), entry.cost, normalize(entry.serviceProvider ?? '')])
 }
 
 export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: VehicleMapping[], current: CarVaultData): Promise<CarVaultData> {
@@ -120,6 +153,11 @@ export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: Vehi
       incoming.fuelEntries.push({ ...entry, id: await stableId('drivvo-fuel', signature(entry)) })
       vehicle.currentOdometer = Math.max(vehicle.currentOdometer, entry.odometer)
     }
+    for (const row of preview.services.filter(item => item.vehicle === source)) {
+      const entry = { ...row.entry, vehicleId: vehicle.id, createdAt: now }
+      incoming.maintenanceRecords.push({ ...entry, id: await stableId('drivvo-service', serviceSignature(entry)) })
+      vehicle.currentOdometer = Math.max(vehicle.currentOdometer, entry.odometer)
+    }
     const previous = incoming.vehicles.find(item => item.id === vehicle.id)
     if (previous) previous.currentOdometer = Math.max(previous.currentOdometer, vehicle.currentOdometer)
     else incoming.vehicles.push(vehicle)
@@ -131,6 +169,11 @@ export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: Vehi
     seen.add(entry.id)
     return true
   })
+  incoming.maintenanceRecords = incoming.maintenanceRecords.filter(entry => {
+    if (seen.has(entry.id)) return false
+    seen.add(entry.id)
+    return true
+  })
   encodeVault(incoming)
   return incoming
 }
@@ -138,7 +181,8 @@ export async function prepareDrivvoImport(preview: DrivvoPreview, mappings: Vehi
 export function mergeDrivvoImport(current: CarVaultData, incoming: CarVaultData): CarVaultData {
   for (const vehicle of incoming.vehicles) assertVehicleAcceptsRecords(current, vehicle.id)
   for (const entry of incoming.fuelEntries) assertVehicleAcceptsRecords(current, entry.vehicleId)
-  const next = { ...current, vehicles: [...current.vehicles], fuelEntries: [...current.fuelEntries] }
+  for (const entry of incoming.maintenanceRecords) assertVehicleAcceptsRecords(current, entry.vehicleId)
+  const next = { ...current, vehicles: [...current.vehicles], fuelEntries: [...current.fuelEntries], maintenanceRecords: [...current.maintenanceRecords] }
   const known = new Set(current.fuelEntries.map(signature))
   const ids = new Set(current.fuelEntries.map(entry => entry.id))
   for (const vehicle of incoming.vehicles) {
@@ -151,6 +195,13 @@ export function mergeDrivvoImport(current: CarVaultData, incoming: CarVaultData)
   for (const entry of incoming.fuelEntries) {
     if (ids.has(entry.id) || known.has(signature(entry))) continue
     next.fuelEntries.push(entry); ids.add(entry.id); known.add(signature(entry))
+  }
+  const knownServices = new Set(current.maintenanceRecords.map(serviceSignature))
+  const serviceIds = new Set(current.maintenanceRecords.map(entry => entry.id))
+  for (const entry of incoming.maintenanceRecords) {
+    const key = serviceSignature(entry)
+    if (serviceIds.has(entry.id) || knownServices.has(key)) continue
+    next.maintenanceRecords.push(entry); serviceIds.add(entry.id); knownServices.add(key)
   }
   next.settings = { ...current.settings, activeVehicleId: current.settings.activeVehicleId ?? next.vehicles[0]?.id ?? null }
   encodeVault(next)
