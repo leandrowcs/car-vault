@@ -14,6 +14,8 @@ import {
   Plus,
   CheckCircle2,
   ChevronDown,
+  ChartColumn,
+  History,
 } from 'lucide-react'
 import { useCarVault } from '../context/CarVaultContext'
 import {
@@ -166,9 +168,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              {t("Active Digital Garage •")} {new Date().getFullYear()}
+              <Car size={18} aria-hidden="true" style={{ flexShrink: 0 }} />
+              <span>{t("Active Digital Garage •")} {new Date().getFullYear()}</span>
             </div>
             <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--vault-text)' }}>
               {activeVehicle.year} {activeVehicle.make} {activeVehicle.model}{' '}
@@ -367,6 +373,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <h3 className="card-title">
                 <button type="button" className="dashboard-card-toggle" aria-expanded={spendingExpanded} aria-controls="dashboard-spending-content" onClick={() => setSpendingExpanded(!spendingExpanded)}>
+                  <ChartColumn size={18} color="var(--vault-primary)" aria-hidden="true" />
                   {t("Spending History")}
                   <ChevronDown size={18} aria-hidden="true" />
                 </button>
@@ -498,7 +505,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <Card>
         <div className="card-header">
           <div>
-            <h3 className="card-title">{t("Recent Transactions & Services")}</h3>
+            <h3 className="card-title">
+              <History size={18} color="var(--vault-primary)" aria-hidden="true" style={{ flexShrink: 0 }} />
+              {t("Recent Transactions & Services")}
+            </h3>
             <p className="card-subtitle">{t("Latest fill-ups, maintenance, and vehicle expenses")}</p>
           </div>
         </div>
