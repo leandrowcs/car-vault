@@ -304,7 +304,7 @@
 
 /* Metric Cards & Grids */
 .dashboard-metrics { border: 1px solid var(--vault-border); border-radius: var(--radius-md); background: var(--vault-surface); min-width: 0; }
-.dashboard-metrics > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; min-height: 48px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 700; border-radius: var(--radius-md); }
+.dashboard-metrics > summary { display: flex; align-items: center; gap: 10px; padding: 12px; min-height: 48px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 700; border-radius: var(--radius-md); }
 .dashboard-metrics > summary::-webkit-details-marker { display: none; }
 .dashboard-metrics > summary svg { flex-shrink: 0; color: var(--vault-primary); }
 .dashboard-metrics > summary:hover { background: var(--vault-surface-2); }
