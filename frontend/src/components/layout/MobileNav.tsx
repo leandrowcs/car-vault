@@ -2,6 +2,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import React, { useEffect, useRef, useState } from 'react'
 import { LayoutDashboard, Warehouse, Fuel, Receipt, Menu, X, Wrench, Bell, FileText, BarChart3, Settings, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
+import { sortVehiclesByLatestExpense } from '../../utils/calculations'
 import type { NavView } from './Sidebar'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
@@ -25,7 +26,7 @@ const items = [
 
 export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, onQuickAddFuel }) => {
   const t = useTranslation()
-  const { vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
+  const { data, vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
   const [open, setOpen] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -50,7 +51,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, o
       <div className="mobile-vehicle-picker">
         <img src="/favicon.svg" alt={t("Car Vault")} className="mobile-brand-icon" />
         {vehicles.length > 0 ? <select className="vehicle-select" aria-label={t("Active vehicle")} value={activeVehicle?.id || ''} onChange={e => setActiveVehicleId(e.target.value)}>
-          {vehicles.map(v => <option key={v.id} value={v.id}>{v.year} {v.make} {v.model}</option>)}
+          {sortVehiclesByLatestExpense(data).map(v => <option key={v.id} value={v.id}>{v.year} {v.make} {v.model}</option>)}
         </select> : <span className="mobile-brand-name">{t("Car Vault")}</span>}
       </div>
     </div>

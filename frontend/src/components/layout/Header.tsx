@@ -2,6 +2,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import React from 'react'
 import { Car, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
+import { sortVehiclesByLatestExpense } from '../../utils/calculations'
 import type { NavView } from './Sidebar'
 
 interface HeaderProps {
@@ -18,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onQuickAddMaintenance,
 }) => {
   const t = useTranslation()
-  const { vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
+  const { data, vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
 
   const viewTitles: Record<NavView, { title: string; subtitle: string }> = {
     dashboard: {
@@ -80,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => setActiveVehicleId(e.target.value)}
               aria-label={t("Select active vehicle")}
             >
-              {vehicles.map((v) => (
+              {sortVehiclesByLatestExpense(data).map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.year} {v.make} {v.model} ({v.name})
                 </option>
