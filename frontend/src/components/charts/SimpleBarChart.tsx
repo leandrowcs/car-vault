@@ -36,10 +36,10 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
         style={{
           display: 'flex',
           alignItems: 'flex-end',
-          gap: '16px',
-          height: '200px',
-          paddingTop: '20px',
-          paddingBottom: '24px',
+          gap: '12px',
+          height: '160px',
+          paddingTop: '10px',
+          paddingBottom: '10px',
           minWidth: `${data.length * 60}px`,
         }}
       >

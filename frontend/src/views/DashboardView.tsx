@@ -227,13 +227,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             >
               <Plus size={14} /> {t("Add Service")}
             </button>
-            <button
+            {/* <button
               type="button"
               className="btn btn-secondary btn-sm"
               onClick={onAddReminder}
             >
               <Plus size={14} /> {t("Add Reminder")}
-            </button>
+            </button> */}
           </div>
         </div>
       </Card>

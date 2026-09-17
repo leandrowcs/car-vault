@@ -45,7 +45,7 @@
 .garage-hero-actions { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 6px; }
 .garage-hero-layout h2 { overflow-wrap: anywhere; }
 .garage-hero-actions .btn svg { flex-shrink: 0; }
-.garage-hero-actions .btn { width: 100%; min-height: 36px; white-space: normal; }
+.garage-hero-actions .btn { width: 100%; min-height: 30px; white-space: normal; }
 @media (max-width: 600px) {
   .garage-hero-layout { grid-template-columns: minmax(2, 1fr); gap: 6px; }
   .garage-hero-actions { grid-template-columns: repeat(1, minmax(0, 1fr)); }
@@ -284,7 +284,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -421,7 +420,7 @@
 
 .btn-sm {
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .btn-icon {
@@ -774,7 +773,7 @@
   }
 
   .btn, .vehicle-select, .form-input, .form-select {
-    min-height: 44px;
+    min-height: 30px;
   }
 
   .btn {
@@ -877,7 +876,7 @@
 .mobile-nav-item.mobile-add-fuel { background: var(--vault-primary); color: #111827; border-radius: 14px; margin: 4px 8px 4px 2px; }
 @keyframes drawer-slide-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .mobile-drawer[open] { animation: none; } }
-.smart-reminders { display: grid; gap: 8px; margin-bottom: 8px; }
+.smart-reminders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 6px; }
 .smart-reminder { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: 8px; padding: 10px; border: 1px solid var(--vault-border); border-left: 3px solid var(--vault-primary); background: var(--vault-surface-2); border-radius: 10px; }
 .smart-reminder-content { min-width: 0; }
 .smart-reminder-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
