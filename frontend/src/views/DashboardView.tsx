@@ -219,7 +219,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="btn btn-primary btn-sm"
               onClick={onAddFuel}
             >
-              <Plus size={14} /> {isEv ? t("Log Charge") : t("Log Fuel")}
+              <Plus size={14} /> {isEv ? t("Log Charge") : t("Add Fuel")}
             </button>
             <button
               type="button"

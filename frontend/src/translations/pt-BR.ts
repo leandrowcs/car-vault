@@ -148,7 +148,7 @@ export const ptBR: Record<string, string> = {
   "Latest fill-ups, maintenance, and vehicle expenses": "Últimos abastecimentos, serviços e despesas",
   "Log Charge": "Nova recarga",
   "Log fill-up": "Abastecer",
-  "Log Fuel": "Abastecer",
+  "Add Fuel": "Abastecer",
   "Log service": "Novo serviço",
   "Mark complete": "Concluir",
   "Monthly breakdown across categories": "Gastos mensais por categoria",
