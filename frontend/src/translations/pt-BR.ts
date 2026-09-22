@@ -655,12 +655,12 @@ export const ptBR: Record<string, string> = {
 
   // Gas stations
   "Close nearby stations": "Fechar postos próximos",
+  "Distances are straight-line estimates, not driving distances.": "As distâncias são estimativas em linha reta, não distâncias de percurso.",
   "Enter a location manually or enable location permissions to find nearby stations.": "Informe uma localização manualmente ou permita o acesso à localização para encontrar postos próximos.",
   "Enter a valid odometer, volume, and total cost.": "Informe quilometragem, volume e custo total válidos.",
   "Enter latitude and longitude from your map application.": "Informe a latitude e a longitude do seu aplicativo de mapas.",
   "Enter location manually": "Informar localização manualmente",
   "Enter valid latitude (−90 to 90) and longitude (−180 to 180).": "Informe latitude (−90 a 90) e longitude (−180 a 180) válidas.",
-  "Distances are straight-line estimates, not driving distances.": "As distâncias são estimativas em linha reta, não distâncias de percurso.",
   "Finding your location…": "Buscando sua localização…",
   "Fuel availability is not confirmed. Prices are unavailable from this source.": "A disponibilidade do combustível não está confirmada. Esta fonte não fornece preços.",
   "Fuel type": "Tipo de combustível",

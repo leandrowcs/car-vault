@@ -28,6 +28,13 @@ export function StationPicker({ onSelect, initialFuelType = 'regular', selection
   const { request } = location
   useEffect(() => { void request() }, [request])
   const busy = location.loading || search.loading
+  const searchManualLocation = () => {
+    const point = manualLocation(latitude, longitude)
+    setManualError(!point)
+    if (!point || search.loading) return
+    if (point.latitude === location.coordinates?.latitude && point.longitude === location.coordinates.longitude) search.retry()
+    else location.setManualCoordinates(point)
+  }
 
   return <section className="station-picker" aria-label={t('Nearby Stations')}>
     <p className="card-subtitle">{t('Your location is used only for this search and shared with the station provider. It is not saved to your vault.')}</p>
@@ -43,9 +50,7 @@ export function StationPicker({ onSelect, initialFuelType = 'regular', selection
     <details className="station-manual" open={location.error !== null || undefined} onKeyDown={event => {
       if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
         event.preventDefault()
-        const point = manualLocation(latitude, longitude)
-        setManualError(!point)
-        if (point && !search.loading) location.setManualCoordinates(point)
+        searchManualLocation()
       }
     }}>
       <summary>{t('Enter location manually')}</summary>
@@ -53,11 +58,7 @@ export function StationPicker({ onSelect, initialFuelType = 'regular', selection
       <div className="station-filters">
         <label className="form-group" htmlFor={`${id}-lat`}><span className="form-label">{t('Latitude')}</span><input id={`${id}-lat`} className="form-input" type="number" min="-90" max="90" step="any" value={latitude} onChange={e => setLatitude(e.target.value)} /></label>
         <label className="form-group" htmlFor={`${id}-lng`}><span className="form-label">{t('Longitude')}</span><input id={`${id}-lng`} className="form-input" type="number" min="-180" max="180" step="any" value={longitude} onChange={e => setLongitude(e.target.value)} /></label>
-        <button type="button" className="btn btn-secondary" disabled={search.loading} onClick={() => {
-          const point = manualLocation(latitude, longitude)
-          setManualError(!point)
-          if (point) location.setManualCoordinates(point)
-        }}>{t('Search here')}</button>
+        <button type="button" className="btn btn-secondary" disabled={search.loading} onClick={searchManualLocation}>{t('Search here')}</button>
       </div>
       {manualError && <p role="alert">{t('Enter valid latitude (−90 to 90) and longitude (−180 to 180).')}</p>}
     </details>

@@ -6,6 +6,8 @@ Designed for tracking vehicle expenses, fuel consumption, EV charging, maintenan
 
 ## Features
 
+- **Gas Stations**: Nearby station search, available Québec fuel prices, filters, navigation, and station/price suggestions in Add Fuel. See the [Gas Stations guide](docs/gas-stations.md) for provider limits and proxy hosting.
+
 - **Drivvo CSV**: Import/export refuelling with preview, vehicle mapping and duplicate detection. See the [Drivvo CSV guide](docs/drivvo-csv.md). JSON remains the complete backup format.
 
 - 🏎️ **Garage Management**: Multi-vehicle support (Gasoline, Diesel, Hybrid, Plug-in Hybrid, EV, Other) with trim, VIN, license plate, and odometer tracking.
