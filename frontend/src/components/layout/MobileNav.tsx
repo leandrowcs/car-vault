@@ -20,6 +20,7 @@ const items = [
   { id: 'maintenance', label: 'Maintenance Log', icon: Wrench },
   { id: 'reminders', label: 'Service Reminders', icon: Bell },
   { id: 'documents', label: 'Vehicle Documents', icon: FileText },
+  { id: 'gas-stations', label: 'Gas Stations', icon: Fuel },
   { id: 'statistics', label: 'Statistics & Reports', icon: BarChart3 },
   { id: 'settings', label: 'Settings & Data', icon: Settings },
 ] as const

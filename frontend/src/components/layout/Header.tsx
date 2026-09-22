@@ -54,6 +54,10 @@ export const Header: React.FC<HeaderProps> = ({
       title: 'Vault Statistics',
       subtitle: 'Detailed historical analytics, cost per km, and fuel economy',
     },
+    'gas-stations': {
+      title: 'Gas Stations',
+      subtitle: 'Nearby stations and recent fuel prices',
+    },
     settings: {
       title: 'Settings & Data',
       subtitle: 'Customize units, export JSON backups, or load demo garage',

@@ -19,6 +19,7 @@ import {
 import { RecordCard } from '../components/common/RecordCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { FuelEntry, ChargingEntry } from '../types/fuel'
+import { fuelTypes, type StationFuelType } from '../services/gas-stations/types'
 
 interface FuelViewProps {
   onAddFuel: () => void
@@ -223,6 +224,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
                         { label: 'Distance', value: stat?.distanceKm ? `+${stat.distanceKm.toLocaleString(getLanguage())} km` : '—' },
                         { label: 'Volume', value: `${entry.liters.toFixed(2)} L` },
                         { label: 'Price / L', value: `$${entry.pricePerLiter.toFixed(3)}` },
+                        { label: 'Fuel type', value: t(fuelTypes[entry.fuelType as StationFuelType] ?? entry.fuelType ?? '—') },
                         { label: 'Economy', value: stat?.lPer100Km ? formatConsumption(stat.lPer100Km, settings.fuelEconomyUnit) : '—' },
                       ]}
                       actionLabel={t("fill-up on {0}", { "0": formatDate(entry.date, settings.dateFormat) ?? '' })}

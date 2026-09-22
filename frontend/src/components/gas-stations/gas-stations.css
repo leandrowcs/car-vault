@@ -1,0 +1,17 @@
+.station-picker { display: grid; gap: 14px; min-width: 0; }
+.station-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.station-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.station-manual { border: 1px solid var(--vault-border); padding: 12px; border-radius: 12px; }
+.station-manual summary { cursor: pointer; font-weight: 600; }
+.station-manual .station-filters { margin-top: 10px; }
+.station-notice { padding: 12px; border-radius: 10px; background: var(--vault-primary-soft); font-size: 13px; line-height: 1.6; }
+.station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 12px; margin-top: 12px; }
+.station-card { display: grid; gap: 10px; padding: 16px; min-width: 0; }
+.station-card-heading { display: flex; align-items: center; gap: 8px; color: var(--vault-primary); }
+.station-card-heading h3 { font-size: 16px; color: var(--vault-text); flex: 1; }
+.station-card-heading span { white-space: nowrap; font-size: 13px; }
+.station-price { color: var(--vault-primary); font-size: 22px; font-weight: 800; }
+.station-attribution { font-size: 11px; line-height: 1.5; color: var(--vault-text-secondary); overflow-wrap: anywhere; }
+.station-attribution a { color: var(--vault-primary); }
+.station-form-picker { border-top: 1px solid var(--vault-border); padding-top: 14px; }
+@media (max-width: 480px) { .station-filters { grid-template-columns: 1fr; } }

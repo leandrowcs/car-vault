@@ -10,6 +10,8 @@ import type { NavView } from './components/layout/Sidebar'
 import { DashboardView } from './views/DashboardView'
 import { GarageView } from './views/GarageView'
 import { FuelView } from './views/FuelView'
+import { GasStationsView } from './views/GasStationsView'
+import type { StationSelection } from './services/gas-stations/types'
 import { ExpensesView } from './views/ExpensesView'
 import { MaintenanceView } from './views/MaintenanceView'
 import { RemindersView } from './views/RemindersView'
@@ -64,6 +66,7 @@ const CarVaultApp: React.FC = () => {
 
   const [fuelModalOpen, setFuelModalOpen] = useState(false)
   const [editingFuel, setEditingFuel] = useState<FuelEntry | null>(null)
+  const [selectedStation, setSelectedStation] = useState<StationSelection | null>(null)
 
   const [chargingModalOpen, setChargingModalOpen] = useState(false)
   const [editingCharge, setEditingCharge] = useState<ChargingEntry | null>(null)
@@ -92,11 +95,13 @@ const CarVaultApp: React.FC = () => {
   }
 
   const handleOpenAddFuel = () => {
+    setSelectedStation(null)
     setEditingFuel(null)
     setFuelModalOpen(true)
   }
 
   const handleOpenEditFuel = (entry: FuelEntry) => {
+    setSelectedStation(null)
     setEditingFuel(entry)
     setFuelModalOpen(true)
   }
@@ -216,6 +221,12 @@ const CarVaultApp: React.FC = () => {
       )}
 
       {currentView === 'statistics' && (<StatisticsView />)}
+      {currentView === 'gas-stations' && <GasStationsView onSelect={selection => {
+        if (!activeVehicle || activeVehicle.isSold || activeVehicle.fuelType === 'electric') return
+        setSelectedStation(selection)
+        setEditingFuel(null)
+        setFuelModalOpen(true)
+      }} />}
 
       {currentView === 'settings' && (<SettingsView />)}
 
@@ -244,6 +255,7 @@ const CarVaultApp: React.FC = () => {
         isOpen={fuelModalOpen && (!activeVehicle?.isSold || Boolean(editingFuel))}
         onClose={() => setFuelModalOpen(false)}
         initialData={editingFuel}
+        selectedStation={selectedStation}
         onSave={(fuelData) => {
           if (editingFuel) {
             updateFuelEntry(editingFuel.id, fuelData)

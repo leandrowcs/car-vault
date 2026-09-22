@@ -25,6 +25,7 @@ export type NavView =
   | 'maintenance'
   | 'reminders'
   | 'documents'
+  | 'gas-stations'
   | 'statistics'
   | 'settings'
 
@@ -45,6 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => 
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'reminders', label: 'Reminders', icon: Bell },
     { id: 'documents', label: 'Documents', icon: FileText },
+    { id: 'gas-stations', label: 'Gas Stations', icon: Fuel },
     { id: 'statistics', label: 'Statistics', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ] as const
