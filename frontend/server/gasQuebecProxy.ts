@@ -1,6 +1,6 @@
 /** Fixed-destination, read-only proxy: Gas Québec does not currently send browser CORS headers. */
-interface Request { method?: string; url?: string }
-interface Response {
+export interface ProxyRequest { method?: string; url?: string }
+export interface ProxyResponse {
   statusCode: number
   setHeader(name: string, value: string): unknown
   end(body?: string): unknown
@@ -21,7 +21,7 @@ export function nearbyParameters(url: string): URLSearchParams | null {
   return new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius), fuelType, sort, limit: '10' })
 }
 
-export default async function gasQuebecProxy(req: Request, res: Response): Promise<void> {
+export default async function gasQuebecProxy(req: ProxyRequest, res: ProxyResponse): Promise<void> {
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
   // Never persist a visitor's coordinate query in a browser or CDN cache.
   res.setHeader('Cache-Control', 'no-store')

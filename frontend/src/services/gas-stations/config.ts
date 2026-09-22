@@ -1,5 +1,6 @@
 export const stationConfig = {
   gasQuebecEndpoint: import.meta.env.VITE_GAS_QUEBEC_ENDPOINT || '/api/gas-stations',
+  locationSearchEndpoint: import.meta.env.VITE_LOCATION_SEARCH_ENDPOINT || '/api/location-search',
   overpassEndpoint: import.meta.env.VITE_OVERPASS_ENDPOINT || 'https://overpass-api.de/api/interpreter',
   cacheMs: 5 * 60 * 1000,
   requestTimeoutMs: 25_000,

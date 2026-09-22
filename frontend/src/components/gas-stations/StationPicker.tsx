@@ -3,7 +3,7 @@ import { Fuel, LocateFixed, Navigation, RefreshCw } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useGeolocation } from '../../hooks/useGeolocation'
 import { useNearbyGasStations } from '../../hooks/useNearbyGasStations'
-import { manualLocation } from '../../services/gas-stations/location'
+import { LocationSearch } from './LocationSearch'
 import { navigationUrl } from '../../services/gas-stations/config'
 import { fuelTypes, type StationFuelType, type StationSelection, type StationSort } from '../../services/gas-stations/types'
 import { getLanguage } from '../../services/language'
@@ -21,25 +21,16 @@ export function StationPicker({ onSelect, initialFuelType = 'regular', selection
   const [radius, setRadius] = useState(5)
   const [fuelType, setFuelType] = useState<StationFuelType>(initialFuelType)
   const [sort, setSort] = useState<StationSort>('distance')
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
-  const [manualError, setManualError] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState('')
   const search = useNearbyGasStations(location.coordinates, radius, fuelType, sort)
   const { request } = location
   useEffect(() => { void request() }, [request])
   const busy = location.loading || search.loading
-  const searchManualLocation = () => {
-    const point = manualLocation(latitude, longitude)
-    setManualError(!point)
-    if (!point || search.loading) return
-    if (point.latitude === location.coordinates?.latitude && point.longitude === location.coordinates.longitude) search.retry()
-    else location.setManualCoordinates(point)
-  }
 
   return <section className="station-picker" aria-label={t('Nearby Stations')}>
     <p className="card-subtitle">{t('Your location is used only for this search and shared with the station provider. It is not saved to your vault.')}</p>
     <div className="station-actions">
-      <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => void request()}><LocateFixed size={16} />{t('Use current location')}</button>
+      <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => { setSelectedLocation(''); void request() }}><LocateFixed size={16} />{t('Use current location')}</button>
       {location.coordinates && <button type="button" className="btn btn-secondary" disabled={busy} onClick={search.retry}><RefreshCw size={16} />{t('Search again')}</button>}
     </div>
     {location.error && <div role="status" className="station-notice">
@@ -47,21 +38,15 @@ export function StationPicker({ onSelect, initialFuelType = 'regular', selection
       <p>{t(location.error === 'denied' ? 'Location permission was denied.' : location.error === 'timeout' ? 'Location request timed out.' : 'Your browser could not determine your location.')}</p>
       <p>{t('Enter a location manually or enable location permissions to find nearby stations.')}</p>
     </div>}
-    <details className="station-manual" open={location.error !== null || undefined} onKeyDown={event => {
-      if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
-        event.preventDefault()
-        searchManualLocation()
-      }
-    }}>
+    <details className="station-manual" open={location.error !== null || Boolean(search.error) || undefined}>
       <summary>{t('Enter location manually')}</summary>
-      <p className="card-subtitle">{t('Enter latitude and longitude from your map application.')}</p>
-      <div className="station-filters">
-        <label className="form-group" htmlFor={`${id}-lat`}><span className="form-label">{t('Latitude')}</span><input id={`${id}-lat`} className="form-input" type="number" min="-90" max="90" step="any" value={latitude} onChange={e => setLatitude(e.target.value)} /></label>
-        <label className="form-group" htmlFor={`${id}-lng`}><span className="form-label">{t('Longitude')}</span><input id={`${id}-lng`} className="form-input" type="number" min="-180" max="180" step="any" value={longitude} onChange={e => setLongitude(e.target.value)} /></label>
-        <button type="button" className="btn btn-secondary" disabled={search.loading} onClick={searchManualLocation}>{t('Search here')}</button>
-      </div>
-      {manualError && <p role="alert">{t('Enter valid latitude (−90 to 90) and longitude (−180 to 180).')}</p>}
+      <LocationSearch onSelect={match => {
+        setSelectedLocation(match.label)
+        if (match.latitude === location.coordinates?.latitude && match.longitude === location.coordinates.longitude) search.retry()
+        else location.setManualCoordinates(match)
+      }} />
     </details>
+    {selectedLocation && <p role="status" className="card-subtitle">{t('Searching near')}: {selectedLocation}</p>}
     <div className="station-filters">
       <label className="form-group" htmlFor={`${id}-radius`}><span className="form-label">{t('Radius')}</span><select id={`${id}-radius`} className="form-input" value={radius} disabled={busy} onChange={e => setRadius(Number(e.target.value))}>{[1, 5, 10, 20, 30].map(value => <option key={value} value={value}>{value} km</option>)}</select></label>
       <label className="form-group" htmlFor={`${id}-fuel`}><span className="form-label">{t('Fuel type')}</span><select id={`${id}-fuel`} className="form-input" value={fuelType} disabled={busy} onChange={e => setFuelType(e.target.value as StationFuelType)}>{Object.entries(fuelTypes).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}</select></label>

@@ -11,6 +11,7 @@ import { DEFAULT_SETTINGS } from '../../types/settings'
 import type { FuelEntry } from '../../types/fuel'
 import type { Vehicle } from '../../types/vehicle'
 import { setLanguage } from '../../services/language'
+import { locationSearchService } from '../../services/gas-stations/locationSearch'
 
 const vehicle: Vehicle = {
   id: 'vehicle-test', name: 'Test car', year: 2020, make: 'Test', model: 'Car', fuelType: 'gasoline',
@@ -36,6 +37,10 @@ beforeEach(async () => {
     store.update(previous => ({ ...previous, fuelEntries: [{ ...entry, id: 'saved-fuel', createdAt: new Date().toISOString() }] }))
   })
   vi.spyOn(gasStationService, 'nearby').mockResolvedValue({ stations: [{ ...station, distanceKm: 1.2 }], fetchedAt: Date.now() })
+  vi.spyOn(locationSearchService, 'search').mockResolvedValue([{
+    id: 'city', label: 'Montréal, Québec, Canada', latitude: 45.5, longitude: -73.56,
+    attribution: 'Photon · © OpenStreetMap contributors', sourceUrl: 'https://www.openstreetmap.org/copyright',
+  }])
   Object.defineProperty(navigator, 'geolocation', { configurable: true, value: {
     getCurrentPosition: vi.fn(success => success({ coords: { latitude: 45.5, longitude: -73.56 } })),
   } })
@@ -130,22 +135,37 @@ describe('fuel form station integration', () => {
     await click('Search again')
     expect(gasStationService.nearby).toHaveBeenCalledTimes(2)
   })
-  it('searches manual coordinates after denial and can repeat that same search', async () => {
+  it('searches a city after denial, requires choosing a match, and supports repeated selection', async () => {
     Object.defineProperty(navigator, 'geolocation', { configurable: true, value: {
       getCurrentPosition: (_success: unknown, error: (value: { code: number }) => void) => error({ code: 1 }),
     } })
     await click('Select nearby station')
     const labels = Array.from(container.querySelectorAll('label'))
-    const latitude = labels.find(label => label.textContent === 'Latitude')!.control as HTMLInputElement
-    const longitude = labels.find(label => label.textContent === 'Longitude')!.control as HTMLInputElement
-    await change(latitude.id, '45.5')
-    await change(longitude.id, '-73.56')
-    await click('Search here')
+    const cityInput = labels.find(label => label.textContent === 'City or postal code')!.control as HTMLInputElement
+    expect(container.textContent).not.toContain('Latitude')
+    expect(container.textContent).not.toContain('Longitude')
+    await change(cityInput.id, 'Montréal')
+    expect(locationSearchService.search).not.toHaveBeenCalled()
+    await click('Search location')
+    expect(locationSearchService.search).toHaveBeenCalledWith('Montréal')
+    expect(gasStationService.nearby).not.toHaveBeenCalled()
+    await click('Montréal, Québec, Canada')
     expect(gasStationService.nearby).toHaveBeenCalledWith(expect.objectContaining({ latitude: 45.5, longitude: -73.56 }))
-    await click('Search here')
+    await click('Montréal, Québec, Canada')
     expect(gasStationService.nearby).toHaveBeenCalledTimes(2)
     await click('Select')
     expect(input('fuel-station').value).toBe('Test station')
+  })
+  it('searches a postal code and reports empty results without guessing coordinates', async () => {
+    await click('Select nearby station')
+    vi.mocked(locationSearchService.search).mockResolvedValue([])
+    const cityInput = Array.from(container.querySelectorAll('label')).find(label => label.textContent === 'City or postal code')!.control as HTMLInputElement
+    await change(cityInput.id, 'J1H 5N4')
+    await click('Search location')
+    expect(locationSearchService.search).toHaveBeenCalledWith('J1H 5N4')
+    expect(container.textContent).toContain('No location found.')
+    expect(gasStationService.nearby).toHaveBeenCalledTimes(1)
+    expect(onSave).not.toHaveBeenCalled()
   })
   it('clears a previous automatic price when the next station has no price', async () => {
     await selectNearby()

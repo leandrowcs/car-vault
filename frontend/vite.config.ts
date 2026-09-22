@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import manifest from './public/manifest.json'
 import gasQuebecProxy from './server/gasQuebecProxy'
+import locationSearchProxy from './server/locationSearchProxy'
 
 export default defineConfig({
   plugins: [
@@ -11,9 +12,11 @@ export default defineConfig({
       name: 'gas-quebec-proxy',
       configureServer(server) {
         server.middlewares.use('/api/gas-stations', (req, res) => { void gasQuebecProxy(req, res) })
+        server.middlewares.use('/api/location-search', (req, res) => { void locationSearchProxy(req, res) })
       },
       configurePreviewServer(server) {
         server.middlewares.use('/api/gas-stations', (req, res) => { void gasQuebecProxy(req, res) })
+        server.middlewares.use('/api/location-search', (req, res) => { void locationSearchProxy(req, res) })
       },
     },
     VitePWA({

@@ -16,9 +16,3 @@ export function currentLocation(geolocation?: Geolocation): Promise<Coordinates>
     { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 })
   })
 }
-/** Manual coordinate input works worldwide without sending a place name to another service. */
-export function manualLocation(latitude: string, longitude: string): Coordinates | null {
-  if (!latitude.trim() || !longitude.trim()) return null
-  const point = { latitude: Number(latitude), longitude: Number(longitude) }
-  return validCoordinates(point) ? point : null
-}

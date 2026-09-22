@@ -1,1 +1,1 @@
-export { default } from '../frontend/server/gasQuebecProxy'
+export { default } from '../frontend/server/gasQuebecProxy.js'

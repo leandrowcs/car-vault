@@ -3,7 +3,7 @@ import { distanceKm, validCoordinates } from '../../utils/distance'
 import { normalizeGasQuebec, GasQuebecProvider } from './GasQuebecProvider'
 import { normalizeOpenStreetMap } from './OpenStreetMapProvider'
 import { GasStationService, sortStations } from './gasStationService'
-import { currentLocation, manualLocation } from './location'
+import { currentLocation } from './location'
 import { fetchStationJson, StationServiceError } from './http'
 import { applyStationSelection, calculateFuelTotal } from './fuelDraft'
 import { stationConfig } from './config'
@@ -156,12 +156,8 @@ describe('geolocation and manual fallback', () => {
     const geo = { getCurrentPosition: (_success: unknown, failure: (error: { code: number | string }) => void) => failure({ code }) }
     await expect(currentLocation(geo as Geolocation)).rejects.toMatchObject({ reason })
   })
-  it('handles missing browser support and validates manual coordinates', async () => {
+  it('handles missing browser support', async () => {
     await expect(currentLocation()).rejects.toMatchObject({ reason: 'unavailable' })
-    expect(manualLocation('45.5', '-73.56')).toEqual(point)
-    expect(manualLocation('', '0')).toBeNull()
-    expect(manualLocation('0', '0')).toEqual({ latitude: 0, longitude: 0 })
-    expect(manualLocation('91', '0')).toBeNull()
   })
 })
 

@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run src",
+    "test:api": "node --test scripts/api-runtime.test.mjs",
     "test:rules": "vitest run tests/firestore.rules.test.ts",
     "generate:icons": "node scripts/generate-icons.mjs"
   },
