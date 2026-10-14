@@ -155,6 +155,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     )
   }
 
+  const isEv = activeVehicle.fuelType === 'electric'
   const defaultLogType = getVehicleLogTypes(activeVehicle.fuelType)[0]
 
   return (
