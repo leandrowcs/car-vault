@@ -43,6 +43,7 @@ import { getVehicleLogTypes } from '../utils/vehicleLogTypes'
 interface DashboardViewProps {
   onNavigate: (view: NavView) => void
   onAddQuickEntry: () => void
+  onAddFuel: () => void
   onAddExpense: () => void
   onAddMaintenance: () => void
   onAddReminder: () => void
@@ -51,6 +52,7 @@ interface DashboardViewProps {
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
   onAddQuickEntry,
+  onAddFuel,
   onAddExpense,
   onAddMaintenance,
   onAddReminder,

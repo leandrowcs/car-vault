@@ -180,6 +180,7 @@ const CarVaultApp: React.FC = () => {
         <DashboardView
           onNavigate={setCurrentView}
           onAddQuickEntry={handleOpenQuickAddEntry}
+          onAddFuel={handleOpenAddFuel}
           onAddExpense={handleOpenAddExpense}
           onAddMaintenance={handleOpenAddMaintenance}
           onAddReminder={handleOpenAddReminder}
