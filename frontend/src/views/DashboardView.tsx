@@ -38,9 +38,11 @@ import { Card } from '../components/common/Card'
 import { ReminderBadge } from '../components/common/StatBadge'
 import { SimpleBarChart } from '../components/charts/SimpleBarChart'
 import type { NavView } from '../components/layout/Sidebar'
+import { getVehicleLogTypes } from '../utils/vehicleLogTypes'
 
 interface DashboardViewProps {
   onNavigate: (view: NavView) => void
+  onAddQuickEntry: () => void
   onAddFuel: () => void
   onAddExpense: () => void
   onAddMaintenance: () => void
@@ -49,6 +51,7 @@ interface DashboardViewProps {
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
+  onAddQuickEntry,
   onAddFuel,
   onAddExpense,
   onAddMaintenance,
@@ -153,6 +156,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }
 
   const isEv = activeVehicle.fuelType === 'electric'
+  const defaultLogType = getVehicleLogTypes(activeVehicle.fuelType)[0]
 
   return (
     <div style={{ display: 'grid', gap: '12px' }}>
@@ -217,9 +221,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              onClick={onAddFuel}
+              onClick={onAddQuickEntry}
             >
-              <Plus size={14} /> {isEv ? t("Log Charge") : t("Add Fuel")}
+              <Plus size={14} /> {defaultLogType === 'charging' ? t("Log Charge") : t("Add Fuel")}
             </button>
             <button
               type="button"

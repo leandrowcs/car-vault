@@ -1,6 +1,6 @@
 import { getLanguage } from '../services/language'
 import { useTranslation } from '../hooks/useTranslation'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   Fuel,
   Zap,
@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { FuelEntry, ChargingEntry } from '../types/fuel'
 import { formatChargingDuration } from '../utils/charging'
 import { fuelTypes, type StationFuelType } from '../services/gas-stations/types'
+import { getVehicleLogTypes } from '../utils/vehicleLogTypes'
 
 interface FuelViewProps {
   onAddFuel: () => void
@@ -47,7 +48,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
 
   const [fuelToDelete, setFuelToDelete] = useState<FuelEntry | null>(null)
   const [chargeToDelete, setChargeToDelete] = useState<ChargingEntry | null>(null)
-  const [tab, setTab] = useState<'fuel' | 'charging'>('fuel')
+  const [tab, setTab] = useState<'fuel' | 'charging'>(activeVehicle?.fuelType === 'electric' ? 'charging' : 'fuel')
   const [sortBy, setSortBy] = useState<'date' | 'cost' | 'volume'>('date')
   const [sortAscending, setSortAscending] = useState(false)
   const sortedFuelEntries = useMemo(() => [...activeFuelEntries].sort((a, b) => {
@@ -57,9 +58,13 @@ export const FuelView: React.FC<FuelViewProps> = ({
     return (sortAscending ? difference : -difference) || b.date.localeCompare(a.date) || a.id.localeCompare(b.id)
   }), [activeFuelEntries, sortBy, sortAscending])
 
-  const isEvOrPhev =
-    activeVehicle?.fuelType === 'electric' ||
-    activeVehicle?.fuelType === 'plug-in-hybrid'
+  const supportedLogTypes = getVehicleLogTypes(activeVehicle?.fuelType ?? 'other')
+  const supportsFuel = supportedLogTypes.includes('fuel')
+  const supportsCharging = supportedLogTypes.includes('charging')
+
+  useEffect(() => {
+    setTab(activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel')
+  }, [activeVehicle?.id, activeVehicle?.fuelType])
 
   // Calculations
   const fuelStats = useMemo(
@@ -104,19 +109,21 @@ export const FuelView: React.FC<FuelViewProps> = ({
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {isEvOrPhev && (
+          {supportsCharging && (
             <button type="button" className="btn btn-secondary" onClick={onAddCharge}>
               <Zap size={15} color="var(--vault-info)" /> {t("Log EV Charge")}
             </button>
           )}
-          <button type="button" className="btn btn-primary" onClick={onAddFuel}>
-            <Plus size={15} /> {t("Log Fuel Fill-Up")}
-          </button>
+          {supportsFuel && (
+            <button type="button" className="btn btn-primary" onClick={onAddFuel}>
+              <Plus size={15} /> {t("Log Fuel Fill-Up")}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Tabs if vehicle supports both or user tracks both */}
-      {isEvOrPhev && (
+      {supportsFuel && supportsCharging && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--vault-border)', paddingBottom: '12px' }}>
           <button
             type="button"

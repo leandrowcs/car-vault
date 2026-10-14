@@ -3,23 +3,25 @@ import React from 'react'
 import { Car, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
 import { sortVehiclesByLatestExpense } from '../../utils/calculations'
+import { getVehicleLogTypes } from '../../utils/vehicleLogTypes'
 import type { NavView } from './Sidebar'
 
 interface HeaderProps {
   currentView: NavView
-  onQuickAddFuel: () => void
+  onQuickAddEntry: () => void
   onQuickAddExpense: () => void
   onQuickAddMaintenance: () => void
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentView,
-  onQuickAddFuel,
+  onQuickAddEntry,
   onQuickAddExpense,
   onQuickAddMaintenance,
 }) => {
   const t = useTranslation()
   const { data, vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
+  const defaultLogType = activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel'
 
   const viewTitles: Record<NavView, { title: string; subtitle: string }> = {
     dashboard: {
@@ -98,10 +100,10 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          onClick={onQuickAddFuel}
-          title={t("Add Fuel Fill-up")}
+          onClick={onQuickAddEntry}
+          title={t(defaultLogType === 'charging' ? "Log EV Charging Session" : "Add Fuel Fill-up")}
         >
-          <Plus size={14} /> {t("Fuel")}
+          <Plus size={14} /> {t(defaultLogType === 'charging' ? "Charge" : "Fuel")}
         </button>
 
         <button
@@ -125,4 +127,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   )
 }
-
