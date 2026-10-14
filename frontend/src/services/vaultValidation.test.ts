@@ -20,8 +20,11 @@ describe('charging record validation', () => {
   it.each([
     { startBatteryPercent: -1 }, { startBatteryPercent: 101 }, { startBatteryPercent: '50' }, { startBatteryPercent: NaN },
     { durationMinutes: 0 }, { durationMinutes: -5 }, { durationMinutes: '30' },
+    { durationMinutes: 1_000_000_000_000 }, { powerKw: 1_000_000_000_000 },
     { powerKw: -1 }, { powerKw: Infinity }, { powerKw: '7' },
     { company: 1 }, { equipment: null }, { chargingAddress: {} },
+    { company: 'a'.repeat(10_001) }, { equipment: 'a'.repeat(10_001) }, { chargingAddress: 'a'.repeat(10_001) },
+    { chargingLocation: 'a'.repeat(10_001) },
   ])('rejects invalid details %j', extra => {
     expect(isVaultRecord('chargingEntries~c1', charge(extra))).toBe(false)
   })

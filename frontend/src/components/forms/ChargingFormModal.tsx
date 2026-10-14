@@ -113,7 +113,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
     if (isNaN(odoNum) || isNaN(kwhNum) || kwhNum <= 0) return
 
-    const parsed = parseChargingDetails({ startBatteryPercent, durationMinutes, powerKw, equipment, company, chargingAddress })
+    const parsed = parseChargingDetails({ startBatteryPercent, durationMinutes, powerKw, equipment, company, chargingAddress, chargingLocation })
     if (!parsed.ok) {
       setInvalidField(parsed.field)
       return
@@ -256,7 +256,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
               id="charging-location"
               type="text"
               className="form-input"
+              maxLength={10000}
               placeholder={t("e.g. Home Garage, Barrie Service Plaza")}
+              aria-invalid={invalidField === 'chargingLocation'}
               value={chargingLocation}
               onChange={(e) => setChargingLocation(e.target.value)}
             />
@@ -270,7 +272,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
               id="charging-company"
               type="text"
               className="form-input"
+              maxLength={10000}
               placeholder={t("e.g. Electrify Canada, Tesla Supercharger")}
+              aria-invalid={invalidField === 'company'}
               value={company}
               onChange={(e) => setCompany(e.target.value)}
             />
@@ -281,7 +285,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
               id="charging-equipment"
               type="text"
               className="form-input"
+              maxLength={10000}
               placeholder={t("e.g. Wall Connector, CCS stall 3")}
+              aria-invalid={invalidField === 'equipment'}
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
             />
@@ -294,7 +300,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
             id="charging-address"
             type="text"
             className="form-input"
+            maxLength={10000}
             placeholder={t("Street, city")}
+            aria-invalid={invalidField === 'chargingAddress'}
             value={chargingAddress}
             onChange={(e) => setChargingAddress(e.target.value)}
           />
@@ -322,6 +330,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
               id="charging-duration"
               type="number"
               min="1"
+              max="999999999999"
               step="1"
               className="form-input font-mono"
               placeholder={t("e.g. 45")}
@@ -336,6 +345,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
               id="charging-power"
               type="number"
               min="0"
+              max="999999999999"
               step="0.1"
               className="form-input font-mono"
               placeholder={t("e.g. 150")}
@@ -348,7 +358,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
         {invalidField && (
           <p role="alert" className="account-error">
-            {t("Check the highlighted charging detail: battery must be 0–100%, duration above 0 and power 0 or more.")}
+            {t("Check the highlighted charging details. Battery must be 0–100%, duration above 0, power below 1 trillion, and text at most 10,000 characters.")}
           </p>
         )}
 
@@ -366,4 +376,3 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
     </Modal>
   )
 }
-

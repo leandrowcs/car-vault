@@ -12,9 +12,13 @@ export interface ChargingDetailsInput {
   equipment: string
   company: string
   chargingAddress: string
+  chargingLocation: string
 }
 
-export type ChargingDetailsError = 'startBatteryPercent' | 'durationMinutes' | 'powerKw'
+export type ChargingDetailsError = 'startBatteryPercent' | 'durationMinutes' | 'powerKw' | 'equipment' | 'company' | 'chargingAddress' | 'chargingLocation'
+
+const maxFirestoreNumber = 1_000_000_000_000
+const maxFirestoreTextLength = 10_000
 
 export type ChargingDetailsResult =
   | { ok: true; details: ChargingDetails }
@@ -35,10 +39,13 @@ function optionalText(raw: string): string | undefined {
 export function parseChargingDetails(input: ChargingDetailsInput): ChargingDetailsResult {
   const startBatteryPercent = optionalNumber(input.startBatteryPercent, value => value >= 0 && value <= 100)
   if (startBatteryPercent === null) return { ok: false, field: 'startBatteryPercent' }
-  const durationMinutes = optionalNumber(input.durationMinutes, value => value > 0)
+  const durationMinutes = optionalNumber(input.durationMinutes, value => value > 0 && value < maxFirestoreNumber)
   if (durationMinutes === null) return { ok: false, field: 'durationMinutes' }
-  const powerKw = optionalNumber(input.powerKw, value => value >= 0)
+  const powerKw = optionalNumber(input.powerKw, value => value >= 0 && value < maxFirestoreNumber)
   if (powerKw === null) return { ok: false, field: 'powerKw' }
+  for (const field of ['equipment', 'company', 'chargingAddress', 'chargingLocation'] as const) {
+    if (input[field].length > maxFirestoreTextLength) return { ok: false, field }
+  }
   return {
     ok: true,
     details: {

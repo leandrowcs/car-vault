@@ -296,7 +296,7 @@ export const ptBR: Record<string, string> = {
   "Sort by": "Ordenar",
   "Sort fill-ups": "Ordenar abastecimentos",
   "Charging curve, observations...": "Curva de carga, observações...",
-  "Check the highlighted charging detail: battery must be 0–100%, duration above 0 and power 0 or more.": "Verifique os detalhes da recarga: bateria entre 0 e 100%, duração maior que 0 e potência 0 ou mais.",
+  "Check the highlighted charging details. Battery must be 0–100%, duration above 0, power below 1 trillion, and text at most 10,000 characters.": "Verifique os detalhes da recarga. A bateria deve estar entre 0 e 100%, a duração acima de 0, a potência abaixo de 1 trilhão e os textos com até 10.000 caracteres.",
   "Address": "Endereço",
   "Company": "Empresa",
   "Charger / Equipment": "Carregador / equipamento",

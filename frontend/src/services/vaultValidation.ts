@@ -17,7 +17,10 @@ export function isVaultRecord(id: string, record: unknown): record is VaultRecor
   if ('startBatteryPercent' in value && (typeof value.startBatteryPercent !== 'number' || !Number.isFinite(value.startBatteryPercent) ||
       value.startBatteryPercent < 0 || value.startBatteryPercent > 100)) return false
   if ('durationMinutes' in value && (typeof value.durationMinutes !== 'number' || !Number.isFinite(value.durationMinutes) ||
-      value.durationMinutes <= 0)) return false
+      value.durationMinutes <= 0 || value.durationMinutes >= 1_000_000_000_000)) return false
+  if ('powerKw' in value && Number(value.powerKw) >= 1_000_000_000_000) return false
+  if (['chargingAddress', 'chargingLocation', 'company', 'equipment'].some(key => key in value &&
+      (typeof value[key] !== 'string' || value[key].length > 10_000))) return false
   const strings = (...keys: string[]) => keys.every(key => typeof value[key] === 'string')
   const numbers = (...keys: string[]) => keys.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]) && Number(value[key]) >= 0)
   if (record.kind === 'settings') {
