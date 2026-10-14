@@ -32,6 +32,7 @@ import { DocumentFormModal } from './components/forms/DocumentFormModal'
 
 // Domain types
 import type { Vehicle } from './types/vehicle'
+import { getVehicleLogTypes } from './utils/vehicleLogTypes'
 import type { FuelEntry, ChargingEntry } from './types/fuel'
 import type { Expense } from './types/expense'
 import type { MaintenanceRecord } from './types/maintenance'
@@ -111,6 +112,15 @@ const CarVaultApp: React.FC = () => {
     setChargingModalOpen(true)
   }
 
+  const handleOpenQuickAddEntry = () => {
+    const defaultLogType = activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel'
+    if (defaultLogType === 'charging') {
+      handleOpenAddCharge()
+    } else {
+      handleOpenAddFuel()
+    }
+  }
+
   const handleOpenEditCharge = (entry: ChargingEntry) => {
     setEditingCharge(entry)
     setChargingModalOpen(true)
@@ -160,7 +170,7 @@ const CarVaultApp: React.FC = () => {
     <AppShell
       currentView={currentView}
       onNavigate={setCurrentView}
-      onQuickAddFuel={handleOpenAddFuel}
+      onQuickAddEntry={handleOpenQuickAddEntry}
       onQuickAddExpense={handleOpenAddExpense}
       onQuickAddMaintenance={handleOpenAddMaintenance}
     >
@@ -169,7 +179,7 @@ const CarVaultApp: React.FC = () => {
       {currentView === 'dashboard' && (
         <DashboardView
           onNavigate={setCurrentView}
-          onAddFuel={handleOpenAddFuel}
+          onAddQuickEntry={handleOpenQuickAddEntry}
           onAddExpense={handleOpenAddExpense}
           onAddMaintenance={handleOpenAddMaintenance}
           onAddReminder={handleOpenAddReminder}
