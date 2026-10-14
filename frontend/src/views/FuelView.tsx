@@ -1,6 +1,6 @@
 import { getLanguage } from '../services/language'
 import { useTranslation } from '../hooks/useTranslation'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   Fuel,
   Zap,
@@ -48,7 +48,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
 
   const [fuelToDelete, setFuelToDelete] = useState<FuelEntry | null>(null)
   const [chargeToDelete, setChargeToDelete] = useState<ChargingEntry | null>(null)
-  const [tab, setTab] = useState<'fuel' | 'charging'>('fuel')
+  const [tab, setTab] = useState<'fuel' | 'charging'>(activeVehicle?.fuelType === 'electric' ? 'charging' : 'fuel')
   const [sortBy, setSortBy] = useState<'date' | 'cost' | 'volume'>('date')
   const [sortAscending, setSortAscending] = useState(false)
   const sortedFuelEntries = useMemo(() => [...activeFuelEntries].sort((a, b) => {
@@ -61,6 +61,10 @@ export const FuelView: React.FC<FuelViewProps> = ({
   const supportedLogTypes = getVehicleLogTypes(activeVehicle?.fuelType ?? 'other')
   const supportsFuel = supportedLogTypes.includes('fuel')
   const supportsCharging = supportedLogTypes.includes('charging')
+
+  useEffect(() => {
+    setTab(activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel')
+  }, [activeVehicle?.id, activeVehicle?.fuelType])
 
   // Calculations
   const fuelStats = useMemo(
