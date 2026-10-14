@@ -25,6 +25,21 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore owner isolation
     await assertSucceeds(deleteDoc(doc(db, 'users/alice/records', vehicle[0])))
   })
 
+  it('accepts legacy and structured charging details and rejects out-of-range values', async () => {
+    const db = env.authenticatedContext('alice').firestore()
+    const charge = [...records.entries()].find(([, record]) => record.kind === 'chargingEntries')!
+    const ref = doc(db, 'users/alice/records', charge[0])
+    const withValue = (extra: Record<string, unknown>) => ({ ...charge[1], value: { ...charge[1].value, ...extra } })
+    await assertSucceeds(setDoc(ref, charge[1]))
+    await assertSucceeds(setDoc(ref, withValue({ company: 'Op', equipment: 'CCS', chargingAddress: '1 Main St',
+      startBatteryPercent: 0, durationMinutes: 30, powerKw: 150 })))
+    await assertSucceeds(setDoc(ref, withValue({ startBatteryPercent: 100, powerKw: 0 })))
+    for (const bad of [{ startBatteryPercent: -1 }, { startBatteryPercent: 101 }, { startBatteryPercent: '10' },
+      { durationMinutes: 0 }, { durationMinutes: -1 }, { powerKw: -1 }, { company: 5 }, { equipment: {} }, { chargingAddress: 1 }]) {
+      await assertFails(setDoc(ref, withValue(bad)))
+    }
+  })
+
   it('denies anonymous reads and writes', async () => {
     const db = env.unauthenticatedContext().firestore()
     await assertFails(getDocs(collection(db, 'users/alice/records')))

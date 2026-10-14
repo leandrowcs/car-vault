@@ -9,7 +9,7 @@ interface AppShellProps {
   currentView: NavView
   onNavigate: (view: NavView) => void
   children: React.ReactNode
-  onQuickAddFuel: () => void
+  onQuickAddEntry: () => void
   onQuickAddExpense: () => void
   onQuickAddMaintenance: () => void
 }
@@ -18,7 +18,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   currentView,
   onNavigate,
   children,
-  onQuickAddFuel,
+  onQuickAddEntry,
   onQuickAddExpense,
   onQuickAddMaintenance,
 }) => {
@@ -37,13 +37,13 @@ export const AppShell: React.FC<AppShellProps> = ({
         <MobileNav
           currentView={currentView}
           onNavigate={onNavigate}
-          onQuickAddFuel={onQuickAddFuel}
+          onQuickAddEntry={onQuickAddEntry}
         />
 
         {/* Desktop Sticky Header */}
         <Header
           currentView={currentView}
-          onQuickAddFuel={onQuickAddFuel}
+          onQuickAddEntry={onQuickAddEntry}
           onQuickAddExpense={onQuickAddExpense}
           onQuickAddMaintenance={onQuickAddMaintenance}
         />
@@ -54,4 +54,3 @@ export const AppShell: React.FC<AppShellProps> = ({
     </div>
   )
 }
-

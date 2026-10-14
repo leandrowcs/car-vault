@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { LayoutDashboard, Warehouse, Fuel, Receipt, Menu, X, Wrench, Bell, FileText, BarChart3, Settings, Plus } from 'lucide-react'
 import { useCarVault } from '../../context/CarVaultContext'
 import { sortVehiclesByLatestExpense } from '../../utils/calculations'
+import { getVehicleLogTypes } from '../../utils/vehicleLogTypes'
 import type { NavView } from './Sidebar'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
@@ -10,7 +11,7 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 interface MobileNavProps {
   currentView: NavView
   onNavigate: (view: NavView) => void
-  onQuickAddFuel: () => void
+  onQuickAddEntry: () => void
 }
 const items = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,9 +26,10 @@ const items = [
   { id: 'settings', label: 'Settings & Data', icon: Settings },
 ] as const
 
-export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, onQuickAddFuel }) => {
+export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, onQuickAddEntry }) => {
   const t = useTranslation()
   const { data, vehicles, activeVehicle, setActiveVehicleId } = useCarVault()
+  const defaultLogType = activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel'
   const [open, setOpen] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -60,7 +62,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentView, onNavigate, o
       {items.slice(0, 4).map(({ id, label, icon: Icon }) => <button key={id} type="button" className={`mobile-nav-item ${currentView === id ? 'active' : ''}`} aria-current={currentView === id ? 'page' : undefined} onClick={() => navigate(id)}>
         <Icon size={20} /><span>{id === 'dashboard' ? t("Dash") : t(label)}</span>
       </button>)}
-      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddFuel}><Plus size={24} /><span>{t("Fuel")}</span></button>
+      <button type="button" className="mobile-nav-item mobile-add-fuel" onClick={onQuickAddEntry}><Plus size={24} /><span>{t(defaultLogType === 'charging' ? "Charge" : "Fuel")}</span></button>
     </nav>
     <dialog ref={dialog} id="mobile-menu" className="mobile-drawer" aria-labelledby="mobile-menu-title" onCancel={() => setOpen(false)} onClick={e => { if (e.target === e.currentTarget && e.clientX > e.currentTarget.getBoundingClientRect().right) setOpen(false) }}>
       <div className="drawer-heading"><strong id="mobile-menu-title">{t("Car Vault")}</strong><button type="button" className="btn btn-secondary btn-icon" aria-label={t("Close navigation menu")} onClick={() => setOpen(false)}><X size={20} /></button></div>

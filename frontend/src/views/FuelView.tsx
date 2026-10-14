@@ -1,6 +1,6 @@
 import { getLanguage } from '../services/language'
 import { useTranslation } from '../hooks/useTranslation'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   Fuel,
   Zap,
@@ -19,7 +19,9 @@ import {
 import { RecordCard } from '../components/common/RecordCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { FuelEntry, ChargingEntry } from '../types/fuel'
+import { formatChargingDuration } from '../utils/charging'
 import { fuelTypes, type StationFuelType } from '../services/gas-stations/types'
+import { getVehicleLogTypes } from '../utils/vehicleLogTypes'
 
 interface FuelViewProps {
   onAddFuel: () => void
@@ -46,7 +48,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
 
   const [fuelToDelete, setFuelToDelete] = useState<FuelEntry | null>(null)
   const [chargeToDelete, setChargeToDelete] = useState<ChargingEntry | null>(null)
-  const [tab, setTab] = useState<'fuel' | 'charging'>('fuel')
+  const [tab, setTab] = useState<'fuel' | 'charging'>(activeVehicle?.fuelType === 'electric' ? 'charging' : 'fuel')
   const [sortBy, setSortBy] = useState<'date' | 'cost' | 'volume'>('date')
   const [sortAscending, setSortAscending] = useState(false)
   const sortedFuelEntries = useMemo(() => [...activeFuelEntries].sort((a, b) => {
@@ -56,9 +58,13 @@ export const FuelView: React.FC<FuelViewProps> = ({
     return (sortAscending ? difference : -difference) || b.date.localeCompare(a.date) || a.id.localeCompare(b.id)
   }), [activeFuelEntries, sortBy, sortAscending])
 
-  const isEvOrPhev =
-    activeVehicle?.fuelType === 'electric' ||
-    activeVehicle?.fuelType === 'plug-in-hybrid'
+  const supportedLogTypes = getVehicleLogTypes(activeVehicle?.fuelType ?? 'other')
+  const supportsFuel = supportedLogTypes.includes('fuel')
+  const supportsCharging = supportedLogTypes.includes('charging')
+
+  useEffect(() => {
+    setTab(activeVehicle ? getVehicleLogTypes(activeVehicle.fuelType)[0] : 'fuel')
+  }, [activeVehicle?.id, activeVehicle?.fuelType])
 
   // Calculations
   const fuelStats = useMemo(
@@ -103,19 +109,21 @@ export const FuelView: React.FC<FuelViewProps> = ({
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {isEvOrPhev && (
+          {supportsCharging && (
             <button type="button" className="btn btn-secondary" onClick={onAddCharge}>
               <Zap size={15} color="var(--vault-info)" /> {t("Log EV Charge")}
             </button>
           )}
-          <button type="button" className="btn btn-primary" onClick={onAddFuel}>
-            <Plus size={15} /> {t("Log Fuel Fill-Up")}
-          </button>
+          {supportsFuel && (
+            <button type="button" className="btn btn-primary" onClick={onAddFuel}>
+              <Plus size={15} /> {t("Log Fuel Fill-Up")}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Tabs if vehicle supports both or user tracks both */}
-      {isEvOrPhev && (
+      {supportsFuel && supportsCharging && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--vault-border)', paddingBottom: '12px' }}>
           <button
             type="button"
@@ -300,7 +308,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
                   <RecordCard
                     key={entry.id}
                     icon={<Zap size={20} />}
-                    title={entry.chargingLocation || (entry.locationType === 'home' ? t("Home") : t("Public"))}
+                    title={entry.chargingLocation || entry.company || (entry.locationType === 'home' ? t("Home") : t("Public"))}
                     date={formatDate(entry.date, settings.dateFormat)}
                     amount={formatCurrency(entry.totalCost, settings.currency)}
                     badge={<span className="badge badge-blue">{entry.chargingType || (t("Level 2"))}</span>}
@@ -308,6 +316,12 @@ export const FuelView: React.FC<FuelViewProps> = ({
                       { label: 'Odometer', value: `${entry.odometer.toLocaleString(getLanguage())} km` },
                       { label: 'Energy', value: `${entry.kwh.toFixed(1)} kWh` },
                       { label: 'Rate / kWh', value: `$${entry.pricePerKwh.toFixed(3)}` },
+                      ...(entry.startBatteryPercent !== undefined ? [{ label: t("Start battery"), value: `${entry.startBatteryPercent}%` }] : []),
+                      ...(entry.durationMinutes !== undefined ? [{ label: t("Duration"), value: formatChargingDuration(entry.durationMinutes) }] : []),
+                      ...(entry.powerKw !== undefined ? [{ label: t("Power"), value: `${entry.powerKw} kW` }] : []),
+                      ...(entry.company ? [{ label: t("Company"), value: entry.company }] : []),
+                      ...(entry.equipment ? [{ label: t("Equipment"), value: entry.equipment }] : []),
+                      ...(entry.chargingAddress ? [{ label: t("Address"), value: entry.chargingAddress }] : []),
                     ]}
                     actionLabel={t("charge on {0}", { "0": formatDate(entry.date, settings.dateFormat) ?? '' })}
                     onEdit={() => onEditCharge(entry)}

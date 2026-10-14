@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import type { ChargingEntry, ChargingLocationType, ChargingSpeedType } from '../../types/fuel'
 import { useCarVault } from '../../context/CarVaultContext'
+import { parseChargingDetails, type ChargingDetailsError } from '../../utils/charging'
 
 interface ChargingFormModalProps {
   isOpen: boolean
@@ -28,9 +29,17 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
   const [chargingLocation, setChargingLocation] = useState('')
   const [locationType, setLocationType] = useState<ChargingLocationType>('home')
   const [chargingType, setChargingType] = useState<ChargingSpeedType>('Level 2')
+  const [chargingAddress, setChargingAddress] = useState('')
+  const [company, setCompany] = useState('')
+  const [equipment, setEquipment] = useState('')
+  const [startBatteryPercent, setStartBatteryPercent] = useState('')
+  const [durationMinutes, setDurationMinutes] = useState('')
+  const [powerKw, setPowerKw] = useState('')
+  const [invalidField, setInvalidField] = useState<ChargingDetailsError | null>(null)
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
+    setInvalidField(null)
     if (initialData) {
       setDate(initialData.date.slice(0, 10))
       setOdometer(String(initialData.odometer))
@@ -40,6 +49,12 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
       setChargingLocation(initialData.chargingLocation || '')
       setLocationType(initialData.locationType || 'home')
       setChargingType((initialData.chargingType as ChargingSpeedType) || 'Level 2')
+      setChargingAddress(initialData.chargingAddress || '')
+      setCompany(initialData.company || '')
+      setEquipment(initialData.equipment || '')
+      setStartBatteryPercent(initialData.startBatteryPercent === undefined ? '' : String(initialData.startBatteryPercent))
+      setDurationMinutes(initialData.durationMinutes === undefined ? '' : String(initialData.durationMinutes))
+      setPowerKw(initialData.powerKw === undefined ? '' : String(initialData.powerKw))
       setNotes(initialData.notes || '')
     } else {
       setDate(new Date().toISOString().slice(0, 10))
@@ -50,6 +65,12 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
       setChargingLocation('Home Garage')
       setLocationType('home')
       setChargingType('Level 2')
+      setChargingAddress('')
+      setCompany('')
+      setEquipment('')
+      setStartBatteryPercent('')
+      setDurationMinutes('')
+      setPowerKw('')
       setNotes('')
     }
   }, [initialData, isOpen, activeVehicle])
@@ -92,6 +113,13 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
     if (isNaN(odoNum) || isNaN(kwhNum) || kwhNum <= 0) return
 
+    const parsed = parseChargingDetails({ startBatteryPercent, durationMinutes, powerKw, equipment, company, chargingAddress, chargingLocation })
+    if (!parsed.ok) {
+      setInvalidField(parsed.field)
+      return
+    }
+    setInvalidField(null)
+
     onSave({
       vehicleId: activeVehicle.id,
       date,
@@ -102,6 +130,7 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
       chargingLocation: chargingLocation || undefined,
       locationType,
       chargingType,
+      ...parsed.details,
       notes: notes || undefined,
     })
     onClose()
@@ -151,8 +180,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">{t("Energy (kWh) *")}</label>
+            <label className="form-label" htmlFor="charging-kwh">{t("Energy (kWh) *")}</label>
             <input
+              id="charging-kwh"
               type="number"
               required
               step="0.01"
@@ -164,8 +194,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">{t("Price per kWh ($ CAD)")}</label>
+            <label className="form-label" htmlFor="charging-price">{t("Price per kWh ($ CAD)")}</label>
             <input
+              id="charging-price"
               type="number"
               step="0.001"
               min="0"
@@ -179,8 +210,9 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">{t("Total Cost ($ CAD) *")}</label>
+            <label className="form-label" htmlFor="charging-total">{t("Total Cost ($ CAD) *")}</label>
             <input
+              id="charging-total"
               type="number"
               required
               step="0.01"
@@ -219,23 +251,123 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label className="form-label">{t("Station / Location Name")}</label>
+            <label className="form-label" htmlFor="charging-location">{t("Station / Location Name")}</label>
             <input
+              id="charging-location"
               type="text"
               className="form-input"
-              placeholder={t("e.g. Electrify Canada, Tesla Supercharger")}
+              maxLength={10000}
+              placeholder={t("e.g. Home Garage, Barrie Service Plaza")}
+              aria-invalid={invalidField === 'chargingLocation'}
               value={chargingLocation}
               onChange={(e) => setChargingLocation(e.target.value)}
             />
           </div>
         </div>
 
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label" htmlFor="charging-company">{t("Company / Operator")}</label>
+            <input
+              id="charging-company"
+              type="text"
+              className="form-input"
+              maxLength={10000}
+              placeholder={t("e.g. Electrify Canada, Tesla Supercharger")}
+              aria-invalid={invalidField === 'company'}
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="charging-equipment">{t("Charger / Equipment")}</label>
+            <input
+              id="charging-equipment"
+              type="text"
+              className="form-input"
+              maxLength={10000}
+              placeholder={t("e.g. Wall Connector, CCS stall 3")}
+              aria-invalid={invalidField === 'equipment'}
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="charging-address">{t("Address")}</label>
+          <input
+            id="charging-address"
+            type="text"
+            className="form-input"
+            maxLength={10000}
+            placeholder={t("Street, city")}
+            aria-invalid={invalidField === 'chargingAddress'}
+            value={chargingAddress}
+            onChange={(e) => setChargingAddress(e.target.value)}
+          />
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label" htmlFor="charging-start-battery">{t("Starting Battery (%)")}</label>
+            <input
+              id="charging-start-battery"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              className="form-input font-mono"
+              placeholder={t("e.g. 20")}
+              aria-invalid={invalidField === 'startBatteryPercent'}
+              value={startBatteryPercent}
+              onChange={(e) => setStartBatteryPercent(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="charging-duration">{t("Duration (min)")}</label>
+            <input
+              id="charging-duration"
+              type="number"
+              min="1"
+              max="999999999999"
+              step="1"
+              className="form-input font-mono"
+              placeholder={t("e.g. 45")}
+              aria-invalid={invalidField === 'durationMinutes'}
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="charging-power">{t("Charging Power (kW)")}</label>
+            <input
+              id="charging-power"
+              type="number"
+              min="0"
+              max="999999999999"
+              step="0.1"
+              className="form-input font-mono"
+              placeholder={t("e.g. 150")}
+              aria-invalid={invalidField === 'powerKw'}
+              value={powerKw}
+              onChange={(e) => setPowerKw(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {invalidField && (
+          <p role="alert" className="account-error">
+            {t("Check the highlighted charging details. Battery must be 0–100%, duration above 0, power below 1 trillion, and text at most 10,000 characters.")}
+          </p>
+        )}
+
         <div className="form-group">
           <label className="form-label">{t("Notes")}</label>
           <input
             type="text"
             className="form-input"
-            placeholder={t("Starting state of charge (SoC), charging curve...")}
+            placeholder={t("Charging curve, observations...")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
@@ -244,4 +376,3 @@ export const ChargingFormModal: React.FC<ChargingFormModalProps> = ({
     </Modal>
   )
 }
-
