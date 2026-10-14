@@ -123,7 +123,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
       </div>
 
       {/* Tabs if vehicle supports both or user tracks both */}
-      {supportsCharging && (
+      {supportsFuel && supportsCharging && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--vault-border)', paddingBottom: '12px' }}>
           <button
             type="button"
