@@ -19,6 +19,7 @@ import {
 import { RecordCard } from '../components/common/RecordCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import type { FuelEntry, ChargingEntry } from '../types/fuel'
+import { formatChargingDuration } from '../utils/charging'
 import { fuelTypes, type StationFuelType } from '../services/gas-stations/types'
 
 interface FuelViewProps {
@@ -300,7 +301,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
                   <RecordCard
                     key={entry.id}
                     icon={<Zap size={20} />}
-                    title={entry.chargingLocation || (entry.locationType === 'home' ? t("Home") : t("Public"))}
+                    title={entry.chargingLocation || entry.company || (entry.locationType === 'home' ? t("Home") : t("Public"))}
                     date={formatDate(entry.date, settings.dateFormat)}
                     amount={formatCurrency(entry.totalCost, settings.currency)}
                     badge={<span className="badge badge-blue">{entry.chargingType || (t("Level 2"))}</span>}
@@ -308,6 +309,12 @@ export const FuelView: React.FC<FuelViewProps> = ({
                       { label: 'Odometer', value: `${entry.odometer.toLocaleString(getLanguage())} km` },
                       { label: 'Energy', value: `${entry.kwh.toFixed(1)} kWh` },
                       { label: 'Rate / kWh', value: `$${entry.pricePerKwh.toFixed(3)}` },
+                      ...(entry.startBatteryPercent !== undefined ? [{ label: t("Start battery"), value: `${entry.startBatteryPercent}%` }] : []),
+                      ...(entry.durationMinutes !== undefined ? [{ label: t("Duration"), value: formatChargingDuration(entry.durationMinutes) }] : []),
+                      ...(entry.powerKw !== undefined ? [{ label: t("Power"), value: `${entry.powerKw} kW` }] : []),
+                      ...(entry.company ? [{ label: t("Company"), value: entry.company }] : []),
+                      ...(entry.equipment ? [{ label: t("Equipment"), value: entry.equipment }] : []),
+                      ...(entry.chargingAddress ? [{ label: t("Address"), value: entry.chargingAddress }] : []),
                     ]}
                     actionLabel={t("charge on {0}", { "0": formatDate(entry.date, settings.dateFormat) ?? '' })}
                     onEdit={() => onEditCharge(entry)}

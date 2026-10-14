@@ -9,11 +9,15 @@ export function isVaultRecord(id: string, record: unknown): record is VaultRecor
   const value = record.value
   if ('drivvo' in value && (!object(value.drivvo) || !Array.isArray(value.drivvo.columns) ||
       value.drivvo.columns.length !== 30 || value.drivvo.columns.some(cell => typeof cell !== 'string' || cell.length > 10000))) return false
-  const optionalStrings = ['notes', 'trim', 'vin', 'licensePlate', 'transmission', 'purchaseDate', 'photoUrl', 'station', 'fuelType', 'chargingLocation', 'locationType', 'chargingType', 'vendor', 'receiptUrl', 'serviceProvider', 'dueDate', 'completedAt', 'category', 'documentNumber', 'issueDate', 'expiryDate', 'fileReference']
-  const optionalNumbers = ['odometer', 'purchasePrice', 'partsCost', 'laborCost', 'dueMileage', 'targetOdometer']
+  const optionalStrings = ['notes', 'trim', 'vin', 'licensePlate', 'transmission', 'purchaseDate', 'photoUrl', 'station', 'fuelType', 'chargingLocation', 'locationType', 'chargingType', 'chargingAddress', 'company', 'equipment', 'vendor', 'receiptUrl', 'serviceProvider', 'dueDate', 'completedAt', 'category', 'documentNumber', 'issueDate', 'expiryDate', 'fileReference']
+  const optionalNumbers = ['odometer', 'purchasePrice', 'partsCost', 'laborCost', 'dueMileage', 'targetOdometer', 'powerKw']
   if (optionalStrings.some(key => key in value && typeof value[key] !== 'string') ||
       optionalNumbers.some(key => key in value && (typeof value[key] !== 'number' || !Number.isFinite(value[key]) || Number(value[key]) < 0)) ||
       ['isPrimary', 'isSold', 'missedPreviousFillUp'].some(key => key in value && typeof value[key] !== 'boolean')) return false
+  if ('startBatteryPercent' in value && (typeof value.startBatteryPercent !== 'number' || !Number.isFinite(value.startBatteryPercent) ||
+      value.startBatteryPercent < 0 || value.startBatteryPercent > 100)) return false
+  if ('durationMinutes' in value && (typeof value.durationMinutes !== 'number' || !Number.isFinite(value.durationMinutes) ||
+      value.durationMinutes <= 0)) return false
   const strings = (...keys: string[]) => keys.every(key => typeof value[key] === 'string')
   const numbers = (...keys: string[]) => keys.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]) && Number(value[key]) >= 0)
   if (record.kind === 'settings') {

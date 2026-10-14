@@ -6,6 +6,8 @@ service cloud.firestore {
     function number(v, key) { return v[key] is number && v[key] >= 0 && v[key] < 1000000000000; }
     function optionalText(v, key) { return !(key in v) || text(v, key); }
     function optionalNumber(v, key) { return !(key in v) || number(v, key); }
+    function optionalPercent(v, key) { return !(key in v) || (v[key] is number && v[key] >= 0 && v[key] <= 100); }
+    function optionalPositiveNumber(v, key) { return !(key in v) || (v[key] is number && v[key] > 0 && v[key] < 1000000000000); }
     function optionalBool(v, key) { return !(key in v) || v[key] is bool; }
     function optionalFields(v) {
       return optionalText(v, 'notes') && optionalText(v, 'trim') && optionalText(v, 'vin')
@@ -13,7 +15,9 @@ service cloud.firestore {
         && optionalText(v, 'purchaseDate') && optionalText(v, 'photoUrl')
         && optionalText(v, 'station') && optionalText(v, 'fuelType')
         && optionalText(v, 'chargingLocation') && optionalText(v, 'locationType')
-        && optionalText(v, 'chargingType') && optionalText(v, 'vendor')
+        && optionalText(v, 'chargingType') && optionalText(v, 'chargingAddress')
+        && optionalText(v, 'company') && optionalText(v, 'equipment')
+        && optionalText(v, 'vendor')
         && optionalText(v, 'receiptUrl') && optionalText(v, 'serviceProvider')
         && optionalText(v, 'dueDate') && optionalText(v, 'completedAt')
         && optionalText(v, 'category') && optionalText(v, 'documentNumber')
@@ -21,7 +25,9 @@ service cloud.firestore {
         && optionalText(v, 'fileReference') && optionalNumber(v, 'odometer')
         && optionalNumber(v, 'purchasePrice') && optionalNumber(v, 'partsCost')
         && optionalNumber(v, 'laborCost') && optionalNumber(v, 'dueMileage')
-        && optionalNumber(v, 'targetOdometer') && optionalBool(v, 'isPrimary')
+        && optionalNumber(v, 'targetOdometer') && optionalNumber(v, 'powerKw')
+        && optionalPercent(v, 'startBatteryPercent') && optionalPositiveNumber(v, 'durationMinutes')
+        && optionalBool(v, 'isPrimary')
         && optionalBool(v, 'missedPreviousFillUp');
     }
     function settings(v) {

@@ -32,6 +32,12 @@ export interface ChargingEntry {
   chargingLocation?: string
   locationType?: ChargingLocationType
   chargingType?: ChargingSpeedType
+  chargingAddress?: string
+  company?: string
+  equipment?: string
+  startBatteryPercent?: number
+  durationMinutes?: number
+  powerKw?: number
   notes?: string
   createdAt: string
 }
