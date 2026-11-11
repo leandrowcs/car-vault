@@ -58,6 +58,11 @@ export const FuelView: React.FC<FuelViewProps> = ({
     return (sortAscending ? difference : -difference) || b.date.localeCompare(a.date) || a.id.localeCompare(b.id)
   }), [activeFuelEntries, sortBy, sortAscending])
 
+  const sortedChargingEntries = useMemo(
+    () => [...activeChargingEntries].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id)),
+    [activeChargingEntries]
+  )
+
   const supportedLogTypes = getVehicleLogTypes(activeVehicle?.fuelType ?? 'other')
   const supportsFuel = supportedLogTypes.includes('fuel')
   const supportsCharging = supportedLogTypes.includes('charging')
@@ -304,7 +309,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
               <div className="record-empty">{t("No EV charging sessions logged yet for this vehicle.")}</div>
             ) : (
               <div className="record-grid">
-                {activeChargingEntries.map((entry) => (
+                {sortedChargingEntries.map((entry) => (
                   <RecordCard
                     key={entry.id}
                     icon={<Zap size={20} />}
