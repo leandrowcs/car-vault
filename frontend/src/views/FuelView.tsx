@@ -324,6 +324,7 @@ export const FuelView: React.FC<FuelViewProps> = ({
                       ...(entry.chargingAddress ? [{ label: t("Address"), value: entry.chargingAddress }] : []),
                     ]}
                     actionLabel={t("charge on {0}", { "0": formatDate(entry.date, settings.dateFormat) ?? '' })}
+                    actionsInHeader
                     onEdit={() => onEditCharge(entry)}
                     onDelete={() => setChargeToDelete(entry)}
                   />

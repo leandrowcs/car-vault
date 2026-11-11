@@ -196,6 +196,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   { label: 'Odometer', value: expense.odometer != null ? `${expense.odometer.toLocaleString(getLanguage())} km` : '—' },
                 ]}
                 actionLabel={t("expense {0} on {1}", { "0": expense.description ?? '', "1": formatDate(expense.date, settings.dateFormat) ?? '' })}
+                actionsInHeader
                 onEdit={() => onEditExpense(expense)}
                 onDelete={() => setExpenseToDelete(expense)}
               />
