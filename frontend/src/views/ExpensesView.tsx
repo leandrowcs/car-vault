@@ -38,7 +38,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
   // Filtered expenses
   const filteredExpenses = useMemo(() => {
-    return activeExpenses.filter((e) => {
+    return [...activeExpenses].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id)).filter((e) => {
       const matchCat = selectedCategory === 'all' || e.category === selectedCategory
       const query = searchQuery.toLowerCase()
       const matchQuery =
