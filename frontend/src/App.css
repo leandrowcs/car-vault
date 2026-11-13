@@ -330,7 +330,7 @@
 .grid-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 12px;
+  gap: 5px;
 }
 
 .metric-card {
@@ -339,10 +339,10 @@
   background: var(--vault-surface);
   border: 1px solid var(--vault-border);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .metric-card-top {
